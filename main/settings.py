@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'reference',
     'mainapplication',
     'operations',
+    'reports',
+    'administrator',
 ]
 
 MIDDLEWARE = [

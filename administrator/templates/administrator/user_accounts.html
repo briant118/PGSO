@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}User Accounts - PGSO{% endblock %}
+
+{% block content %}
+<h1>👥 User Accounts</h1>
+<p style="color: #666;">Manage system users and their permissions.</p>
+
+<div style="background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 2rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <h2 style="margin: 0;">User List</h2>
+    <button style="padding: 0.5rem 1rem; background: #2ecc71; color: #fff; border: none; border-radius: 4px; cursor: pointer;">+ Add New User</button>
+  </div>
+
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr style="border-bottom: 2px solid #ddd;">
+        <th style="padding: 0.75rem; text-align: left;">Username</th>
+        <th style="padding: 0.75rem; text-align: left;">Email</th>
+        <th style="padding: 0.75rem; text-align: left;">Role</th>
+        <th style="padding: 0.75rem; text-align: left;">Status</th>
+        <th style="padding: 0.75rem; text-align: left;">Last Login</th>
+        <th style="padding: 0.75rem; text-align: left;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom: 1px solid #eee;">
+        <td style="padding: 0.75rem;">admin</td>
+        <td style="padding: 0.75rem;">admin@pgso.gov.ph</td>
+        <td style="padding: 0.75rem;"><span style="background: #e74c3c; color: #fff; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">Administrator</span></td>
+        <td style="padding: 0.75rem;"><span style="color: #2ecc71;">● Active</span></td>
+        <td style="padding: 0.75rem;">2026-02-11 10:30 AM</td>
+        <td style="padding: 0.75rem;">
+          <button style="padding: 0.25rem 0.5rem; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; margin-right: 0.25rem;">Edit</button>
+          <button style="padding: 0.25rem 0.5rem; background: #e74c3c; color: #fff; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="6" style="padding: 2rem; text-align: center; color: #999;">
+          No additional users. Click "Add New User" to create user accounts.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}
