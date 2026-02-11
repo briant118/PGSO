@@ -37,11 +37,11 @@
     <div class="brand"><a href="{% url 'mainapplication:dashboard' %}">PGSO</a></div>
     <nav>
       <div class="nav-section">
-        <div class="nav-section-title">Main</div>
+        {% comment %} <div class="nav-section-title">Main</div> {% endcomment %}
         <a href="{% url 'mainapplication:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><span class="nav-icon">🏠</span> Dashboard</a>
       </div>
       <div class="nav-section">
-        <div class="nav-section-title">References</div>
+        {% comment %} <div class="nav-section-title">References</div> {% endcomment %}
         <a href="{% url 'reference:index' %}" class="nav-link js-nav-toggle {% if request.resolver_match.app_name == 'reference' %}is-open{% endif %}" data-nav="reference">
           <span class="nav-icon">📁</span>
           References
@@ -53,7 +53,7 @@
         </div>
       </div>
       <div class="nav-section">
-        <div class="nav-section-title">Operations</div>
+        {% comment %} <div class="nav-section-title">Operations</div> {% endcomment %}
         <a href="{% url 'operations:index' %}" class="nav-link js-nav-toggle {% if request.resolver_match.app_name == 'operations' %}is-open{% endif %}" data-nav="operations">
           <span class="nav-icon">🧰</span>
           Operations
@@ -67,7 +67,7 @@
         </div>
       </div>
       <div class="nav-section">
-        <div class="nav-section-title">Reports</div>
+       {% comment %}  <div class="nav-section-title">Reports</div> {% endcomment %}
         <a href="{% url 'reports:index' %}" class="nav-link js-nav-toggle {% if request.resolver_match.app_name == 'reports' %}is-open{% endif %}" data-nav="reports">
           <span class="nav-icon">📊</span>
           Reports
@@ -85,7 +85,7 @@
         </div>
       </div>
       <div class="nav-section">
-        <div class="nav-section-title">Administrator</div>
+        {% comment %} <div class="nav-section-title">Administrator</div> {% endcomment %}
         <a href="{% url 'administrator:index' %}" class="nav-link js-nav-toggle {% if request.resolver_match.app_name == 'administrator' %}is-open{% endif %}" data-nav="administrator">
           <span class="nav-icon">⚙️</span>
           Administrator Control
@@ -98,9 +98,9 @@
         </div>
       </div>
     </nav>
-    <div class="nav-footer">
+   {% comment %}  <div class="nav-footer">
       <a href="{% url 'admin:index' %}">Admin site →</a>
-    </div>
+    </div> {% endcomment %}
   </aside>
   <div class="main-wrap">
     <main class="main-content">
