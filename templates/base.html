@@ -4,31 +4,222 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}PGSO{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * { box-sizing: border-box; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; color: #1a1d24; min-height: 100vh; display: flex; background: #f0f2f5; }
-    .side-nav { width: 240px; min-height: 100vh; background: #2c3e50; color: #ecf0f1; flex-shrink: 0; }
-    .side-nav .brand { padding: 1.25rem 1.5rem; font-weight: 700; font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .side-nav .brand a { color: #fff; text-decoration: none; }
-    .side-nav .brand a:hover { color: #ecf0f1; }
-    .side-nav nav { padding: 1rem 0; }
-    .side-nav .nav-section { margin-bottom: 0.5rem; }
-    .side-nav .nav-section-title { padding: 0.5rem 1.5rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.5); }
-    .side-nav .nav-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.65rem 1.5rem; color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.95rem; transition: background 0.15s, color 0.15s; }
-    .side-nav .nav-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
-    .side-nav .nav-link.active { background: rgba(255,255,255,0.12); color: #fff; font-weight: 500; }
-    .side-nav .nav-link .nav-icon { font-size: 1.1rem; width: 1.4em; text-align: center; }
-    .side-nav .nav-dropdown-toggle { border: none; background: none; width: 100%; text-align: left; cursor: pointer; font: inherit; padding: 0; }
-    .side-nav .nav-dropdown-chevron { margin-left: auto; font-size: 0.75rem; opacity: 0.8; transition: transform 0.15s; }
+    body { 
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; 
+      margin: 0; 
+      color: #1a1d24; 
+      min-height: 100vh; 
+      display: flex; 
+      background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    }
+    
+    /* Sidebar Container */
+    .side-nav { 
+      width: 260px; 
+      min-height: 100vh; 
+      background: linear-gradient(180deg, #1e3a5f 0%, #152a45 100%);
+      color: #ffffff; 
+      flex-shrink: 0;
+      box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    /* Decorative background pattern */
+    .side-nav::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(circle at 20% 30%, rgba(66, 153, 225, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(99, 179, 237, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    
+    /* Brand Section */
+    .side-nav .brand { 
+      padding: 1.75rem 1.5rem; 
+      font-weight: 700; 
+      font-size: 1.5rem; 
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      background: rgba(0, 0, 0, 0.15);
+      position: relative;
+      z-index: 1;
+    }
+    .side-nav .brand a { 
+      color: #fff; 
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      letter-spacing: 0.5px;
+    }
+    .side-nav .brand a::before {
+      content: '🏛️';
+      font-size: 1.8rem;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+    
+    /* Navigation Container */
+    .side-nav nav { 
+      padding: 1.25rem 0; 
+      position: relative;
+      z-index: 1;
+    }
+    
+    .side-nav .nav-section { 
+      margin-bottom: 0.75rem; 
+    }
+    
+    /* Navigation Links */
+    .side-nav .nav-link { 
+      display: flex; 
+      align-items: center; 
+      gap: 0.875rem; 
+      padding: 0.875rem 1.5rem;
+      margin: 0.25rem 0.75rem;
+      color: rgba(255,255,255,0.9); 
+      text-decoration: none; 
+      font-size: 0.95rem;
+      font-weight: 500;
+      border-radius: 10px;
+      transition: background 0.15s ease, color 0.15s ease;
+      position: relative;
+    }
+    
+    .side-nav .nav-link:hover {
+      background: rgba(66, 153, 225, 0.2);
+      color: #fff;
+    }
+    
+    /* Active state */
+    .side-nav .nav-link.active { 
+      background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+      color: #fff; 
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(66, 153, 225, 0.3);
+    }
+    
+    /* Icons */
+    .side-nav .nav-link .nav-icon { 
+      font-size: 1.125rem; 
+      width: 1.5em; 
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    
+    /* Dropdown chevron */
+    .side-nav .nav-dropdown-chevron { 
+      margin-left: auto; 
+      font-size: 0.75rem; 
+      opacity: 0.7; 
+      transition: transform 0.2s ease;
+      position: relative;
+      z-index: 1;
+    }
+    
     .side-nav .nav-link.is-open .nav-dropdown-chevron,
-    .side-nav .nav-link.active .nav-dropdown-chevron { transform: rotate(90deg); }
-    .side-nav .nav-dropdown { display: none; padding-left: 0.5rem; }
-    .side-nav .nav-dropdown.open { display: block; }
-    .side-nav .nav-footer { margin-top: auto; padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); }
-    .side-nav .nav-footer a { color: rgba(255,255,255,0.6); font-size: 0.85rem; text-decoration: none; }
-    .side-nav .nav-footer a:hover { color: #fff; }
-    .main-wrap { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-    .main-content { flex: 1; padding: 1.5rem 2rem; }
+    .side-nav .nav-link.active .nav-dropdown-chevron { 
+      transform: rotate(90deg); 
+      opacity: 1;
+    }
+    
+    /* Dropdown menu */
+    .side-nav .nav-dropdown { 
+      display: none; 
+      padding-left: 0;
+      margin-top: 0.25rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .side-nav .nav-dropdown.open { 
+      display: block; 
+    }
+    
+    /* Dropdown items styling */
+    .side-nav .nav-dropdown .nav-link {
+      padding-left: 3.5rem;
+      font-size: 0.9rem;
+      margin: 0.15rem 0.75rem;
+    }
+    
+    .side-nav .nav-dropdown .nav-link::after {
+      content: '';
+      position: absolute;
+      left: 2rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 6px;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+    }
+    
+    .side-nav .nav-dropdown .nav-link:hover::after {
+      background: rgba(66, 153, 225, 0.8);
+    }
+    
+    .side-nav .nav-dropdown .nav-link.active::after {
+      background: #fff;
+    }
+    
+    /* Footer */
+    .side-nav .nav-footer { 
+      margin-top: auto; 
+      padding: 1.25rem 1.5rem; 
+      border-top: 1px solid rgba(255,255,255,0.1);
+      background: rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1;
+    }
+    .side-nav .nav-footer a { 
+      color: rgba(255,255,255,0.7); 
+      font-size: 0.875rem; 
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .side-nav .nav-footer a:hover { 
+      color: #63b3ed; 
+    }
+    
+    /* Main Content Area */
+    .main-wrap { 
+      flex: 1; 
+      min-width: 0; 
+      display: flex; 
+      flex-direction: column; 
+    }
+    
+    .main-content { 
+      flex: 1; 
+      padding: 2rem 2.5rem;
+    }
+    
+    /* Scrollbar styling for sidebar */
+    .side-nav::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .side-nav::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    
+    .side-nav::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+    
+    .side-nav::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
     {% block extra_css %}{% endblock %}
   </style>
 </head>
@@ -37,70 +228,98 @@
     <div class="brand"><a href="{% url 'mainapplication:dashboard' %}">PGSO</a></div>
     <nav>
       <div class="nav-section">
-        {% comment %} <div class="nav-section-title">Main</div> {% endcomment %}
-        <a href="{% url 'mainapplication:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><span class="nav-icon">🏠</span> Dashboard</a>
+        <a href="{% url 'mainapplication:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+          <span class="nav-icon"><i class="fas fa-home"></i></span> Dashboard
+        </a>
       </div>
       <div class="nav-section">
-        {% comment %} <div class="nav-section-title">References</div> {% endcomment %}
         <a href="{% url 'reference:index' %}" class="nav-link js-nav-toggle {% if request.resolver_match.app_name == 'reference' %}is-open{% endif %}" data-nav="reference">
-          <span class="nav-icon">📁</span>
+          <span class="nav-icon"><i class="fas fa-folder"></i></span>
           References
-          <span class="nav-dropdown-chevron">▶</span>
+          <span class="nav-dropdown-chevron"><i class="fas fa-chevron-right"></i></span>
         </a>
         <div class="nav-dropdown js-nav-dropdown {% if request.resolver_match.app_name == 'reference' %}open{% endif %}" data-nav="reference">
-          <a href="{% url 'reference:barangay_list' %}" class="nav-link {% if request.resolver_match.url_name == 'barangay_list' %}active{% endif %}"><span class="nav-icon">📍</span> Barangay</a>
-          <a href="{% url 'reference:position_list' %}" class="nav-link {% if request.resolver_match.url_name == 'position_list' %}active{% endif %}"><span class="nav-icon">👤</span> Positions</a>
+          <a href="{% url 'reference:barangay_list' %}" class="nav-link {% if request.resolver_match.url_name == 'barangay_list' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-map-marker-alt"></i></span> Barangay
+          </a>
+          <a href="{% url 'reference:position_list' %}" class="nav-link {% if request.resolver_match.url_name == 'position_list' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-user-tag"></i></span> Positions
+          </a>
         </div>
       </div>
       <div class="nav-section">
-        {% comment %} <div class="nav-section-title">Operations</div> {% endcomment %}
         <a href="{% url 'operations:index' %}" class="nav-link js-nav-toggle {% if request.resolver_match.app_name == 'operations' %}is-open{% endif %}" data-nav="operations">
-          <span class="nav-icon">🧰</span>
+          <span class="nav-icon"><i class="fas fa-tasks"></i></span>
           Operations
-          <span class="nav-dropdown-chevron">▶</span>
+          <span class="nav-dropdown-chevron"><i class="fas fa-chevron-right"></i></span>
         </a>
         <div class="nav-dropdown js-nav-dropdown {% if request.resolver_match.app_name == 'operations' %}open{% endif %}" data-nav="operations">
-          <a href="{% url 'operations:coordinator' %}" class="nav-link {% if request.resolver_match.url_name == 'coordinator' %}active{% endif %}"><span class="nav-icon">🧑‍💼</span> Coordinator</a>
-          <a href="{% url 'operations:barangay_officials' %}" class="nav-link {% if request.resolver_match.url_name == 'barangay_officials' %}active{% endif %}"><span class="nav-icon">🏘️</span> Barangay Officials</a>
-          <a href="{% url 'operations:residents_record' %}" class="nav-link {% if request.resolver_match.url_name == 'residents_record' %}active{% endif %}"><span class="nav-icon">📒</span> Residents Record</a>
-          <a href="{% url 'operations:voters_registration' %}" class="nav-link {% if request.resolver_match.url_name == 'voters_registration' %}active{% endif %}"><span class="nav-icon">🗳️</span> Voter's Registration</a>
+          <a href="{% url 'operations:coordinator' %}" class="nav-link {% if request.resolver_match.url_name == 'coordinator' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-user-tie"></i></span> Coordinator
+          </a>
+          <a href="{% url 'operations:barangay_officials' %}" class="nav-link {% if request.resolver_match.url_name == 'barangay_officials' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-users-cog"></i></span> Barangay Officials
+          </a>
+          <a href="{% url 'operations:residents_record' %}" class="nav-link {% if request.resolver_match.url_name == 'residents_record' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-address-book"></i></span> Residents Record
+          </a>
+          <a href="{% url 'operations:voters_registration' %}" class="nav-link {% if request.resolver_match.url_name == 'voters_registration' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-vote-yea"></i></span> Voter's Registration
+          </a>
         </div>
       </div>
       <div class="nav-section">
-       {% comment %}  <div class="nav-section-title">Reports</div> {% endcomment %}
         <a href="{% url 'reports:index' %}" class="nav-link js-nav-toggle {% if request.resolver_match.app_name == 'reports' %}is-open{% endif %}" data-nav="reports">
-          <span class="nav-icon">📊</span>
+          <span class="nav-icon"><i class="fas fa-chart-bar"></i></span>
           Reports
-          <span class="nav-dropdown-chevron">▶</span>
+          <span class="nav-dropdown-chevron"><i class="fas fa-chevron-right"></i></span>
         </a>
         <div class="nav-dropdown js-nav-dropdown {% if request.resolver_match.app_name == 'reports' %}open{% endif %}" data-nav="reports">
-          <a href="{% url 'reports:list_male' %}" class="nav-link {% if request.resolver_match.url_name == 'list_male' %}active{% endif %}"><span class="nav-icon">👨</span> List of MALE</a>
-          <a href="{% url 'reports:list_female' %}" class="nav-link {% if request.resolver_match.url_name == 'list_female' %}active{% endif %}"><span class="nav-icon">👩</span> List of FEMALE</a>
-          <a href="{% url 'reports:list_pwd' %}" class="nav-link {% if request.resolver_match.url_name == 'list_pwd' %}active{% endif %}"><span class="nav-icon">♿</span> List of PWD</a>
-          <a href="{% url 'reports:list_solo_parent' %}" class="nav-link {% if request.resolver_match.url_name == 'list_solo_parent' %}active{% endif %}"><span class="nav-icon">👤</span> List of Solo Parent</a>
-          <a href="{% url 'reports:list_senior_citizen' %}" class="nav-link {% if request.resolver_match.url_name == 'list_senior_citizen' %}active{% endif %}"><span class="nav-icon">👴</span> List of Senior Citizen</a>
-          <a href="{% url 'reports:list_4ps_member' %}" class="nav-link {% if request.resolver_match.url_name == 'list_4ps_member' %}active{% endif %}"><span class="nav-icon">👥</span> List of 4PS Member</a>
-          <a href="{% url 'reports:list_voters' %}" class="nav-link {% if request.resolver_match.url_name == 'list_voters' %}active{% endif %}"><span class="nav-icon">🗳️</span> List of Voters</a>
-          <a href="{% url 'reports:list_residents_record' %}" class="nav-link {% if request.resolver_match.url_name == 'list_residents_record' %}active{% endif %}"><span class="nav-icon">📝</span> List of Resident's Record</a>
+          <a href="{% url 'reports:list_male' %}" class="nav-link {% if request.resolver_match.url_name == 'list_male' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-male"></i></span> List of Male
+          </a>
+          <a href="{% url 'reports:list_female' %}" class="nav-link {% if request.resolver_match.url_name == 'list_female' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-female"></i></span> List of Female
+          </a>
+          <a href="{% url 'reports:list_pwd' %}" class="nav-link {% if request.resolver_match.url_name == 'list_pwd' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-wheelchair"></i></span> List of PWD
+          </a>
+          <a href="{% url 'reports:list_solo_parent' %}" class="nav-link {% if request.resolver_match.url_name == 'list_solo_parent' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-user"></i></span> List of Solo Parent
+          </a>
+          <a href="{% url 'reports:list_senior_citizen' %}" class="nav-link {% if request.resolver_match.url_name == 'list_senior_citizen' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-user-clock"></i></span> List of Senior Citizen
+          </a>
+          <a href="{% url 'reports:list_4ps_member' %}" class="nav-link {% if request.resolver_match.url_name == 'list_4ps_member' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-users"></i></span> List of 4PS Member
+          </a>
+          <a href="{% url 'reports:list_voters' %}" class="nav-link {% if request.resolver_match.url_name == 'list_voters' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-check-to-slot"></i></span> List of Voters
+          </a>
+          <a href="{% url 'reports:list_residents_record' %}" class="nav-link {% if request.resolver_match.url_name == 'list_residents_record' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-file-alt"></i></span> List of Resident's Record
+          </a>
         </div>
       </div>
       <div class="nav-section">
-        {% comment %} <div class="nav-section-title">Administrator</div> {% endcomment %}
         <a href="{% url 'administrator:index' %}" class="nav-link js-nav-toggle {% if request.resolver_match.app_name == 'administrator' %}is-open{% endif %}" data-nav="administrator">
-          <span class="nav-icon">⚙️</span>
+          <span class="nav-icon"><i class="fas fa-cog"></i></span>
           Administrator Control
-          <span class="nav-dropdown-chevron">▶</span>
+          <span class="nav-dropdown-chevron"><i class="fas fa-chevron-right"></i></span>
         </a>
         <div class="nav-dropdown js-nav-dropdown {% if request.resolver_match.app_name == 'administrator' %}open{% endif %}" data-nav="administrator">
-          <a href="{% url 'administrator:system_policy' %}" class="nav-link {% if request.resolver_match.url_name == 'system_policy' %}active{% endif %}"><span class="nav-icon">📋</span> System Policy</a>
-          <a href="{% url 'administrator:user_accounts' %}" class="nav-link {% if request.resolver_match.url_name == 'user_accounts' %}active{% endif %}"><span class="nav-icon">👥</span> User Accounts</a>
-          <a href="{% url 'administrator:user_activity' %}" class="nav-link {% if request.resolver_match.url_name == 'user_activity' %}active{% endif %}"><span class="nav-icon">📈</span> User Activity</a>
+          <a href="{% url 'administrator:system_policy' %}" class="nav-link {% if request.resolver_match.url_name == 'system_policy' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-shield-alt"></i></span> System Policy
+          </a>
+          <a href="{% url 'administrator:user_accounts' %}" class="nav-link {% if request.resolver_match.url_name == 'user_accounts' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-user-friends"></i></span> User Accounts
+          </a>
+          <a href="{% url 'administrator:user_activity' %}" class="nav-link {% if request.resolver_match.url_name == 'user_activity' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-chart-line"></i></span> User Activity
+          </a>
         </div>
       </div>
     </nav>
-   {% comment %}  <div class="nav-footer">
-      <a href="{% url 'admin:index' %}">Admin site →</a>
-    </div> {% endcomment %}
   </aside>
   <div class="main-wrap">
     <main class="main-content">
