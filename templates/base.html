@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}PGSO{% endblock %}</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; margin: 0; color: #1a1d24; min-height: 100vh; display: flex; background: #f0f2f5; }
+    .side-nav { width: 240px; min-height: 100vh; background: #2c3e50; color: #ecf0f1; flex-shrink: 0; }
+    .side-nav .brand { padding: 1.25rem 1.5rem; font-weight: 700; font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .side-nav .brand a { color: #fff; text-decoration: none; }
+    .side-nav .brand a:hover { color: #ecf0f1; }
+    .side-nav nav { padding: 1rem 0; }
+    .side-nav .nav-section { margin-bottom: 0.5rem; }
+    .side-nav .nav-section-title { padding: 0.5rem 1.5rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.5); }
+    .side-nav .nav-link { display: flex; align-items: center; gap: 0.6rem; padding: 0.65rem 1.5rem; color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.95rem; transition: background 0.15s, color 0.15s; }
+    .side-nav .nav-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .side-nav .nav-link.active { background: rgba(255,255,255,0.12); color: #fff; font-weight: 500; }
+    .side-nav .nav-link .nav-icon { font-size: 1.1rem; width: 1.4em; text-align: center; }
+    .side-nav .nav-dropdown-toggle { border: none; background: none; width: 100%; text-align: left; cursor: pointer; font: inherit; padding: 0; }
+    .side-nav .nav-dropdown-chevron { margin-left: auto; font-size: 0.75rem; opacity: 0.8; transition: transform 0.15s; }
+    .side-nav .nav-dropdown.open + .nav-dropdown-chevron,
+    .side-nav .nav-link.active .nav-dropdown-chevron { transform: rotate(90deg); }
+    .side-nav .nav-dropdown { display: none; padding-left: 0.5rem; }
+    .side-nav .nav-dropdown.open { display: block; }
+    .side-nav .nav-footer { margin-top: auto; padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); }
+    .side-nav .nav-footer a { color: rgba(255,255,255,0.6); font-size: 0.85rem; text-decoration: none; }
+    .side-nav .nav-footer a:hover { color: #fff; }
+    .main-wrap { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .main-content { flex: 1; padding: 1.5rem 2rem; }
+    {% block extra_css %}{% endblock %}
+  </style>
+</head>
+<body>
+  <aside class="side-nav">
+    <div class="brand"><a href="{% url 'mainapplication:dashboard' %}">PGSO</a></div>
+    <nav>
+      <div class="nav-section">
+        <div class="nav-section-title">Main</div>
+        <a href="{% url 'mainapplication:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"><span class="nav-icon">🏠</span> Dashboard</a>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">References</div>
+        <a href="{% url 'reference:index' %}" class="nav-link js-ref-toggle">
+          <span class="nav-icon">📁</span>
+          References
+          <span class="nav-dropdown-chevron">▶</span>
+        </a>
+        <div class="nav-dropdown js-ref-dropdown {% if request.resolver_match.app_name == 'reference' %}open{% endif %}">
+          <a href="{% url 'reference:barangay_list' %}" class="nav-link {% if request.resolver_match.url_name == 'barangay_list' %}active{% endif %}"><span class="nav-icon">📍</span> Barangay</a>
+          <a href="{% url 'reference:position_list' %}" class="nav-link {% if request.resolver_match.url_name == 'position_list' %}active{% endif %}"><span class="nav-icon">👤</span> Positions</a>
+        </div>
+      </div>
+    </nav>
+    <div class="nav-footer">
+      <a href="{% url 'admin:index' %}">Admin site →</a>
+    </div>
+  </aside>
+  <div class="main-wrap">
+    <main class="main-content">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+  <script>
+    (function () {
+      const toggle = document.querySelector('.js-ref-toggle');
+      const dropdown = document.querySelector('.js-ref-dropdown');
+      if (!toggle || !dropdown) return;
+
+      toggle.addEventListener('click', function (e) {
+        // Allow opening/closing without leaving the page
+        e.preventDefault();
+        dropdown.classList.toggle('open');
+      });
+    })();
+  </script>
+</body>
+</html>

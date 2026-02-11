@@ -1,0 +1,15 @@
+{% extends 'reference/base_reference.html' %}
+{% block content %}
+<div class="reference-cards">
+  <a href="{% url 'reference:barangay_list' %}" class="ref-card">
+    <span class="ref-icon">📍</span>
+    <h2>Barangay</h2>
+    <p>View and manage barangay reference data.</p>
+  </a>
+  <a href="{% url 'reference:position_list' %}" class="ref-card">
+    <span class="ref-icon">👤</span>
+    <h2>Positions</h2>
+    <p>View and manage position reference data.</p>
+  </a>
+</div>
+{% endblock %}
