@@ -20,7 +20,7 @@
     .side-nav .nav-link .nav-icon { font-size: 1.1rem; width: 1.4em; text-align: center; }
     .side-nav .nav-dropdown-toggle { border: none; background: none; width: 100%; text-align: left; cursor: pointer; font: inherit; padding: 0; }
     .side-nav .nav-dropdown-chevron { margin-left: auto; font-size: 0.75rem; opacity: 0.8; transition: transform 0.15s; }
-    .side-nav .nav-dropdown.open + .nav-dropdown-chevron,
+    .side-nav .nav-link.is-open .nav-dropdown-chevron,
     .side-nav .nav-link.active .nav-dropdown-chevron { transform: rotate(90deg); }
     .side-nav .nav-dropdown { display: none; padding-left: 0.5rem; }
     .side-nav .nav-dropdown.open { display: block; }
@@ -42,14 +42,28 @@
       </div>
       <div class="nav-section">
         <div class="nav-section-title">References</div>
-        <a href="{% url 'reference:index' %}" class="nav-link js-ref-toggle">
+        <a href="{% url 'reference:index' %}" class="nav-link js-nav-toggle {% if request.resolver_match.app_name == 'reference' %}is-open{% endif %}" data-nav="reference">
           <span class="nav-icon">📁</span>
           References
           <span class="nav-dropdown-chevron">▶</span>
         </a>
-        <div class="nav-dropdown js-ref-dropdown {% if request.resolver_match.app_name == 'reference' %}open{% endif %}">
+        <div class="nav-dropdown js-nav-dropdown {% if request.resolver_match.app_name == 'reference' %}open{% endif %}" data-nav="reference">
           <a href="{% url 'reference:barangay_list' %}" class="nav-link {% if request.resolver_match.url_name == 'barangay_list' %}active{% endif %}"><span class="nav-icon">📍</span> Barangay</a>
           <a href="{% url 'reference:position_list' %}" class="nav-link {% if request.resolver_match.url_name == 'position_list' %}active{% endif %}"><span class="nav-icon">👤</span> Positions</a>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Operations</div>
+        <a href="{% url 'operations:index' %}" class="nav-link js-nav-toggle {% if request.resolver_match.app_name == 'operations' %}is-open{% endif %}" data-nav="operations">
+          <span class="nav-icon">🧰</span>
+          Operations
+          <span class="nav-dropdown-chevron">▶</span>
+        </a>
+        <div class="nav-dropdown js-nav-dropdown {% if request.resolver_match.app_name == 'operations' %}open{% endif %}" data-nav="operations">
+          <a href="{% url 'operations:coordinator' %}" class="nav-link {% if request.resolver_match.url_name == 'coordinator' %}active{% endif %}"><span class="nav-icon">🧑‍💼</span> Coordinator</a>
+          <a href="{% url 'operations:barangay_officials' %}" class="nav-link {% if request.resolver_match.url_name == 'barangay_officials' %}active{% endif %}"><span class="nav-icon">🏘️</span> Barangay Officials</a>
+          <a href="{% url 'operations:residents_record' %}" class="nav-link {% if request.resolver_match.url_name == 'residents_record' %}active{% endif %}"><span class="nav-icon">📒</span> Residents Record</a>
+          <a href="{% url 'operations:voters_registration' %}" class="nav-link {% if request.resolver_match.url_name == 'voters_registration' %}active{% endif %}"><span class="nav-icon">🗳️</span> Voter's Registration</a>
         </div>
       </div>
     </nav>
@@ -64,14 +78,22 @@
   </div>
   <script>
     (function () {
-      const toggle = document.querySelector('.js-ref-toggle');
-      const dropdown = document.querySelector('.js-ref-dropdown');
-      if (!toggle || !dropdown) return;
+      const toggles = Array.from(document.querySelectorAll('.js-nav-toggle'));
+      if (!toggles.length) return;
 
-      toggle.addEventListener('click', function (e) {
-        // Allow opening/closing without leaving the page
-        e.preventDefault();
-        dropdown.classList.toggle('open');
+      toggles.forEach((toggle) => {
+        const key = toggle.getAttribute('data-nav');
+        if (!key) return;
+        const dropdown = document.querySelector(`.js-nav-dropdown[data-nav="${key}"]`);
+        if (!dropdown) return;
+
+        toggle.addEventListener('click', function (e) {
+          // Allow opening/closing without leaving the page
+          e.preventDefault();
+          const willOpen = !dropdown.classList.contains('open');
+          dropdown.classList.toggle('open');
+          toggle.classList.toggle('is-open', willOpen);
+        });
       });
     })();
   </script>
