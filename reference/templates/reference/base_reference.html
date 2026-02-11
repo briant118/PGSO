@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}References{% block page_title %}{% endblock %} – PGSO{% endblock %}
+{% block extra_css %}
+.reference-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; }
+.ref-card { background: #fff; border-radius: 12px; padding: 1.5rem; text-decoration: none; color: inherit; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; display: block; border: 1px solid #e8eaed; }
+.ref-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+.ref-icon { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
+.ref-card h2 { margin: 0 0 0.5rem; font-size: 1.25rem; }
+.ref-card p { margin: 0; color: #5f6368; font-size: 0.9rem; }
+table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #eee; }
+th { background: #2c3e50; color: #fff; font-weight: 600; }
+tr:hover { background: #f8f9fa; }
+.empty-msg { background: #fff; padding: 2rem; border-radius: 12px; text-align: center; color: #5f6368; }
+{% endblock %}
+{% block content %}{% endblock %}

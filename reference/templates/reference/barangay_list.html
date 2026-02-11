@@ -1,0 +1,26 @@
+{% extends 'reference/base_reference.html' %}
+{% block title %} – Barangay{% endblock %}
+{% block breadcrumb %} &rarr; Barangay{% endblock %}
+{% block content %}
+<h1 style="margin-top:0;">Barangay</h1>
+{% if barangays %}
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Code</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for b in barangays %}
+    <tr>
+      <td>{{ b.name }}</td>
+      <td>{{ b.code|default:"—" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty-msg">No barangays in the reference yet. Add some in the <a href="/admin/">admin</a>.</p>
+{% endif %}
+{% endblock %}

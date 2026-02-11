@@ -1,0 +1,26 @@
+{% extends 'reference/base_reference.html' %}
+{% block title %} – Positions{% endblock %}
+{% block breadcrumb %} &rarr; Positions{% endblock %}
+{% block content %}
+<h1 style="margin-top:0;">Positions</h1>
+{% if positions %}
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Code</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for p in positions %}
+    <tr>
+      <td>{{ p.name }}</td>
+      <td>{{ p.code|default:"—" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="empty-msg">No positions in the reference yet. Add some in the <a href="/admin/">admin</a>.</p>
+{% endif %}
+{% endblock %}
