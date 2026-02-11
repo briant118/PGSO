@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Reports - PGSO{% endblock %}
+
+{% block content %}
+<h1>Reports</h1>
+<p>Select a report type from the sidebar.</p>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 2rem;">
+  <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="margin-top: 0;">👨 List of MALE</h3>
+    <p style="color: #666;">View all male residents</p>
+    <a href="{% url 'reports:list_male' %}" style="color: #3498db; text-decoration: none;">View Report →</a>
+  </div>
+  <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="margin-top: 0;">👩 List of FEMALE</h3>
+    <p style="color: #666;">View all female residents</p>
+    <a href="{% url 'reports:list_female' %}" style="color: #3498db; text-decoration: none;">View Report →</a>
+  </div>
+  <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="margin-top: 0;">♿ List of PWD</h3>
+    <p style="color: #666;">View persons with disabilities</p>
+    <a href="{% url 'reports:list_pwd' %}" style="color: #3498db; text-decoration: none;">View Report →</a>
+  </div>
+  <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="margin-top: 0;">👤 List of Solo Parent</h3>
+    <p style="color: #666;">View solo parent records</p>
+    <a href="{% url 'reports:list_solo_parent' %}" style="color: #3498db; text-decoration: none;">View Report →</a>
+  </div>
+  <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="margin-top: 0;">👴 List of Senior Citizen</h3>
+    <p style="color: #666;">View senior citizen records</p>
+    <a href="{% url 'reports:list_senior_citizen' %}" style="color: #3498db; text-decoration: none;">View Report →</a>
+  </div>
+  <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="margin-top: 0;">👥 List of 4PS Member</h3>
+    <p style="color: #666;">View 4PS member records</p>
+    <a href="{% url 'reports:list_4ps_member' %}" style="color: #3498db; text-decoration: none;">View Report →</a>
+  </div>
+  <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="margin-top: 0;">🗳️ List of Voters</h3>
+    <p style="color: #666;">View registered voters</p>
+    <a href="{% url 'reports:list_voters' %}" style="color: #3498db; text-decoration: none;">View Report →</a>
+  </div>
+  <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+    <h3 style="margin-top: 0;">📝 List of Resident's Record</h3>
+    <p style="color: #666;">View all resident records</p>
+    <a href="{% url 'reports:list_residents_record' %}" style="color: #3498db; text-decoration: none;">View Report →</a>
+  </div>
+</div>
+{% endblock %}

@@ -66,6 +66,37 @@
           <a href="{% url 'operations:voters_registration' %}" class="nav-link {% if request.resolver_match.url_name == 'voters_registration' %}active{% endif %}"><span class="nav-icon">🗳️</span> Voter's Registration</a>
         </div>
       </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Reports</div>
+        <a href="{% url 'reports:index' %}" class="nav-link js-nav-toggle {% if request.resolver_match.app_name == 'reports' %}is-open{% endif %}" data-nav="reports">
+          <span class="nav-icon">📊</span>
+          Reports
+          <span class="nav-dropdown-chevron">▶</span>
+        </a>
+        <div class="nav-dropdown js-nav-dropdown {% if request.resolver_match.app_name == 'reports' %}open{% endif %}" data-nav="reports">
+          <a href="{% url 'reports:list_male' %}" class="nav-link {% if request.resolver_match.url_name == 'list_male' %}active{% endif %}"><span class="nav-icon">👨</span> List of MALE</a>
+          <a href="{% url 'reports:list_female' %}" class="nav-link {% if request.resolver_match.url_name == 'list_female' %}active{% endif %}"><span class="nav-icon">👩</span> List of FEMALE</a>
+          <a href="{% url 'reports:list_pwd' %}" class="nav-link {% if request.resolver_match.url_name == 'list_pwd' %}active{% endif %}"><span class="nav-icon">♿</span> List of PWD</a>
+          <a href="{% url 'reports:list_solo_parent' %}" class="nav-link {% if request.resolver_match.url_name == 'list_solo_parent' %}active{% endif %}"><span class="nav-icon">👤</span> List of Solo Parent</a>
+          <a href="{% url 'reports:list_senior_citizen' %}" class="nav-link {% if request.resolver_match.url_name == 'list_senior_citizen' %}active{% endif %}"><span class="nav-icon">👴</span> List of Senior Citizen</a>
+          <a href="{% url 'reports:list_4ps_member' %}" class="nav-link {% if request.resolver_match.url_name == 'list_4ps_member' %}active{% endif %}"><span class="nav-icon">👥</span> List of 4PS Member</a>
+          <a href="{% url 'reports:list_voters' %}" class="nav-link {% if request.resolver_match.url_name == 'list_voters' %}active{% endif %}"><span class="nav-icon">🗳️</span> List of Voters</a>
+          <a href="{% url 'reports:list_residents_record' %}" class="nav-link {% if request.resolver_match.url_name == 'list_residents_record' %}active{% endif %}"><span class="nav-icon">📝</span> List of Resident's Record</a>
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-title">Administrator</div>
+        <a href="{% url 'administrator:index' %}" class="nav-link js-nav-toggle {% if request.resolver_match.app_name == 'administrator' %}is-open{% endif %}" data-nav="administrator">
+          <span class="nav-icon">⚙️</span>
+          Administrator Control
+          <span class="nav-dropdown-chevron">▶</span>
+        </a>
+        <div class="nav-dropdown js-nav-dropdown {% if request.resolver_match.app_name == 'administrator' %}open{% endif %}" data-nav="administrator">
+          <a href="{% url 'administrator:system_policy' %}" class="nav-link {% if request.resolver_match.url_name == 'system_policy' %}active{% endif %}"><span class="nav-icon">📋</span> System Policy</a>
+          <a href="{% url 'administrator:user_accounts' %}" class="nav-link {% if request.resolver_match.url_name == 'user_accounts' %}active{% endif %}"><span class="nav-icon">👥</span> User Accounts</a>
+          <a href="{% url 'administrator:user_activity' %}" class="nav-link {% if request.resolver_match.url_name == 'user_activity' %}active{% endif %}"><span class="nav-icon">📈</span> User Activity</a>
+        </div>
+      </div>
     </nav>
     <div class="nav-footer">
       <a href="{% url 'admin:index' %}">Admin site →</a>
