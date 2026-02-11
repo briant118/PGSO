@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}List of PWD - PGSO{% endblock %}
+
+{% block content %}
+<h1>♿ List of PWD (Persons with Disabilities)</h1>
+<p style="color: #666;">This report displays all persons with disabilities registered in the system.</p>
+
+<div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 2rem;">
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr style="border-bottom: 2px solid #ddd;">
+        <th style="padding: 0.75rem; text-align: left;">ID</th>
+        <th style="padding: 0.75rem; text-align: left;">Name</th>
+        <th style="padding: 0.75rem; text-align: left;">Age</th>
+        <th style="padding: 0.75rem; text-align: left;">Barangay</th>
+        <th style="padding: 0.75rem; text-align: left;">Disability Type</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="5" style="padding: 2rem; text-align: center; color: #999;">
+          No data available. Connect this to your database to display PWD records.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}

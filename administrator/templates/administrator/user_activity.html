@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}User Activity - PGSO{% endblock %}
+
+{% block content %}
+<h1>📈 User Activity</h1>
+<p style="color: #666;">Monitor user activities and system usage logs.</p>
+
+<div style="background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 2rem;">
+  <h2 style="margin-top: 0;">Activity Logs</h2>
+
+  <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+    <select style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+      <option>All Users</option>
+      <option>admin</option>
+    </select>
+    <select style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+      <option>All Actions</option>
+      <option>Login</option>
+      <option>Logout</option>
+      <option>Create</option>
+      <option>Update</option>
+      <option>Delete</option>
+    </select>
+    <input type="date" style="padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px;">
+  </div>
+
+  <table style="width: 100%; border-collapse: collapse;">
+    <thead>
+      <tr style="border-bottom: 2px solid #ddd;">
+        <th style="padding: 0.75rem; text-align: left;">Timestamp</th>
+        <th style="padding: 0.75rem; text-align: left;">User</th>
+        <th style="padding: 0.75rem; text-align: left;">Action</th>
+        <th style="padding: 0.75rem; text-align: left;">Description</th>
+        <th style="padding: 0.75rem; text-align: left;">IP Address</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom: 1px solid #eee;">
+        <td style="padding: 0.75rem;">2026-02-11 10:30:15</td>
+        <td style="padding: 0.75rem;">admin</td>
+        <td style="padding: 0.75rem;"><span style="background: #2ecc71; color: #fff; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">Login</span></td>
+        <td style="padding: 0.75rem;">User logged in successfully</td>
+        <td style="padding: 0.75rem;">127.0.0.1</td>
+      </tr>
+      <tr style="border-bottom: 1px solid #eee;">
+        <td style="padding: 0.75rem;">2026-02-11 09:45:22</td>
+        <td style="padding: 0.75rem;">admin</td>
+        <td style="padding: 0.75rem;"><span style="background: #3498db; color: #fff; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem;">Update</span></td>
+        <td style="padding: 0.75rem;">Updated resident record #1234</td>
+        <td style="padding: 0.75rem;">127.0.0.1</td>
+      </tr>
+      <tr>
+        <td colspan="5" style="padding: 2rem; text-align: center; color: #999;">
+          End of activity logs. More logs will appear as users interact with the system.
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}
