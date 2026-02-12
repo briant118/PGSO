@@ -2,7 +2,66 @@
 {% block title %}Dashboard – PGSO{% endblock %}
 {% block content %}
 <div class="dashboard">
-  <h1 style="margin:0 0 0.25rem; font-size:1.5rem; color:#1a1d24;">Dashboard</h1>
-  <p style="margin:0 0 1.5rem; color:#5f6368; font-size:0.95rem;">Welcome. Use the side menu to navigate through the application.</p>
+  <h1 class="dashboard-header">Dashboard</h1>
+  <p class="dashboard-subtitle">Welcome. Use the side menu to navigate through the application.</p>
+
+  <div class="dashboard-cards">
+    <div class="dashboard-card card-male">
+      <span class="dashboard-card-icon"><i class="fas fa-male"></i></span>
+      <div class="dashboard-card-body">
+        <p class="dashboard-card-value">{{ stats.total_male|default:0 }}</p>
+        <p class="dashboard-card-label">Total Male</p>
+      </div>
+    </div>
+    <div class="dashboard-card card-female">
+      <span class="dashboard-card-icon"><i class="fas fa-female"></i></span>
+      <div class="dashboard-card-body">
+        <p class="dashboard-card-value">{{ stats.total_female|default:0 }}</p>
+        <p class="dashboard-card-label">Total Female</p>
+      </div>
+    </div>
+    <div class="dashboard-card card-senior">
+      <span class="dashboard-card-icon"><i class="fas fa-user-clock"></i></span>
+      <div class="dashboard-card-body">
+        <p class="dashboard-card-value">{{ stats.total_senior_citizen|default:0 }}</p>
+        <p class="dashboard-card-label">Total Senior Citizen</p>
+      </div>
+    </div>
+    <div class="dashboard-card card-pwd">
+      <span class="dashboard-card-icon"><i class="fas fa-wheelchair"></i></span>
+      <div class="dashboard-card-body">
+        <p class="dashboard-card-value">{{ stats.total_pwd|default:0 }}</p>
+        <p class="dashboard-card-label">Total PWD</p>
+      </div>
+    </div>
+    <div class="dashboard-card card-solo">
+      <span class="dashboard-card-icon"><i class="fas fa-user"></i></span>
+      <div class="dashboard-card-body">
+        <p class="dashboard-card-value">{{ stats.total_solo_parent|default:0 }}</p>
+        <p class="dashboard-card-label">Total Solo Parent</p>
+      </div>
+    </div>
+    <div class="dashboard-card card-voters">
+      <span class="dashboard-card-icon"><i class="fas fa-vote-yea"></i></span>
+      <div class="dashboard-card-body">
+        <p class="dashboard-card-value">{{ stats.total_voters|default:0 }}</p>
+        <p class="dashboard-card-label">Total Voters</p>
+      </div>
+    </div>
+    <div class="dashboard-card card-residents">
+      <span class="dashboard-card-icon"><i class="fas fa-address-book"></i></span>
+      <div class="dashboard-card-body">
+        <p class="dashboard-card-value">{{ stats.total_residents_record|default:0 }}</p>
+        <p class="dashboard-card-label">Total Residents Record</p>
+      </div>
+    </div>
+    <div class="dashboard-card card-4ps">
+      <span class="dashboard-card-icon"><i class="fas fa-users"></i></span>
+      <div class="dashboard-card-body">
+        <p class="dashboard-card-value">{{ stats.total_4ps_member|default:0 }}</p>
+        <p class="dashboard-card-label">Total 4P's Member</p>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock %}
