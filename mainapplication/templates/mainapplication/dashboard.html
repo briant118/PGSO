@@ -2,9 +2,18 @@
 {% block title %}Dashboard – PGSO{% endblock %}
 {% block content %}
 <div class="dashboard">
-  <h1 class="dashboard-header">Dashboard</h1>
-  <p class="dashboard-subtitle">Welcome. Use the side menu to navigate through the application.</p>
-
+  <div class="dashboard-toolbar">
+    <h1 class="dashboard-header">Dashboard</h1>
+    <div class="dashboard-actions">
+      <form class="dashboard-search" action="#" method="get" role="search">
+        <span class="dashboard-search-icon"><i class="fas fa-search"></i></span>
+        <input type="search" name="q" placeholder="Search people..." class="dashboard-search-input" aria-label="Search people">
+      </form>
+      <a href="{% url 'operations:residents_record' %}" class="dashboard-btn-add">
+        <i class="fas fa-plus"></i> Add People
+      </a>
+    </div>
+  </div>
   <div class="dashboard-cards">
     <div class="dashboard-card card-male">
       <span class="dashboard-card-icon"><i class="fas fa-male"></i></span>
