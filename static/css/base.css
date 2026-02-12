@@ -211,3 +211,60 @@ body {
 .side-nav::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.3);
 }
+
+/* Dashboard stat cards */
+.dashboard-header {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  color: #1a1d24;
+}
+.dashboard-subtitle {
+  margin: 0 0 1.5rem;
+  color: #5f6368;
+  font-size: 0.95rem;
+}
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+}
+.dashboard-card {
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  color: #fff;
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-height: 100px;
+}
+.dashboard-card-icon {
+  font-size: 2.25rem;
+  opacity: 0.95;
+  flex-shrink: 0;
+}
+.dashboard-card-body {
+  min-width: 0;
+}
+.dashboard-card-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 0.25rem;
+}
+.dashboard-card-label {
+  font-size: 0.875rem;
+  opacity: 0.95;
+  margin: 0;
+  line-height: 1.3;
+}
+.dashboard-card.card-male { background: linear-gradient(135deg, #5bc0de 0%, #46b8da 100%); }
+.dashboard-card.card-female { background: linear-gradient(135deg, #e83e8c 0%, #dc3545 100%); }
+.dashboard-card.card-senior { background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%); }
+.dashboard-card.card-pwd { background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); color: #1a1d24; }
+.dashboard-card.card-pwd .dashboard-card-label { color: #1a1d24; opacity: 0.85; }
+.dashboard-card.card-solo { background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%); }
+.dashboard-card.card-voters { background: linear-gradient(135deg, #fd7e14 0%, #e96a0a 100%); }
+.dashboard-card.card-residents { background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); }
+.dashboard-card.card-4ps { background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%); }
