@@ -87,8 +87,11 @@ DATABASES = {
         'PASSWORD': config('SUPABASE_DB_PASSWORD'),
         'HOST': config('SUPABASE_DB_HOST'),
         'PORT': config('SUPABASE_DB_PORT', default='5432'),
-        'CONN_MAX_AGE': 0,  # Don't persist connections
-        'ATOMIC_REQUESTS': False,
+        'CONN_MAX_AGE': 60,  # Keep connections open for 60 seconds
+        'ATOMIC_REQUESTS': True,  # Wrap each request in a transaction
+        'OPTIONS': {
+            'connect_timeout': 10,
+        }
     }
 }
 
