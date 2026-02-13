@@ -1,0 +1,252 @@
+{% extends 'reference/base_reference.html' %}
+{% block title %} – {{ position.name }} in {{ barangay.name }}{% endblock %}
+{% block breadcrumb %} &rarr; <a href="{% url 'reference:position_list' %}">Positions</a> &rarr; <a href="{% url 'reference:position_detail' position.id %}">{{ position.name }}</a> &rarr; {{ barangay.name }}{% endblock %}
+{% block content %}
+<style>
+/* Page Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 2rem;
+  color: #1a1d24;
+  font-weight: 700;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+}
+
+.btn-back:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+}
+
+/* Info Card */
+.info-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.info-card h2 {
+  margin: 0 0 1rem;
+  color: #1a1d24;
+  font-size: 1.5rem;
+}
+
+.info-card .info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.info-card .info-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.info-card .info-label {
+  font-weight: 600;
+  color: #5f6368;
+}
+
+.info-card .info-value {
+  color: #1a1d24;
+}
+
+.badge-code {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #e8f4f8;
+  color: #0056b3;
+}
+
+/* Table Styles */
+.officials-table-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.officials-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.officials-table thead {
+  background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%);
+}
+
+.officials-table thead th {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.officials-table tbody tr {
+  border-bottom: 1px solid #e8eaed;
+  transition: background 0.15s ease;
+}
+
+.officials-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.officials-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.officials-table tbody td {
+  padding: 1rem 1.25rem;
+  color: #1a1d24;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+
+.empty-state h3 {
+  margin: 0 0 0.5rem;
+  color: #1a1d24;
+  font-size: 1.5rem;
+}
+
+.empty-state p {
+  margin: 0 0 1.5rem;
+  color: #5f6368;
+}
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title">
+    <i class="fas fa-users" style="color: #4299e1;"></i> {{ position.name }} in {{ barangay.name }}
+  </h1>
+  <a href="{% url 'reference:position_detail' position.id %}" class="btn-back">
+    <i class="fas fa-arrow-left"></i> Back to Position
+  </a>
+</div>
+
+<!-- Info Card -->
+<div class="info-card">
+  <h2><i class="fas fa-info-circle"></i> Information</h2>
+  <div class="info-row">
+    <div class="info-item">
+      <span class="info-label">Position:</span>
+      <span class="info-value"><strong>{{ position.name }}</strong></span>
+    </div>
+    {% if position.code %}
+    <div class="info-item">
+      <span class="info-label">Position Code:</span>
+      <span class="info-value"><span class="badge-code">{{ position.code }}</span></span>
+    </div>
+    {% endif %}
+    <div class="info-item">
+      <span class="info-label">Barangay:</span>
+      <span class="info-value"><strong>{{ barangay.name }}</strong></span>
+    </div>
+    {% if barangay.code %}
+    <div class="info-item">
+      <span class="info-label">Barangay Code:</span>
+      <span class="info-value"><span class="badge-code">{{ barangay.code }}</span></span>
+    </div>
+    {% endif %}
+    {% if barangay.municipality %}
+    <div class="info-item">
+      <span class="info-label">Municipality:</span>
+      <span class="info-value">{{ barangay.municipality }}</span>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Officials List -->
+{% if officials %}
+<div class="officials-table-container">
+  <table class="officials-table">
+    <thead>
+      <tr>
+        <th style="width: 5%;">#</th>
+        <th style="width: 25%;">Name</th>
+        <th style="width: 20%;">Contact</th>
+        <th style="width: 25%;">Address</th>
+        <th style="width: 15%;">Status</th>
+        <th style="width: 10%;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for official in officials %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td><strong>{{ official.name|default:"—" }}</strong></td>
+        <td>{{ official.contact|default:"—" }}</td>
+        <td>{{ official.address|default:"—" }}</td>
+        <td>
+          {% if official.is_active %}
+          <span style="color: #28a745; font-weight: 600;">Active</span>
+          {% else %}
+          <span style="color: #dc3545; font-weight: 600;">Inactive</span>
+          {% endif %}
+        </td>
+        <td>
+          <!-- TODO: Add edit/delete actions when model is created -->
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">👥</div>
+  <h3>No Officials Found</h3>
+  <p>There are no officials assigned to the position "{{ position.name }}" in {{ barangay.name }} yet.</p>
+  <p style="font-size: 0.9rem; color: #5f6368; margin-top: 1rem;">
+    <i class="fas fa-info-circle"></i> When you add barangay officials and assign them to this position, they will appear here.
+  </p>
+</div>
+{% endif %}
+
+{% endblock %}

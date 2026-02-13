@@ -5,7 +5,7 @@ class Barangay(models.Model):
     """Reference data for barangays."""
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=20, blank=True)
-    description = models.TextField(blank=True)
+    municipality = models.CharField(max_length=100, blank=True)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

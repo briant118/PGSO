@@ -368,7 +368,7 @@
       <tr>
         <th style="width: 10%;">Code</th>
         <th style="width: 30%;">Name</th>
-        <th style="width: 35%;">Description</th>
+        <th style="width: 35%;">Municipality</th>
         <th style="width: 25%; text-align: center;">Actions</th>
       </tr>
     </thead>
@@ -384,10 +384,10 @@
         </td>
         <td><strong>{{ b.name }}</strong></td>
         <td>
-          {% if b.description %}
-          {{ b.description|truncatewords:10 }}
+          {% if b.municipality %}
+          {{ b.municipality }}
           {% else %}
-          <span style="color: #999; font-style: italic;">No description</span>
+          <span style="color: #999; font-style: italic;">No municipality</span>
           {% endif %}
         </td>
         <td style="text-align: center;">
@@ -431,8 +431,8 @@
           <input type="text" id="add_name" name="name" required placeholder="Enter barangay name">
         </div>
         <div class="form-group">
-          <label for="add_description">Description</label>
-          <textarea id="add_description" name="description" placeholder="Enter description (optional)"></textarea>
+          <label for="add_municipality">Municipality</label>
+          <input type="text" id="add_municipality" name="municipality" placeholder="Enter municipality (optional)">
         </div>
         <p style="margin: 0; padding: 0.75rem; background: #e8f4f8; border-radius: 6px; color: #0056b3; font-size: 0.9rem;">
           <i class="fas fa-info-circle"></i> Code will be automatically assigned
@@ -472,8 +472,8 @@
           <input type="text" id="edit_name" name="name" required placeholder="Enter barangay name">
         </div>
         <div class="form-group">
-          <label for="edit_description">Description</label>
-          <textarea id="edit_description" name="description" placeholder="Enter description (optional)"></textarea>
+          <label for="edit_municipality">Municipality</label>
+          <input type="text" id="edit_municipality" name="municipality" placeholder="Enter municipality (optional)">
         </div>
       </div>
       <div class="modal-footer">
@@ -527,7 +527,7 @@ function openAddModal() {
 function closeAddModal() {
   document.getElementById('addModal').classList.remove('active');
   document.getElementById('add_name').value = '';
-  document.getElementById('add_description').value = '';
+  document.getElementById('add_municipality').value = '';
 }
 
 // Edit Modal Functions
@@ -537,7 +537,7 @@ function openEditModal(id) {
     .then(data => {
       document.getElementById('edit_name').value = data.name;
       document.getElementById('edit_code').value = data.code || '';
-      document.getElementById('edit_description').value = data.description || '';
+      document.getElementById('edit_municipality').value = data.municipality || '';
       document.getElementById('editForm').action = `/reference/barangay/edit/${id}/`;
       document.getElementById('editModal').classList.add('active');
       document.getElementById('edit_name').focus();
