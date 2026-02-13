@@ -23,7 +23,7 @@ def barangay_add(request):
     """Add a new barangay."""
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
-        description = request.POST.get('description', '').strip()
+        municipality = request.POST.get('municipality', '').strip()
         
         if not name:
             messages.error(request, 'Barangay name is required.')
@@ -41,7 +41,7 @@ def barangay_add(request):
         barangay = Barangay.objects.create(
             name=name,
             code=str(next_code),
-            description=description,
+            municipality=municipality,
             is_active=True
         )
         # Force commit to database
@@ -60,7 +60,7 @@ def barangay_edit(request, pk):
     
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
-        description = request.POST.get('description', '').strip()
+        municipality = request.POST.get('municipality', '').strip()
         
         if not name:
             messages.error(request, 'Barangay name is required.')
@@ -68,9 +68,9 @@ def barangay_edit(request, pk):
         
         # Update barangay data
         barangay.name = name
-        barangay.description = description
+        barangay.municipality = municipality
         # Code is not updated - it remains the same
-        barangay.save(update_fields=['name', 'description', 'updated_at'])
+        barangay.save(update_fields=['name', 'municipality', 'updated_at'])
         # Force commit to database
         transaction.on_commit(lambda: None)
         
@@ -121,7 +121,7 @@ def barangay_get(request, pk):
         'id': barangay.id,
         'name': barangay.name,
         'code': barangay.code,
-        'description': barangay.description,
+        'municipality': barangay.municipality,
     }
     return JsonResponse(data)
 
@@ -131,6 +131,14 @@ def position_list(request):
     positions = Position.objects.filter(is_active=True)
     # Sort by numeric code value instead of alphabetically
     positions = sorted(positions, key=lambda x: int(x.code) if x.code.isdigit() else 999999)
+    
+    # Add total count for each position
+    # TODO: When you create a model linking positions to people/officials,
+    # replace this with: position.total = BarangayOfficial.objects.filter(position=position, is_active=True).count()
+    for position in positions:
+        # For now, set total to 0 until the model is created
+        position.total = 0
+    
     return render(request, 'reference/position_list.html', {'positions': positions})
 
 
@@ -240,3 +248,60 @@ def position_get(request, pk):
         'description': position.description,
     }
     return JsonResponse(data)
+
+
+def position_detail(request, pk):
+    """Show list of barangays for a specific position."""
+    position = get_object_or_404(Position, pk=pk)
+    
+    # Get municipality filter from request
+    selected_municipality = request.GET.get('municipality', '')
+    
+    # Get unique municipalities from barangays
+    municipalities = Barangay.objects.filter(
+        is_active=True,
+        municipality__isnull=False
+    ).exclude(municipality='').values_list('municipality', flat=True).distinct().order_by('municipality')
+    
+    # Convert to list of dictionaries for template
+    municipalities_list = [{'name': m} for m in municipalities]
+    
+    # Get barangays - all if no filter, filtered by municipality if filter is selected
+    if selected_municipality:
+        barangays = Barangay.objects.filter(
+            is_active=True,
+            municipality=selected_municipality
+        ).order_by('name')
+    else:
+        # Show all barangays when no municipality filter is selected
+        barangays = Barangay.objects.filter(is_active=True).order_by('name')
+    
+    context = {
+        'position': position,
+        'municipalities': municipalities_list,
+        'selected_municipality': selected_municipality,
+        'barangays': barangays,
+    }
+    return render(request, 'reference/position_detail.html', context)
+
+
+def position_barangay_officials(request, position_pk, barangay_pk):
+    """Show list of officials for a specific position in a specific barangay."""
+    position = get_object_or_404(Position, pk=position_pk)
+    barangay = get_object_or_404(Barangay, pk=barangay_pk, is_active=True)
+    
+    # TODO: When you create a model linking positions to people/officials,
+    # replace this empty list with filtering logic like:
+    # officials = BarangayOfficial.objects.filter(
+    #     position=position,
+    #     barangay=barangay,
+    #     is_active=True
+    # ).order_by('name')
+    officials = []
+    
+    context = {
+        'position': position,
+        'barangay': barangay,
+        'officials': officials,
+    }
+    return render(request, 'reference/position_barangay_officials.html', context)

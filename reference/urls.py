@@ -15,4 +15,6 @@ urlpatterns = [
     path('positions/edit/<int:pk>/', views.position_edit, name='position_edit'),
     path('positions/delete/<int:pk>/', views.position_delete, name='position_delete'),
     path('positions/get/<int:pk>/', views.position_get, name='position_get'),
+    path('positions/view/<int:pk>/', views.position_detail, name='position_detail'),
+    path('positions/<int:position_pk>/barangay/<int:barangay_pk>/', views.position_barangay_officials, name='position_barangay_officials'),
 ]

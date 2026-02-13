@@ -1,0 +1,431 @@
+{% extends 'reference/base_reference.html' %}
+{% block title %} – {{ position.name }}{% endblock %}
+{% block breadcrumb %} &rarr; <a href="{% url 'reference:position_list' %}">Positions</a> &rarr; {{ position.name }}{% endblock %}
+{% block content %}
+<style>
+/* Page Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 2rem;
+  color: #1a1d24;
+  font-weight: 700;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+  color: white;
+}
+
+.btn-back:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+}
+
+/* Position Info Card */
+.position-info-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.position-info-card h2 {
+  margin: 0 0 1rem;
+  color: #1a1d24;
+  font-size: 1.5rem;
+}
+
+.position-info-card .info-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.position-info-card .info-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.position-info-card .info-label {
+  font-weight: 600;
+  color: #5f6368;
+}
+
+.position-info-card .info-value {
+  color: #1a1d24;
+}
+
+.badge-code {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #e8f4f8;
+  color: #0056b3;
+}
+
+/* Table Styles */
+.officials-table-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.officials-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.officials-table thead {
+  background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%);
+}
+
+.officials-table thead th {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.officials-table tbody tr {
+  border-bottom: 1px solid #e8eaed;
+  transition: background 0.15s ease;
+}
+
+.officials-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.officials-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.officials-table tbody td {
+  padding: 1rem 1.25rem;
+  color: #1a1d24;
+}
+
+/* Filter Styles */
+.filter-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-section label {
+  font-weight: 600;
+  color: #1a1d24;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-section select {
+  padding: 0.75rem 1rem;
+  border: 2px solid #e8eaed;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: white;
+  color: #1a1d24;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-width: 250px;
+}
+
+.filter-section select:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.btn-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+}
+
+.btn-filter:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+}
+
+.btn-clear-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  background: #e8eaed;
+  color: #5f6368;
+}
+
+.btn-clear-filter:hover {
+  background: #d1d5db;
+  color: #1a1d24;
+}
+
+.filter-info {
+  margin-left: auto;
+  color: #5f6368;
+  font-size: 0.9rem;
+}
+
+/* Barangay Cards */
+.barangay-cards-container {
+  margin-bottom: 2rem;
+}
+
+.barangay-cards-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1d24;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.barangay-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+
+.barangay-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: block;
+  border: 2px solid #e8eaed;
+  cursor: pointer;
+}
+
+.barangay-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  color: inherit;
+  border-color: #4299e1;
+}
+
+.barangay-card.selected {
+  border-color: #4299e1;
+  background: #f0f7ff;
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.2);
+}
+
+.barangay-card-icon {
+  font-size: 2.5rem;
+  display: block;
+  margin-bottom: 1rem;
+  color: #4299e1;
+}
+
+.barangay-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+  color: #1a1d24;
+  font-weight: 600;
+}
+
+.barangay-card-code {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background: #e8f4f8;
+  color: #0056b3;
+  margin-top: 0.5rem;
+}
+
+.barangay-card p {
+  margin: 0.5rem 0 0;
+  color: #5f6368;
+  font-size: 0.9rem;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+
+.empty-state h3 {
+  margin: 0 0 0.5rem;
+  color: #1a1d24;
+  font-size: 1.5rem;
+}
+
+.empty-state p {
+  margin: 0 0 1.5rem;
+  color: #5f6368;
+}
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title">
+    <i class="fas fa-user-tag" style="color: #4299e1;"></i> {{ position.name }}
+  </h1>
+  <a href="{% url 'reference:position_list' %}" class="btn-back">
+    <i class="fas fa-arrow-left"></i> Back to Positions
+  </a>
+</div>
+
+<!-- Position Info Card -->
+<div class="position-info-card">
+  <h2><i class="fas fa-info-circle"></i> Position Information</h2>
+  <div class="info-row">
+    <div class="info-item">
+      <span class="info-label">Code:</span>
+      <span class="info-value">
+        {% if position.code %}
+        <span class="badge-code">{{ position.code }}</span>
+        {% else %}
+        <span style="color: #999;">—</span>
+        {% endif %}
+      </span>
+    </div>
+    <div class="info-item">
+      <span class="info-label">Name:</span>
+      <span class="info-value"><strong>{{ position.name }}</strong></span>
+    </div>
+    {% if position.description %}
+    <div class="info-item">
+      <span class="info-label">Description:</span>
+      <span class="info-value">{{ position.description }}</span>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Filter Section -->
+<div class="filter-section">
+  <label for="municipality-filter">
+    <i class="fas fa-filter"></i> Filter by Municipality:
+  </label>
+  <form method="get" action="{% url 'reference:position_detail' position.id %}" style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+    <select name="municipality" id="municipality-filter" onchange="this.form.submit()">
+      <option value="">All Municipalities</option>
+      {% for municipality in municipalities %}
+      <option value="{{ municipality.name }}" {% if selected_municipality == municipality.name %}selected{% endif %}>
+        {{ municipality.name }}
+      </option>
+      {% endfor %}
+    </select>
+    {% if selected_municipality %}
+    <a href="{% url 'reference:position_detail' position.id %}" class="btn-clear-filter">
+      <i class="fas fa-times"></i> Clear Filter
+    </a>
+    {% endif %}
+  </form>
+  {% if selected_municipality %}
+  <div class="filter-info">
+    <i class="fas fa-info-circle"></i> Showing results for selected municipality
+  </div>
+  {% endif %}
+</div>
+
+<!-- Barangay Cards -->
+{% if barangays %}
+<div class="barangay-cards-container">
+  <h2 class="barangay-cards-title">
+    <i class="fas fa-folder-open" style="color: #4299e1;"></i>
+    {% if selected_municipality %}
+    Barangays in {{ selected_municipality }}
+    {% else %}
+    All Barangays
+    {% endif %}
+  </h2>
+  <div class="barangay-cards-grid">
+    {% for barangay in barangays %}
+    <a href="{% url 'reference:position_barangay_officials' position.id barangay.id %}" 
+       class="barangay-card">
+      <span class="barangay-card-icon">
+        <i class="fas fa-folder"></i>
+      </span>
+      <h3>{{ barangay.name }}</h3>
+      {% if barangay.code %}
+      <span class="barangay-card-code">Code: {{ barangay.code }}</span>
+      {% endif %}
+      {% if barangay.municipality %}
+      <p style="font-size: 0.85rem; color: #5f6368; margin-top: 0.5rem;">
+        <i class="fas fa-map-marker-alt"></i> {{ barangay.municipality }}
+      </p>
+      {% endif %}
+      <p style="margin-top: 0.5rem;">Click to view officials</p>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+
+{% endblock %}
