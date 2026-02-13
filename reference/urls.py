@@ -11,4 +11,8 @@ urlpatterns = [
     path('barangay/delete/<int:pk>/', views.barangay_delete, name='barangay_delete'),
     path('barangay/get/<int:pk>/', views.barangay_get, name='barangay_get'),
     path('positions/', views.position_list, name='position_list'),
+    path('positions/add/', views.position_add, name='position_add'),
+    path('positions/edit/<int:pk>/', views.position_edit, name='position_edit'),
+    path('positions/delete/<int:pk>/', views.position_delete, name='position_delete'),
+    path('positions/get/<int:pk>/', views.position_get, name='position_get'),
 ]
