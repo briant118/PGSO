@@ -1,0 +1,19 @@
+# Core Framework
+Django>=5.0,<6.0
+
+# Database
+psycopg2-binary>=2.9.9
+
+# Configuration Management
+python-decouple>=3.8
+
+# WSGI Server (for production)
+gunicorn>=21.2.0
+
+# Additional utilities
+python-dotenv>=1.0.0
+
+# Development tools (optional, comment out if not needed)
+# pylint>=3.0.0
+# black>=24.0.0
+# django-debug-toolbar>=4.2.0
