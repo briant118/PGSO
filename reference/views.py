@@ -12,7 +12,9 @@ def reference_index(request):
 
 def barangay_list(request):
     """List all active barangays ordered by code."""
-    barangays = Barangay.objects.filter(is_active=True).order_by('code')
+    barangays = Barangay.objects.filter(is_active=True)
+    # Sort by numeric code value instead of alphabetically
+    barangays = sorted(barangays, key=lambda x: int(x.code) if x.code.isdigit() else 999999)
     return render(request, 'reference/barangay_list.html', {'barangays': barangays})
 
 
@@ -126,7 +128,9 @@ def barangay_get(request, pk):
 
 def position_list(request):
     """List all active positions ordered by code."""
-    positions = Position.objects.filter(is_active=True).order_by('code')
+    positions = Position.objects.filter(is_active=True)
+    # Sort by numeric code value instead of alphabetically
+    positions = sorted(positions, key=lambda x: int(x.code) if x.code.isdigit() else 999999)
     return render(request, 'reference/position_list.html', {'positions': positions})
 
 
