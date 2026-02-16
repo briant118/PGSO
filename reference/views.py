@@ -47,6 +47,10 @@ def barangay_add(request):
             messages.error(request, 'Barangay name is required.')
             return redirect('reference:barangay_list')
         
+        if not municipality_id:
+            messages.error(request, 'Municipality is required.')
+            return redirect('reference:barangay_list')
+        
         # Auto-increment code: get maximum code and add 1 (no gap filling)
         # Get all existing codes from all barangays (including inactive ones)
         existing_codes = Barangay.objects.exclude(code='').values_list('code', flat=True)
@@ -55,13 +59,12 @@ def barangay_add(request):
         # Get the maximum code and increment by 1
         next_code = max(numeric_codes) + 1 if numeric_codes else 1
         
-        # Get municipality object if provided
-        municipality = None
-        if municipality_id:
-            try:
-                municipality = Municipality.objects.get(id=municipality_id)
-            except Municipality.DoesNotExist:
-                pass
+        # Get municipality object
+        try:
+            municipality = Municipality.objects.get(id=municipality_id)
+        except Municipality.DoesNotExist:
+            messages.error(request, 'Selected municipality is invalid.')
+            return redirect('reference:barangay_list')
         
         # Create and save the barangay
         barangay = Barangay.objects.create(
@@ -92,13 +95,16 @@ def barangay_edit(request, pk):
             messages.error(request, 'Barangay name is required.')
             return redirect('reference:barangay_list')
         
-        # Get municipality object if provided
-        municipality = None
-        if municipality_id:
-            try:
-                municipality = Municipality.objects.get(id=municipality_id)
-            except Municipality.DoesNotExist:
-                pass
+        if not municipality_id:
+            messages.error(request, 'Municipality is required.')
+            return redirect('reference:barangay_list')
+        
+        # Get municipality object
+        try:
+            municipality = Municipality.objects.get(id=municipality_id)
+        except Municipality.DoesNotExist:
+            messages.error(request, 'Selected municipality is invalid.')
+            return redirect('reference:barangay_list')
         
         # Update barangay data
         barangay.name = name

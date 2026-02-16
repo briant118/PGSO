@@ -21,7 +21,7 @@ class Barangay(models.Model):
     """Reference data for barangays."""
     name = models.CharField(max_length=100)
     code = models.CharField(max_length=20, blank=True)
-    municipality = models.ForeignKey(Municipality, on_delete=models.PROTECT, related_name='barangays', null=True, blank=True)
+    municipality = models.ForeignKey(Municipality, on_delete=models.PROTECT, related_name='barangays')
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

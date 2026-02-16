@@ -655,9 +655,9 @@
           <input type="text" id="add_name" name="name" required placeholder="Enter barangay name">
         </div>
         <div class="form-group">
-          <label for="add_municipality">Municipality</label>
-          <select id="add_municipality" name="municipality" class="select2-municipality">
-            <option value="">Select municipality (optional)</option>
+          <label for="add_municipality">Municipality <span style="color: #dc3545;">*</span></label>
+          <select id="add_municipality" name="municipality" class="select2-municipality" required>
+            <option value="">Select municipality</option>
             {% for municipality in municipalities %}
             <option value="{{ municipality.id }}">{{ municipality.name }}</option>
             {% endfor %}
@@ -703,9 +703,9 @@
           <input type="text" id="edit_name" name="name" required placeholder="Enter barangay name">
         </div>
         <div class="form-group">
-          <label for="edit_municipality">Municipality</label>
-          <select id="edit_municipality" name="municipality" class="select2-municipality">
-            <option value="">Select municipality (optional)</option>
+          <label for="edit_municipality">Municipality <span style="color: #dc3545;">*</span></label>
+          <select id="edit_municipality" name="municipality" class="select2-municipality" required>
+            <option value="">Select municipality</option>
             {% for municipality in municipalities %}
             <option value="{{ municipality.id }}">{{ municipality.name }}</option>
             {% endfor %}
