@@ -1,5 +1,5 @@
 from django.db import models
-from reference.models import Barangay
+from reference.models import Barangay, Position
 
 
 class Resident(models.Model):
@@ -118,6 +118,15 @@ class Resident(models.Model):
             name += f" {self.suffix}"
         return name
     
+    def get_age(self):
+        """Calculate and return the current age."""
+        from datetime import date
+        today = date.today()
+        age = today.year - self.date_of_birth.year
+        if today.month < self.date_of_birth.month or (today.month == self.date_of_birth.month and today.day < self.date_of_birth.day):
+            age -= 1
+        return age
+    
     def save(self, *args, **kwargs):
         """Override save to auto-generate resident ID."""
         if not self.resident_id:
@@ -132,3 +141,29 @@ class Resident(models.Model):
             else:
                 self.resident_id = '1'
         super().save(*args, **kwargs)
+
+
+class BarangayOfficial(models.Model):
+    """Model for barangay officials."""
+    
+    resident = models.ForeignKey(Resident, on_delete=models.PROTECT, related_name='official_positions')
+    barangay = models.ForeignKey(Barangay, on_delete=models.PROTECT, related_name='officials')
+    position = models.ForeignKey(Position, on_delete=models.PROTECT, related_name='officials')
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    remarks = models.TextField(blank=True)
+    
+    # Metadata
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Barangay Official'
+        verbose_name_plural = 'Barangay Officials'
+        # Ensure a resident can only have one active position per barangay
+        unique_together = [['resident', 'barangay', 'position', 'is_active']]
+    
+    def __str__(self):
+        return f"{self.resident.get_full_name()} - {self.position.name} ({self.barangay.name})"

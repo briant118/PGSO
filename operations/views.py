@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db import transaction
-from reference.models import Barangay
-from .models import Resident
+from reference.models import Barangay, Position
+from .models import Resident, BarangayOfficial
 import logging
 
 # Set up logging
@@ -19,7 +19,19 @@ def coordinator(request):
 
 
 def barangay_officials(request):
-    return render(request, "operations/barangay_officials.html")
+    """Display list of barangay officials."""
+    officials = BarangayOfficial.objects.select_related('resident', 'barangay', 'position').filter(is_active=True)
+    residents = Resident.objects.filter(status='ALIVE').order_by('lastname', 'firstname')
+    barangays = Barangay.objects.filter(is_active=True)
+    positions = Position.objects.filter(is_active=True)
+    
+    context = {
+        'officials': officials,
+        'residents': residents,
+        'barangays': barangays,
+        'positions': positions,
+    }
+    return render(request, "operations/barangay_officials.html", context)
 
 
 def residents_record(request):
@@ -188,3 +200,107 @@ def resident_delete(request, pk):
 
 def voters_registration(request):
     return render(request, "operations/voters_registration.html")
+
+
+@transaction.atomic
+def barangay_official_add(request):
+    """Add a new barangay official."""
+    if request.method == 'POST':
+        try:
+            resident_id = request.POST.get('resident')
+            barangay_id = request.POST.get('barangay')
+            position_id = request.POST.get('position')
+            
+            resident = get_object_or_404(Resident, id=resident_id)
+            barangay = get_object_or_404(Barangay, id=barangay_id)
+            position = get_object_or_404(Position, id=position_id)
+            
+            official = BarangayOfficial(
+                resident=resident,
+                barangay=barangay,
+                position=position,
+                start_date=request.POST.get('start_date'),
+                end_date=request.POST.get('end_date') or None,
+                remarks=request.POST.get('remarks', ''),
+            )
+            official.save()
+            
+            logger.info(f'Barangay official {resident.get_full_name()} added as {position.name} in {barangay.name}')
+            
+            messages.success(request, f'{resident.get_full_name()} added as {position.name} successfully!')
+            return redirect('operations:barangay_officials')
+        except Exception as e:
+            logger.error(f'Error adding barangay official: {str(e)}')
+            messages.error(request, f'Error adding official: {str(e)}')
+            return redirect('operations:barangay_officials')
+    
+    return redirect('operations:barangay_officials')
+
+
+def barangay_official_get(request, pk):
+    """Get barangay official data as JSON."""
+    official = get_object_or_404(BarangayOfficial, pk=pk)
+    data = {
+        'id': official.id,
+        'resident': official.resident.id,
+        'barangay': official.barangay.id,
+        'position': official.position.id,
+        'start_date': official.start_date.strftime('%Y-%m-%d'),
+        'end_date': official.end_date.strftime('%Y-%m-%d') if official.end_date else '',
+        'remarks': official.remarks,
+    }
+    return JsonResponse(data)
+
+
+@transaction.atomic
+def barangay_official_edit(request, pk):
+    """Edit an existing barangay official."""
+    official = get_object_or_404(BarangayOfficial, pk=pk)
+    
+    if request.method == 'POST':
+        try:
+            resident_id = request.POST.get('resident')
+            barangay_id = request.POST.get('barangay')
+            position_id = request.POST.get('position')
+            
+            official.resident = get_object_or_404(Resident, id=resident_id)
+            official.barangay = get_object_or_404(Barangay, id=barangay_id)
+            official.position = get_object_or_404(Position, id=position_id)
+            official.start_date = request.POST.get('start_date')
+            official.end_date = request.POST.get('end_date') or None
+            official.remarks = request.POST.get('remarks', '')
+            
+            official.save()
+            
+            logger.info(f'Barangay official {official.resident.get_full_name()} updated')
+            
+            messages.success(request, f'{official.resident.get_full_name()} updated successfully!')
+            return redirect('operations:barangay_officials')
+        except Exception as e:
+            logger.error(f'Error updating barangay official: {str(e)}')
+            messages.error(request, f'Error updating official: {str(e)}')
+            return redirect('operations:barangay_officials')
+    
+    return redirect('operations:barangay_officials')
+
+
+@transaction.atomic
+def barangay_official_delete(request, pk):
+    """Delete a barangay official."""
+    official = get_object_or_404(BarangayOfficial, pk=pk)
+    
+    if request.method == 'POST':
+        try:
+            name = official.resident.get_full_name()
+            position = official.position.name
+            
+            official.delete()
+            
+            logger.info(f'Barangay official {name} ({position}) deleted')
+            
+            messages.success(request, f'{name} removed from {position} successfully!')
+        except Exception as e:
+            logger.error(f'Error deleting barangay official: {str(e)}')
+            messages.error(request, f'Error deleting official: {str(e)}')
+    
+    return redirect('operations:barangay_officials')

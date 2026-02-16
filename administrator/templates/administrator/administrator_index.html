@@ -3,26 +3,145 @@
 {% block title %}Administrator Control - PGSO{% endblock %}
 
 {% block content %}
-<h1>⚙️ Administrator Control</h1>
-<p>Manage system settings and user accounts from this section.</p>
+<style>
+/* Page Header */
+.page-header {
+  margin-bottom: 2rem;
+}
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
-  <div style="background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h3 style="margin-top: 0;">📋 System Policy</h3>
-    <p style="color: #666;">Configure system policies, rules, and settings for the PGSO application.</p>
-    <a href="{% url 'administrator:system_policy' %}" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #3498db; color: #fff; text-decoration: none; border-radius: 4px;">Manage Policies →</a>
+.page-title {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  color: #1a1d24;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: #5f6368;
+  font-size: 0.95rem;
+}
+
+/* Admin Cards Grid */
+.admin-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Admin Card */
+.admin-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border-top: 4px solid #4299e1;
+}
+
+.admin-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.admin-card h3 {
+  margin: 0 0 1rem;
+  color: #1a1d24;
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-card p {
+  margin: 0 0 1.5rem;
+  color: #5f6368;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.admin-card-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-card-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-blue {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+}
+
+.btn-blue:hover {
+  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+}
+
+.btn-green {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+}
+
+.btn-green:hover {
+  background: linear-gradient(135deg, #218838 0%, #1aa179 100%);
+}
+
+.btn-red {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+}
+
+.btn-red:hover {
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+}
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title">
+    <i class="fas fa-cog" style="color: #4299e1;"></i> Administrator Control
+  </h1>
+  <p class="page-subtitle">Manage system settings, policies, and user accounts from this section.</p>
+</div>
+
+<!-- Admin Cards Grid -->
+<div class="admin-cards-grid">
+  <div class="admin-card">
+    <h3><i class="fas fa-shield-alt" style="color: #4299e1;"></i> System Policy</h3>
+    <p>Configure system policies, security settings, data retention rules, and access controls for the PGSO application.</p>
+    <a href="{% url 'administrator:system_policy' %}" class="admin-card-btn btn-blue">
+      Manage Policies <i class="fas fa-arrow-right"></i>
+    </a>
   </div>
   
-  <div style="background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h3 style="margin-top: 0;">👥 User Accounts</h3>
-    <p style="color: #666;">Create, edit, and manage user accounts with different permission levels.</p>
-    <a href="{% url 'administrator:user_accounts' %}" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #2ecc71; color: #fff; text-decoration: none; border-radius: 4px;">Manage Users →</a>
+  <div class="admin-card">
+    <h3><i class="fas fa-user-friends" style="color: #4299e1;"></i> User Accounts</h3>
+    <p>Create, edit, and manage user accounts with different permission levels and access rights.</p>
+    <a href="{% url 'administrator:user_accounts' %}" class="admin-card-btn btn-green">
+      Manage Users <i class="fas fa-arrow-right"></i>
+    </a>
   </div>
   
-  <div style="background: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h3 style="margin-top: 0;">📈 User Activity</h3>
-    <p style="color: #666;">Monitor user activities, login history, and system usage logs.</p>
-    <a href="{% url 'administrator:user_activity' %}" style="display: inline-block; margin-top: 1rem; padding: 0.5rem 1rem; background: #e74c3c; color: #fff; text-decoration: none; border-radius: 4px;">View Activity →</a>
+  <div class="admin-card">
+    <h3><i class="fas fa-chart-line" style="color: #4299e1;"></i> User Activity</h3>
+    <p>Monitor user activities, login history, system usage logs, and track all operations performed in the system.</p>
+    <a href="{% url 'administrator:user_activity' %}" class="admin-card-btn btn-red">
+      View Activity <i class="fas fa-arrow-right"></i>
+    </a>
   </div>
 </div>
 {% endblock %}

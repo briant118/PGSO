@@ -2,17 +2,121 @@
 {% block title %}References{% block page_title %}{% endblock %} – PGSO{% endblock %}
 {% block extra_css %}
 <style>
-.reference-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; }
-.ref-card { background: #fff; border-radius: 12px; padding: 1.5rem; text-decoration: none; color: inherit; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; display: block; border: 1px solid #e8eaed; }
-.ref-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
-.ref-icon { font-size: 2rem; display: block; margin-bottom: 0.5rem; }
-.ref-card h2 { margin: 0 0 0.5rem; font-size: 1.25rem; }
-.ref-card p { margin: 0; color: #5f6368; font-size: 0.9rem; }
-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-th, td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid #eee; }
-th { background: #2c3e50; color: #fff; font-weight: 600; }
-tr:hover { background: #f8f9fa; }
-.empty-msg { background: #fff; padding: 2rem; border-radius: 12px; text-align: center; color: #5f6368; }
+/* Page Header */
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  color: #1a1d24;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: #5f6368;
+  font-size: 0.95rem;
+}
+
+/* Reference Cards */
+.reference-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.ref-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  display: block;
+  border-left: 4px solid #4299e1;
+}
+
+.ref-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-left-color: #3182ce;
+}
+
+.ref-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 1rem;
+  opacity: 0.8;
+}
+
+.ref-card h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.5rem;
+  color: #1a1d24;
+  font-weight: 700;
+}
+
+.ref-card p {
+  margin: 0;
+  color: #5f6368;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+th, td {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  border-bottom: 1px solid #e8eaed;
+}
+
+th {
+  background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+tr:hover {
+  background: #f8f9fa;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+/* Empty Message */
+.empty-msg {
+  background: #fff;
+  padding: 4rem 2rem;
+  border-radius: 12px;
+  text-align: center;
+  color: #5f6368;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.empty-msg h3 {
+  margin: 0 0 0.5rem;
+  color: #1a1d24;
+  font-size: 1.5rem;
+}
 </style>
 {% endblock %}
 {% block content %}{% endblock %}

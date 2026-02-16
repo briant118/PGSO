@@ -3,6 +3,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db import transaction
 from .models import Barangay, Position
+from operations.models import BarangayOfficial
 
 
 def reference_index(request):
@@ -132,12 +133,9 @@ def position_list(request):
     # Sort by numeric code value instead of alphabetically
     positions = sorted(positions, key=lambda x: int(x.code) if x.code.isdigit() else 999999)
     
-    # Add total count for each position
-    # TODO: When you create a model linking positions to people/officials,
-    # replace this with: position.total = BarangayOfficial.objects.filter(position=position, is_active=True).count()
+    # Add total count for each position from BarangayOfficial model
     for position in positions:
-        # For now, set total to 0 until the model is created
-        position.total = 0
+        position.total = BarangayOfficial.objects.filter(position=position, is_active=True).count()
     
     return render(request, 'reference/position_list.html', {'positions': positions})
 
@@ -290,14 +288,22 @@ def position_barangay_officials(request, position_pk, barangay_pk):
     position = get_object_or_404(Position, pk=position_pk)
     barangay = get_object_or_404(Barangay, pk=barangay_pk, is_active=True)
     
-    # TODO: When you create a model linking positions to people/officials,
-    # replace this empty list with filtering logic like:
-    # officials = BarangayOfficial.objects.filter(
-    #     position=position,
-    #     barangay=barangay,
-    #     is_active=True
-    # ).order_by('name')
+    # Get officials for this position and barangay from BarangayOfficial model
+    barangay_officials = BarangayOfficial.objects.filter(
+        position=position,
+        barangay=barangay,
+        is_active=True
+    ).select_related('resident').order_by('resident__lastname', 'resident__firstname')
+    
+    # Format the data for the template
     officials = []
+    for official in barangay_officials:
+        officials.append({
+            'name': official.resident.get_full_name(),
+            'contact': official.resident.contact_no,
+            'address': official.resident.address,
+            'is_active': official.is_active,
+        })
     
     context = {
         'position': position,

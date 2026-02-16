@@ -3,49 +3,140 @@
 {% block title %}Reports - PGSO{% endblock %}
 
 {% block content %}
-<h1>Reports</h1>
-<p>Select a report type from the sidebar.</p>
+<style>
+/* Page Header */
+.page-header {
+  margin-bottom: 2rem;
+}
 
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 2rem;">
-  <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h3 style="margin-top: 0;">👨 List of MALE</h3>
-    <p style="color: #666;">View all male residents</p>
-    <a href="{% url 'reports:list_male' %}" style="color: #3498db; text-decoration: none;">View Report →</a>
-  </div>
-  <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h3 style="margin-top: 0;">👩 List of FEMALE</h3>
-    <p style="color: #666;">View all female residents</p>
-    <a href="{% url 'reports:list_female' %}" style="color: #3498db; text-decoration: none;">View Report →</a>
-  </div>
-  <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h3 style="margin-top: 0;">♿ List of PWD</h3>
-    <p style="color: #666;">View persons with disabilities</p>
-    <a href="{% url 'reports:list_pwd' %}" style="color: #3498db; text-decoration: none;">View Report →</a>
-  </div>
-  <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h3 style="margin-top: 0;">👤 List of Solo Parent</h3>
-    <p style="color: #666;">View solo parent records</p>
-    <a href="{% url 'reports:list_solo_parent' %}" style="color: #3498db; text-decoration: none;">View Report →</a>
-  </div>
-  <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h3 style="margin-top: 0;">👴 List of Senior Citizen</h3>
-    <p style="color: #666;">View senior citizen records</p>
-    <a href="{% url 'reports:list_senior_citizen' %}" style="color: #3498db; text-decoration: none;">View Report →</a>
-  </div>
-  <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h3 style="margin-top: 0;">👥 List of 4PS Member</h3>
-    <p style="color: #666;">View 4PS member records</p>
-    <a href="{% url 'reports:list_4ps_member' %}" style="color: #3498db; text-decoration: none;">View Report →</a>
-  </div>
-  <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h3 style="margin-top: 0;">🗳️ List of Voters</h3>
-    <p style="color: #666;">View registered voters</p>
-    <a href="{% url 'reports:list_voters' %}" style="color: #3498db; text-decoration: none;">View Report →</a>
-  </div>
-  <div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-    <h3 style="margin-top: 0;">📝 List of Resident's Record</h3>
-    <p style="color: #666;">View all resident records</p>
-    <a href="{% url 'reports:list_residents_record' %}" style="color: #3498db; text-decoration: none;">View Report →</a>
-  </div>
+.page-title {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  color: #1a1d24;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: #5f6368;
+  font-size: 0.95rem;
+}
+
+/* Report Cards Grid */
+.report-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+/* Report Card */
+.report-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: block;
+  border-left: 4px solid #4299e1;
+}
+
+.report-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  border-left-color: #3182ce;
+}
+
+.report-card h3 {
+  margin: 0 0 0.75rem;
+  color: #1a1d24;
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.report-card p {
+  margin: 0 0 1rem;
+  color: #5f6368;
+  font-size: 0.95rem;
+}
+
+.report-card-link {
+  color: #4299e1;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.2s ease;
+}
+
+.report-card:hover .report-card-link {
+  color: #3182ce;
+}
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title">
+    <i class="fas fa-chart-bar" style="color: #4299e1;"></i> Reports
+  </h1>
+  <p class="page-subtitle">Generate and view various reports from the system.</p>
+</div>
+
+<!-- Report Cards Grid -->
+<div class="report-cards-grid">
+  <a href="{% url 'reports:list_male' %}" class="report-card">
+    <h3><i class="fas fa-male" style="color: #4299e1;"></i> List of Male</h3>
+    <p>View all male residents registered in the system.</p>
+    <span class="report-card-link">View Report <i class="fas fa-arrow-right"></i></span>
+  </a>
+
+  <a href="{% url 'reports:list_female' %}" class="report-card">
+    <h3><i class="fas fa-female" style="color: #4299e1;"></i> List of Female</h3>
+    <p>View all female residents registered in the system.</p>
+    <span class="report-card-link">View Report <i class="fas fa-arrow-right"></i></span>
+  </a>
+
+  <a href="{% url 'reports:list_pwd' %}" class="report-card">
+    <h3><i class="fas fa-wheelchair" style="color: #4299e1;"></i> List of PWD</h3>
+    <p>View persons with disabilities registered in the system.</p>
+    <span class="report-card-link">View Report <i class="fas fa-arrow-right"></i></span>
+  </a>
+
+  <a href="{% url 'reports:list_solo_parent' %}" class="report-card">
+    <h3><i class="fas fa-user" style="color: #4299e1;"></i> List of Solo Parent</h3>
+    <p>View solo parent records registered in the system.</p>
+    <span class="report-card-link">View Report <i class="fas fa-arrow-right"></i></span>
+  </a>
+
+  <a href="{% url 'reports:list_senior_citizen' %}" class="report-card">
+    <h3><i class="fas fa-user-clock" style="color: #4299e1;"></i> List of Senior Citizen</h3>
+    <p>View senior citizen records registered in the system.</p>
+    <span class="report-card-link">View Report <i class="fas fa-arrow-right"></i></span>
+  </a>
+
+  <a href="{% url 'reports:list_4ps_member' %}" class="report-card">
+    <h3><i class="fas fa-users" style="color: #4299e1;"></i> List of 4PS Member</h3>
+    <p>View 4PS member records registered in the system.</p>
+    <span class="report-card-link">View Report <i class="fas fa-arrow-right"></i></span>
+  </a>
+
+  <a href="{% url 'reports:list_voters' %}" class="report-card">
+    <h3><i class="fas fa-vote-yea" style="color: #4299e1;"></i> List of Voters</h3>
+    <p>View registered voters in the system.</p>
+    <span class="report-card-link">View Report <i class="fas fa-arrow-right"></i></span>
+  </a>
+
+  <a href="{% url 'reports:list_residents_record' %}" class="report-card">
+    <h3><i class="fas fa-file-alt" style="color: #4299e1;"></i> List of Resident's Record</h3>
+    <p>View all resident records in the system.</p>
+    <span class="report-card-link">View Report <i class="fas fa-arrow-right"></i></span>
+  </a>
 </div>
 {% endblock %}

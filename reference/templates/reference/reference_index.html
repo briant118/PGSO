@@ -1,15 +1,24 @@
 {% extends 'reference/base_reference.html' %}
 {% block content %}
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title">
+    <i class="fas fa-folder" style="color: #4299e1;"></i> References
+  </h1>
+  <p class="page-subtitle">Manage reference data and lookup tables for the system.</p>
+</div>
+
+<!-- Reference Cards -->
 <div class="reference-cards">
   <a href="{% url 'reference:barangay_list' %}" class="ref-card">
     <span class="ref-icon">📍</span>
     <h2>Barangay</h2>
-    <p>View and manage barangay reference data.</p>
+    <p>View and manage barangay reference data for the system.</p>
   </a>
   <a href="{% url 'reference:position_list' %}" class="ref-card">
     <span class="ref-icon">👤</span>
     <h2>Positions</h2>
-    <p>View and manage position reference data.</p>
+    <p>View and manage position reference data for officials.</p>
   </a>
 </div>
 {% endblock %}

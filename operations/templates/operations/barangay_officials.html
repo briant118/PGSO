@@ -1,7 +1,670 @@
 {% extends 'base.html' %}
 {% block title %}Barangay Officials – Operations – PGSO{% endblock %}
 {% block content %}
-  <h1 style="margin:0 0 0.25rem; font-size:1.5rem; color:#1a1d24;">Barangay Officials</h1>
-  <p style="margin:0 0 1.5rem; color:#5f6368; font-size:0.95rem;">Coming soon.</p>
-{% endblock %}
+<style>
+/* Page Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
 
+.page-title {
+  margin: 0;
+  font-size: 2rem;
+  color: #1a1d24;
+  font-weight: 700;
+}
+
+/* Button Styles */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-add {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+}
+
+.btn-add:hover {
+  background: linear-gradient(135deg, #218838 0%, #1aa179 100%);
+}
+
+.btn-edit {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.btn-edit:hover {
+  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+}
+
+.btn-delete {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.btn-delete:hover {
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+}
+
+/* Table Styles */
+.officials-table-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.officials-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.officials-table thead {
+  background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%);
+}
+
+.officials-table thead th {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.officials-table tbody tr {
+  border-bottom: 1px solid #e8eaed;
+  transition: background 0.15s ease;
+}
+
+.officials-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.officials-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.officials-table tbody td {
+  padding: 1rem 1.25rem;
+  color: #1a1d24;
+}
+
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Modal Styles */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+  overflow-y: auto;
+}
+
+.modal.active {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+  margin: auto;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(30px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.modal-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e8eaed;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%);
+  border-radius: 12px 12px 0 0;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.modal-body {
+  padding: 2rem 1.5rem;
+  max-height: calc(100vh - 250px);
+  overflow-y: auto;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #1a1d24;
+  font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e8eaed;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e8eaed;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.btn-cancel {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-cancel:hover {
+  background: #5a6268;
+}
+
+.btn-submit {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+}
+
+.btn-submit:hover {
+  background: linear-gradient(135deg, #218838 0%, #1aa179 100%);
+}
+
+/* Messages */
+.messages {
+  margin-bottom: 1.5rem;
+}
+
+.alert {
+  padding: 1rem 1.25rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 500;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.alert.fade-out {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.alert-success {
+  background: #d4edda;
+  color: #155724;
+  border-left: 4px solid #28a745;
+}
+
+.alert-error {
+  background: #f8d7da;
+  color: #721c24;
+  border-left: 4px solid #dc3545;
+}
+
+.required {
+  color: #dc3545;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+
+.empty-state h3 {
+  margin: 0 0 0.5rem;
+  color: #1a1d24;
+  font-size: 1.5rem;
+}
+
+.empty-state p {
+  margin: 0 0 1.5rem;
+  color: #5f6368;
+}
+</style>
+
+<!-- Messages -->
+{% if messages %}
+<div class="messages">
+  {% for message in messages %}
+  <div class="alert alert-{{ message.tags }}">
+    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% endif %}"></i>
+    {{ message }}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title">
+    <i class="fas fa-users-cog" style="color: #4299e1;"></i> Barangay Officials
+  </h1>
+  <button class="btn btn-add" onclick="openAddModal()">
+    <i class="fas fa-plus"></i> Add Official
+  </button>
+</div>
+
+<!-- Officials Table -->
+{% if officials %}
+<div class="officials-table-container">
+  <table class="officials-table">
+    <thead>
+      <tr>
+        <th style="width: 25%;">Name</th>
+        <th style="width: 20%;">Position</th>
+        <th style="width: 18%;">Barangay</th>
+        <th style="width: 12%;">Start Date</th>
+        <th style="width: 12%;">End Date</th>
+        <th style="width: 13%; text-align: center;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for official in officials %}
+      <tr>
+        <td><strong>{{ official.resident.get_full_name }}</strong></td>
+        <td>{{ official.position.name }}</td>
+        <td>{{ official.barangay.name }}</td>
+        <td style="color: #5f6368;">{{ official.start_date|date:"M d, Y" }}</td>
+        <td style="color: #5f6368;">{% if official.end_date %}{{ official.end_date|date:"M d, Y" }}{% else %}<span style="color: #28a745; font-weight: 600;">Present</span>{% endif %}</td>
+        <td style="text-align: center;">
+          <div class="table-actions">
+            <button class="btn btn-edit" onclick="openEditModal({{ official.id }})">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="btn btn-delete" onclick="openDeleteModal({{ official.id }}, '{{ official.resident.get_full_name|escapejs }}')">
+              <i class="fas fa-trash"></i> Delete
+            </button>
+          </div>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">👥</div>
+  <h3>No Barangay Officials Yet</h3>
+  <p>Start by adding your first barangay official to the system.</p>
+  <button class="btn btn-add" onclick="openAddModal()">
+    <i class="fas fa-plus"></i> Add Your First Official
+  </button>
+</div>
+{% endif %}
+
+<!-- Add Modal -->
+<div id="addModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title"><i class="fas fa-user-plus"></i> Add Barangay Official</h2>
+      <button class="modal-close" onclick="closeAddModal()">&times;</button>
+    </div>
+    <form method="POST" action="{% url 'operations:barangay_official_add' %}">
+      {% csrf_token %}
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="add_resident">Name <span class="required">*</span></label>
+          <select id="add_resident" name="resident" required>
+            <option value="">Select a resident</option>
+            {% for resident in residents %}
+            <option value="{{ resident.id }}">{{ resident.get_full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="add_barangay">Barangay <span class="required">*</span></label>
+          <select id="add_barangay" name="barangay" required>
+            <option value="">Select a barangay</option>
+            {% for barangay in barangays %}
+            <option value="{{ barangay.id }}">{{ barangay.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="add_position">Position <span class="required">*</span></label>
+          <select id="add_position" name="position" required>
+            <option value="">Select a position</option>
+            {% for position in positions %}
+            <option value="{{ position.id }}">{{ position.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="add_start_date">Start Date <span class="required">*</span></label>
+            <input type="date" id="add_start_date" name="start_date" required>
+          </div>
+          <div class="form-group">
+            <label for="add_end_date">End Date</label>
+            <input type="date" id="add_end_date" name="end_date">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="add_remarks">Remarks</label>
+          <textarea id="add_remarks" name="remarks" placeholder="Enter any additional remarks"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" onclick="closeAddModal()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button type="submit" class="btn btn-submit">
+          <i class="fas fa-check"></i> Add Official
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title"><i class="fas fa-edit"></i> Edit Barangay Official</h2>
+      <button class="modal-close" onclick="closeEditModal()">&times;</button>
+    </div>
+    <form method="POST" id="editForm">
+      {% csrf_token %}
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="edit_resident">Name <span class="required">*</span></label>
+          <select id="edit_resident" name="resident" required>
+            <option value="">Select a resident</option>
+            {% for resident in residents %}
+            <option value="{{ resident.id }}">{{ resident.get_full_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="edit_barangay">Barangay <span class="required">*</span></label>
+          <select id="edit_barangay" name="barangay" required>
+            <option value="">Select a barangay</option>
+            {% for barangay in barangays %}
+            <option value="{{ barangay.id }}">{{ barangay.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="edit_position">Position <span class="required">*</span></label>
+          <select id="edit_position" name="position" required>
+            <option value="">Select a position</option>
+            {% for position in positions %}
+            <option value="{{ position.id }}">{{ position.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="edit_start_date">Start Date <span class="required">*</span></label>
+            <input type="date" id="edit_start_date" name="start_date" required>
+          </div>
+          <div class="form-group">
+            <label for="edit_end_date">End Date</label>
+            <input type="date" id="edit_end_date" name="end_date">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="edit_remarks">Remarks</label>
+          <textarea id="edit_remarks" name="remarks"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" onclick="closeEditModal()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button type="submit" class="btn btn-submit" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);">
+          <i class="fas fa-save"></i> Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div id="deleteModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
+      <h2 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Confirm Delete</h2>
+      <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+    </div>
+    <form method="POST" id="deleteForm">
+      {% csrf_token %}
+      <div class="modal-body">
+        <p style="font-size: 1.1rem; color: #1a1d24; margin: 0;">
+          Are you sure you want to remove <strong id="deleteOfficialName"></strong> as a barangay official?
+        </p>
+        <p style="color: #5f6368; margin: 1rem 0 0; font-size: 0.95rem;">
+          <i class="fas fa-info-circle"></i> This action cannot be undone.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" onclick="closeDeleteModal()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button type="submit" class="btn btn-delete">
+          <i class="fas fa-trash"></i> Delete
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// Add Modal Functions
+function openAddModal() {
+  document.getElementById('addModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAddModal() {
+  document.getElementById('addModal').classList.remove('active');
+  document.body.style.overflow = '';
+  // Reset form
+  document.querySelector('#addModal form').reset();
+}
+
+// Edit Modal Functions
+function openEditModal(id) {
+  fetch(`/operations/barangay-official/get/${id}/`)
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('edit_resident').value = data.resident;
+      document.getElementById('edit_barangay').value = data.barangay;
+      document.getElementById('edit_position').value = data.position;
+      document.getElementById('edit_start_date').value = data.start_date;
+      document.getElementById('edit_end_date').value = data.end_date;
+      document.getElementById('edit_remarks').value = data.remarks;
+      
+      document.getElementById('editForm').action = `/operations/barangay-official/edit/${id}/`;
+      document.getElementById('editModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to load official data.');
+    });
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// Delete Modal Functions
+function openDeleteModal(id, name) {
+  document.getElementById('deleteOfficialName').textContent = name;
+  document.getElementById('deleteForm').action = `/operations/barangay-official/delete/${id}/`;
+  document.getElementById('deleteModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDeleteModal() {
+  document.getElementById('deleteModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// Close modals when clicking outside
+document.querySelectorAll('.modal').forEach(modal => {
+  modal.addEventListener('click', function(e) {
+    if (e.target === this) {
+      this.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+  });
+});
+
+// Close modals with Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.classList.remove('active');
+    });
+    document.body.style.overflow = '';
+  }
+});
+
+// Auto-hide messages after 5 seconds
+document.addEventListener('DOMContentLoaded', function() {
+  const alerts = document.querySelectorAll('.alert');
+  if (alerts.length > 0) {
+    alerts.forEach(alert => {
+      setTimeout(() => {
+        alert.classList.add('fade-out');
+        setTimeout(() => {
+          alert.remove();
+        }, 300);
+      }, 5000);
+    });
+  }
+});
+</script>
+
+{% endblock %}

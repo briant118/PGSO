@@ -1,7 +1,71 @@
 {% extends 'base.html' %}
 {% block title %}Operations – PGSO{% endblock %}
 {% block content %}
-  <h1 style="margin:0 0 0.25rem; font-size:1.5rem; color:#1a1d24;">Operations</h1>
-  <p style="margin:0 0 1.5rem; color:#5f6368; font-size:0.95rem;">Select a module from the sidebar.</p>
+<style>
+/* Page Header */
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  color: #1a1d24;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: #5f6368;
+  font-size: 0.95rem;
+}
+
+/* Info Card */
+.info-card {
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 3rem 2rem;
+  text-align: center;
+  border-left: 4px solid #4299e1;
+}
+
+.info-icon {
+  font-size: 4rem;
+  margin-bottom: 1.5rem;
+  opacity: 0.5;
+}
+
+.info-card h2 {
+  margin: 0 0 0.75rem;
+  color: #1a1d24;
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.info-card p {
+  margin: 0;
+  color: #5f6368;
+  font-size: 1.05rem;
+}
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title">
+    <i class="fas fa-tasks" style="color: #4299e1;"></i> Operations
+  </h1>
+  <p class="page-subtitle">Manage operational tasks and records from this section.</p>
+</div>
+
+<!-- Info Card -->
+<div class="info-card">
+  <div class="info-icon">📋</div>
+  <h2>Select a Module</h2>
+  <p>Use the sidebar navigation to access the operations modules.</p>
+</div>
 {% endblock %}
 

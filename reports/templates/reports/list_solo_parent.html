@@ -3,27 +3,144 @@
 {% block title %}List of Solo Parent - PGSO{% endblock %}
 
 {% block content %}
-<h1>👤 List of Solo Parents</h1>
-<p style="color: #666;">This report displays all solo parents registered in the system.</p>
+<style>
+/* Page Header */
+.page-header {
+  margin-bottom: 2rem;
+}
 
-<div style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 2rem;">
-  <table style="width: 100%; border-collapse: collapse;">
+.page-title {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  color: #1a1d24;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: #5f6368;
+  font-size: 0.95rem;
+}
+
+/* Table Styles */
+.report-table-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.report-table thead {
+  background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%);
+}
+
+.report-table thead th {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.report-table tbody tr {
+  border-bottom: 1px solid #e8eaed;
+  transition: background 0.15s ease;
+}
+
+.report-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.report-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.report-table tbody td {
+  padding: 1rem 1.25rem;
+  color: #1a1d24;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.3;
+}
+
+.empty-state h3 {
+  margin: 0 0 0.5rem;
+  color: #1a1d24;
+  font-size: 1.5rem;
+}
+
+.empty-state p {
+  margin: 0;
+  color: #5f6368;
+}
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title">
+    <i class="fas fa-user" style="color: #4299e1;"></i> List of Solo Parents
+  </h1>
+  <p class="page-subtitle">This report displays all solo parents registered in the system. Total: <strong>{{ count }}</strong></p>
+</div>
+
+<!-- Report Table -->
+{% if residents %}
+<div class="report-table-container">
+  <table class="report-table">
     <thead>
-      <tr style="border-bottom: 2px solid #ddd;">
-        <th style="padding: 0.75rem; text-align: left;">ID</th>
-        <th style="padding: 0.75rem; text-align: left;">Name</th>
-        <th style="padding: 0.75rem; text-align: left;">Age</th>
-        <th style="padding: 0.75rem; text-align: left;">Barangay</th>
-        <th style="padding: 0.75rem; text-align: left;">Number of Children</th>
+      <tr>
+        <th>Resident ID</th>
+        <th>Name</th>
+        <th>Age</th>
+        <th>Gender</th>
+        <th>Barangay</th>
+        <th>Purok</th>
+        <th>Contact</th>
       </tr>
     </thead>
     <tbody>
+      {% for resident in residents %}
       <tr>
-        <td colspan="5" style="padding: 2rem; text-align: center; color: #999;">
-          No data available. Connect this to your database to display solo parent records.
-        </td>
+        <td><strong>{{ resident.resident_id }}</strong></td>
+        <td>{{ resident.get_full_name }}</td>
+        <td style="color: #5f6368;">{{ resident.get_age }}</td>
+        <td>{{ resident.get_gender_display }}</td>
+        <td>{{ resident.barangay.barangay_name }}</td>
+        <td style="color: #5f6368;">{{ resident.purok }}</td>
+        <td style="color: #5f6368;">{{ resident.contact_no }}</td>
       </tr>
+      {% endfor %}
     </tbody>
   </table>
 </div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-icon">👤</div>
+  <h3>No Solo Parent Records Found</h3>
+  <p>There are currently no solo parent records in the database.</p>
+</div>
+{% endif %}
+
 {% endblock %}
