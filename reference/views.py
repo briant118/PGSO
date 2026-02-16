@@ -274,6 +274,14 @@ def position_detail(request, pk):
         # Show all barangays when no municipality filter is selected
         barangays = Barangay.objects.filter(is_active=True).order_by('name')
     
+    # Add official count for each barangay for this position
+    for barangay in barangays:
+        barangay.officials_count = BarangayOfficial.objects.filter(
+            position=position,
+            barangay=barangay,
+            is_active=True
+        ).count()
+    
     context = {
         'position': position,
         'municipalities': municipalities_list,

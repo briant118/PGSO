@@ -420,6 +420,9 @@
         <i class="fas fa-map-marker-alt"></i> {{ barangay.municipality }}
       </p>
       {% endif %}
+      <p style="margin-top: 0.5rem; font-weight: 600; color: #1a1d24;">
+        <i class="fas fa-users"></i> Total: {{ barangay.officials_count }}
+      </p>
       <p style="margin-top: 0.5rem;">Click to view officials</p>
     </a>
     {% endfor %}
