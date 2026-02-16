@@ -708,7 +708,7 @@
     <i class="fas fa-address-book" style="color: #4299e1;"></i> Residents Record
   </h1>
   <button class="btn btn-add" onclick="openAddModal()">
-    <i class="fas fa-plus"></i> Add Resident
+    <i class="fas fa-plus"></i> Register Resident
   </button>
 </div>
 
@@ -734,7 +734,7 @@
           <span class="badge badge-id">{{ resident.resident_id }}</span>
         </td>
         <td>{{ resident.barangay.name }}</td>
-        <td><strong class="resident-name" onclick="openViewModal({{ resident.id }})">{{ resident.get_full_name }}</strong></td>
+        <td><strong class="resident-name" data-resident-id="{{ resident.id }}" onclick="openViewModal(this.dataset.residentId)">{{ resident.get_full_name }}</strong></td>
         <td>{{ resident.get_gender_display }}</td>
         <td>{{ resident.contact_no }}</td>
         <td>
@@ -744,10 +744,10 @@
         </td>
         <td style="text-align: center;">
           <div class="table-actions">
-            <button class="btn btn-edit" onclick="openEditModal({{ resident.id }})">
+            <button class="btn btn-edit" data-resident-id="{{ resident.id }}" onclick="openEditModal(this.dataset.residentId)">
               <i class="fas fa-edit"></i> Edit
             </button>
-            <button class="btn btn-delete" onclick="openDeleteModal({{ resident.id }}, '{{ resident.get_full_name|escapejs }}')">
+            <button class="btn btn-delete" data-resident-id="{{ resident.id }}" data-resident-name="{{ resident.get_full_name|escapejs }}" onclick="openDeleteModal(this.dataset.residentId, this.dataset.residentName)">
               <i class="fas fa-trash"></i> Delete
             </button>
           </div>
@@ -1262,10 +1262,8 @@
         <button type="button" class="btn btn-cancel" onclick="closeDeleteModal()">
           <i class="fas fa-times"></i> Cancel
         </button>
-        <button type="submit" class="btn btn-delete" id="deleteSubmitBtn">
-          <i class="fas fa-trash btn-icon"></i>
-          <span class="btn-text">Delete</span>
-          <span class="loading-text"><span class="spinner"></span> Deleting...</span>
+        <button type="submit" class="btn btn-delete">
+          <i class="fas fa-trash"></i> Delete
         </button>
       </div>
     </form>
@@ -1626,36 +1624,6 @@ document.addEventListener('DOMContentLoaded', function() {
           alert.remove();
         }, 300);
       }, 5000);
-    });
-  }
-});
-
-// Form submission handlers with loading state
-document.addEventListener('DOMContentLoaded', function() {
-  // Add form submission
-  const addForm = document.querySelector('#addModal form');
-  if (addForm) {
-    addForm.addEventListener('submit', function(e) {
-      const submitBtn = document.getElementById('addSubmitBtn');
-      submitBtn.classList.add('loading');
-    });
-  }
-
-  // Edit form submission
-  const editForm = document.getElementById('editForm');
-  if (editForm) {
-    editForm.addEventListener('submit', function(e) {
-      const submitBtn = document.getElementById('editSubmitBtn');
-      submitBtn.classList.add('loading');
-    });
-  }
-
-  // Delete form submission
-  const deleteForm = document.getElementById('deleteForm');
-  if (deleteForm) {
-    deleteForm.addEventListener('submit', function(e) {
-      const submitBtn = document.getElementById('deleteSubmitBtn');
-      submitBtn.classList.add('loading');
     });
   }
 });
