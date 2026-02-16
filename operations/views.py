@@ -84,7 +84,7 @@ def resident_add(request):
             # Log successful save to Supabase
             logger.info(f'Resident {resident.get_full_name()} (ID: {resident.resident_id}) added to Supabase database successfully')
             
-            messages.success(request, f'Resident {resident.get_full_name()} added successfully and synced to Supabase!')
+            messages.success(request, f'Resident {resident.get_full_name()} added successfully!')
             return redirect('operations:residents_record')
         except Exception as e:
             logger.error(f'Error adding resident to Supabase: {str(e)}')
@@ -164,7 +164,7 @@ def resident_edit(request, pk):
             # Log successful update to Supabase
             logger.info(f'Resident {old_name} (ID: {resident.resident_id}) updated to {resident.get_full_name()} in Supabase database')
             
-            messages.success(request, f'Resident {resident.get_full_name()} updated successfully and synced to Supabase!')
+            messages.success(request, f'Resident {resident.get_full_name()} updated successfully!')
             return redirect('operations:residents_record')
         except Exception as e:
             logger.error(f'Error updating resident in Supabase: {str(e)}')
@@ -190,7 +190,7 @@ def resident_delete(request, pk):
             # Log successful deletion from Supabase
             logger.info(f'Resident {name} (ID: {resident_id}) deleted from Supabase database')
             
-            messages.success(request, f'Resident {name} deleted successfully from Supabase!')
+            messages.success(request, f'Resident {name} deleted successfully!')
         except Exception as e:
             logger.error(f'Error deleting resident from Supabase: {str(e)}')
             messages.error(request, f'Error deleting resident: {str(e)}')

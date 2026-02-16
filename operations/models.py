@@ -103,7 +103,7 @@ class Resident(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['id']
         verbose_name = 'Resident'
         verbose_name_plural = 'Residents'
     
