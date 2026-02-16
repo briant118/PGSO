@@ -13,11 +13,53 @@ env/
 *.log
 local_settings.py
 db.sqlite3
+db.sqlite3-journal
 media/
 staticfiles/
+
+# Environment variables - CRITICAL SECURITY
+.env
+.env.local
+.env.production
+.env.*.local
+
+# SQL files that may contain sensitive data
+supabase_manual_setup.sql
+supabase_step_by_step.sql
+*.sql
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
+.DS_Store
+
+# Cursor IDE
+.cursor/
+
+# Logs
+*.log
+logs/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# pytest
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+
+# Sensitive files
+secrets.json
+credentials.json
+*.pem
+*.key
