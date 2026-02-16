@@ -11,13 +11,16 @@ body {
 /* Sidebar Container */
 .side-nav { 
   width: 260px; 
-  min-height: 100vh; 
+  height: 100vh; 
   background: linear-gradient(180deg, #1e3a5f 0%, #152a45 100%);
   color: #ffffff; 
   flex-shrink: 0;
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
-  position: relative;
-  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+  z-index: 1000;
 }
 
 /* Decorative background pattern */
@@ -187,6 +190,7 @@ body {
   min-width: 0; 
   display: flex; 
   flex-direction: column; 
+  margin-left: 260px;
 }
 
 .main-content { 
