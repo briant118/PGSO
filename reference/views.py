@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db import transaction
-from .models import Barangay, Position
+from .models import Barangay, Municipality, Position
 from operations.models import BarangayOfficial
 
 
@@ -13,10 +13,27 @@ def reference_index(request):
 
 def barangay_list(request):
     """List all active barangays ordered by code."""
-    barangays = Barangay.objects.filter(is_active=True)
+    # Get municipality filter from request
+    selected_municipality = request.GET.get('municipality', '')
+    
+    # Filter barangays
+    if selected_municipality:
+        barangays = Barangay.objects.filter(
+            is_active=True,
+            municipality__id=selected_municipality
+        ).select_related('municipality')
+    else:
+        barangays = Barangay.objects.filter(is_active=True).select_related('municipality')
+    
     # Sort by numeric code value instead of alphabetically
     barangays = sorted(barangays, key=lambda x: int(x.code) if x.code.isdigit() else 999999)
-    return render(request, 'reference/barangay_list.html', {'barangays': barangays})
+    municipalities = Municipality.objects.filter(is_active=True).order_by('name')
+    
+    return render(request, 'reference/barangay_list.html', {
+        'barangays': barangays,
+        'municipalities': municipalities,
+        'selected_municipality': selected_municipality,
+    })
 
 
 @transaction.atomic
@@ -24,7 +41,7 @@ def barangay_add(request):
     """Add a new barangay."""
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
-        municipality = request.POST.get('municipality', '').strip()
+        municipality_id = request.POST.get('municipality', '').strip()
         
         if not name:
             messages.error(request, 'Barangay name is required.')
@@ -37,6 +54,14 @@ def barangay_add(request):
         
         # Get the maximum code and increment by 1
         next_code = max(numeric_codes) + 1 if numeric_codes else 1
+        
+        # Get municipality object if provided
+        municipality = None
+        if municipality_id:
+            try:
+                municipality = Municipality.objects.get(id=municipality_id)
+            except Municipality.DoesNotExist:
+                pass
         
         # Create and save the barangay
         barangay = Barangay.objects.create(
@@ -61,11 +86,19 @@ def barangay_edit(request, pk):
     
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
-        municipality = request.POST.get('municipality', '').strip()
+        municipality_id = request.POST.get('municipality', '').strip()
         
         if not name:
             messages.error(request, 'Barangay name is required.')
             return redirect('reference:barangay_list')
+        
+        # Get municipality object if provided
+        municipality = None
+        if municipality_id:
+            try:
+                municipality = Municipality.objects.get(id=municipality_id)
+            except Municipality.DoesNotExist:
+                pass
         
         # Update barangay data
         barangay.name = name
@@ -122,7 +155,7 @@ def barangay_get(request, pk):
         'id': barangay.id,
         'name': barangay.name,
         'code': barangay.code,
-        'municipality': barangay.municipality,
+        'municipality': barangay.municipality.id if barangay.municipality else '',
     }
     return JsonResponse(data)
 
@@ -256,23 +289,20 @@ def position_detail(request, pk):
     selected_municipality = request.GET.get('municipality', '')
     
     # Get unique municipalities from barangays
-    municipalities = Barangay.objects.filter(
+    municipalities = Municipality.objects.filter(
         is_active=True,
-        municipality__isnull=False
-    ).exclude(municipality='').values_list('municipality', flat=True).distinct().order_by('municipality')
-    
-    # Convert to list of dictionaries for template
-    municipalities_list = [{'name': m} for m in municipalities]
+        barangays__is_active=True
+    ).distinct().order_by('name')
     
     # Get barangays - all if no filter, filtered by municipality if filter is selected
     if selected_municipality:
         barangays = Barangay.objects.filter(
             is_active=True,
-            municipality=selected_municipality
-        ).order_by('name')
+            municipality__name=selected_municipality
+        ).select_related('municipality').order_by('name')
     else:
         # Show all barangays when no municipality filter is selected
-        barangays = Barangay.objects.filter(is_active=True).order_by('name')
+        barangays = Barangay.objects.filter(is_active=True).select_related('municipality').order_by('name')
     
     # Add official count for each barangay for this position
     for barangay in barangays:
@@ -284,7 +314,7 @@ def position_detail(request, pk):
     
     context = {
         'position': position,
-        'municipalities': municipalities_list,
+        'municipalities': municipalities,
         'selected_municipality': selected_municipality,
         'barangays': barangays,
     }

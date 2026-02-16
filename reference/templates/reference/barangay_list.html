@@ -1,14 +1,79 @@
 {% extends 'reference/base_reference.html' %}
 {% block title %} – Barangay{% endblock %}
 {% block breadcrumb %} &rarr; Barangay{% endblock %}
-{% block content %}
+
+{% block extra_css %}
+{{ block.super }}
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 <style>
+/* Custom Select2 styling */
+.select2-container--default .select2-selection--single {
+  height: 45px;
+  border: 2px solid #e8eaed;
+  border-radius: 8px;
+  padding: 0.5rem;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  line-height: 28px;
+  padding-left: 0.5rem;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+  height: 43px;
+}
+
+.select2-container--default.select2-container--focus .select2-selection--single {
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.select2-dropdown {
+  border: 2px solid #e8eaed;
+  border-radius: 8px;
+}
+
+.select2-search--dropdown .select2-search__field {
+  border: 2px solid #e8eaed;
+  border-radius: 6px;
+  padding: 0.5rem;
+}
+
+.select2-search--dropdown .select2-search__field:focus {
+  border-color: #4299e1;
+  outline: none;
+}
+
+.select2-results__option--highlighted[aria-selected] {
+  background-color: #4299e1 !important;
+}
+
+.select2-container {
+  z-index: 10000 !important;
+}
+
+.select2-dropdown {
+  z-index: 10001 !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__clear {
+  margin-right: 10px;
+  font-size: 1.2rem;
+  color: #dc3545;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__clear:hover {
+  color: #c82333;
+}
+
+/* Page Header */
 /* Page Header */
 .page-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 }
 
 .page-title {
@@ -16,6 +81,99 @@
   font-size: 2rem;
   color: #1a1d24;
   font-weight: 700;
+}
+
+/* Filter Section */
+.filter-section {
+  background: #fff;
+  padding: 1.25rem 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-left: 4px solid #4299e1;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filter-label {
+  font-weight: 600;
+  color: #1a1d24;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.filter-label i {
+  color: #4299e1;
+}
+
+.filter-select {
+  flex: 1;
+  max-width: 400px;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e8eaed;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-select:hover {
+  border-color: #4299e1;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.filter-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, #e8f4f8 0%, #d4edda 100%);
+  border-radius: 8px;
+  color: #155724;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.filter-count i {
+  color: #28a745;
+}
+
+.filter-count strong {
+  color: #0056b3;
+  font-size: 1.1rem;
+}
+
+/* Responsive Filter */
+@media (max-width: 768px) {
+  .filter-group {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .filter-select {
+    max-width: 100%;
+  }
+  
+  .filter-count {
+    justify-content: center;
+  }
 }
 
 /* Button Styles */
@@ -122,6 +280,7 @@
 .table-actions {
   display: flex;
   gap: 0.5rem;
+  justify-content: center;
 }
 
 /* Modal Styles */
@@ -217,6 +376,7 @@
 }
 
 .form-group input,
+.form-group select,
 .form-group textarea {
   width: 100%;
   padding: 0.75rem 1rem;
@@ -225,9 +385,11 @@
   font-size: 0.95rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   font-family: inherit;
+  box-sizing: border-box;
 }
 
 .form-group input:focus,
+.form-group select:focus,
 .form-group textarea:focus {
   outline: none;
   border-color: #4299e1;
@@ -375,7 +537,9 @@
   to { transform: rotate(360deg); }
 }
 </style>
+{% endblock %}
 
+{% block content %}
 <!-- Messages -->
 {% if messages %}
 <div class="messages">
@@ -396,6 +560,28 @@
   <button class="btn btn-add" onclick="openAddModal()">
     <i class="fas fa-plus"></i> Add Barangay
   </button>
+</div>
+
+<!-- Filter Section -->
+<div class="filter-section">
+  <div class="filter-group">
+    <label for="municipalityFilter" class="filter-label">
+      <i class="fas fa-filter"></i> Filter by Municipality:
+    </label>
+    <select id="municipalityFilter" class="filter-select" onchange="filterByMunicipality()">
+      <option value="">All Municipalities</option>
+      {% for municipality in municipalities %}
+      <option value="{{ municipality.id }}" {% if selected_municipality == municipality.id|stringformat:"s" %}selected{% endif %}>
+        {{ municipality.name }}
+      </option>
+      {% endfor %}
+    </select>
+    {% if barangays %}
+    <span class="filter-count">
+      <i class="fas fa-map-marked-alt"></i> Showing <strong>{{ barangays|length }}</strong> barangay{% if barangays|length != 1 %}s{% endif %}
+    </span>
+    {% endif %}
+  </div>
 </div>
 
 <!-- Barangay Table -->
@@ -423,7 +609,7 @@
         <td><strong>{{ b.name }}</strong></td>
         <td>
           {% if b.municipality %}
-          {{ b.municipality }}
+          {{ b.municipality.name }}
           {% else %}
           <span style="color: #999; font-style: italic;">No municipality</span>
           {% endif %}
@@ -470,7 +656,12 @@
         </div>
         <div class="form-group">
           <label for="add_municipality">Municipality</label>
-          <input type="text" id="add_municipality" name="municipality" placeholder="Enter municipality (optional)">
+          <select id="add_municipality" name="municipality" class="select2-municipality">
+            <option value="">Select municipality (optional)</option>
+            {% for municipality in municipalities %}
+            <option value="{{ municipality.id }}">{{ municipality.name }}</option>
+            {% endfor %}
+          </select>
         </div>
         <p style="margin: 0; padding: 0.75rem; background: #e8f4f8; border-radius: 6px; color: #0056b3; font-size: 0.9rem;">
           <i class="fas fa-info-circle"></i> Code will be automatically assigned
@@ -513,7 +704,12 @@
         </div>
         <div class="form-group">
           <label for="edit_municipality">Municipality</label>
-          <input type="text" id="edit_municipality" name="municipality" placeholder="Enter municipality (optional)">
+          <select id="edit_municipality" name="municipality" class="select2-municipality">
+            <option value="">Select municipality (optional)</option>
+            {% for municipality in municipalities %}
+            <option value="{{ municipality.id }}">{{ municipality.name }}</option>
+            {% endfor %}
+          </select>
         </div>
       </div>
       <div class="modal-footer">
@@ -561,17 +757,48 @@
   </div>
 </div>
 
+<!-- jQuery (required for Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <script>
+// Filter by Municipality Function
+function filterByMunicipality() {
+  const selectedMunicipality = document.getElementById('municipalityFilter').value;
+  const currentUrl = new URL(window.location.href);
+  
+  if (selectedMunicipality) {
+    currentUrl.searchParams.set('municipality', selectedMunicipality);
+  } else {
+    currentUrl.searchParams.delete('municipality');
+  }
+  
+  window.location.href = currentUrl.toString();
+}
+
 // Add Modal Functions
 function openAddModal() {
   document.getElementById('addModal').classList.add('active');
-  document.getElementById('add_name').focus();
+  
+  // Initialize Select2 when modal opens
+  setTimeout(() => {
+    if (!$('#add_municipality').hasClass('select2-hidden-accessible')) {
+      $('#add_municipality').select2({
+        placeholder: 'Search and select municipality',
+        allowClear: true,
+        width: '100%',
+        dropdownParent: $('#addModal')
+      });
+    }
+    document.getElementById('add_name').focus();
+  }, 100);
 }
 
 function closeAddModal() {
   document.getElementById('addModal').classList.remove('active');
   document.getElementById('add_name').value = '';
-  document.getElementById('add_municipality').value = '';
+  $('#add_municipality').val('').trigger('change');
 }
 
 // Edit Modal Functions
@@ -581,10 +808,22 @@ function openEditModal(id) {
     .then(data => {
       document.getElementById('edit_name').value = data.name;
       document.getElementById('edit_code').value = data.code || '';
-      document.getElementById('edit_municipality').value = data.municipality || '';
       document.getElementById('editForm').action = `/reference/barangay/edit/${id}/`;
       document.getElementById('editModal').classList.add('active');
-      document.getElementById('edit_name').focus();
+      
+      // Initialize Select2 and set value when modal opens
+      setTimeout(() => {
+        if (!$('#edit_municipality').hasClass('select2-hidden-accessible')) {
+          $('#edit_municipality').select2({
+            placeholder: 'Search and select municipality',
+            allowClear: true,
+            width: '100%',
+            dropdownParent: $('#editModal')
+          });
+        }
+        $('#edit_municipality').val(data.municipality || '').trigger('change');
+        document.getElementById('edit_name').focus();
+      }, 100);
     })
     .catch(error => {
       console.error('Error:', error);
