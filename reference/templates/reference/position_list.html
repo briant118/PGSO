@@ -111,6 +111,18 @@
   background: #f8f9fa;
 }
 
+.position-table tbody tr.position-row-clickable {
+  cursor: pointer;
+}
+
+.position-table tbody tr.position-row-clickable:hover {
+  background: #e8f4fc;
+}
+
+.position-table tbody tr.position-row-clickable.selected {
+  background: #bbdefb;
+}
+
 .position-table tbody tr td a:hover {
   text-decoration: underline;
 }
@@ -407,6 +419,14 @@
       </span>
       <span class="btn-action-label">Add</span>
     </button>
+    <button type="button" class="btn btn-edit-header" id="positionHeaderEditBtn" title="Edit Position">
+      <i class="fas fa-pen"></i>
+      <span class="btn-action-label">Edit</span>
+    </button>
+    <button type="button" class="btn btn-delete-header" id="positionHeaderDeleteBtn" title="Delete Position">
+      <i class="fas fa-trash"></i>
+      <span class="btn-action-label">Delete</span>
+    </button>
     <button type="button" class="btn btn-print" title="Print">
       <i class="fas fa-print"></i>
       <span class="btn-action-label">Print</span>
@@ -420,15 +440,14 @@
   <table class="position-table">
     <thead>
       <tr>
-        <th style="width: 10%;">Code</th>
-        <th style="width: 30%;">Name</th>
-        <th style="width: 35%;">Total</th>
-        <th style="width: 25%; text-align: center;">Actions</th>
+        <th style="width: 15%;">Code</th>
+        <th style="width: 45%;">Position</th>
+        <th style="width: 40%;">Total</th>
       </tr>
     </thead>
     <tbody>
       {% for p in positions %}
-      <tr>
+      <tr class="position-row-clickable" data-id="{{ p.id }}" data-name="{{ p.name|escapejs }}">
         <td>
           {% if p.code %}
           <span class="badge badge-code">{{ p.code }}</span>
@@ -437,25 +456,13 @@
           {% endif %}
         </td>
         <td>
-          <a href="{% url 'reference:position_detail' p.id %}" style="color: #4299e1; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;">
+          <a href="{% url 'reference:position_detail' p.id %}" style="color: #4299e1; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;" onclick="event.stopPropagation();">
             <i class="fas fa-folder"></i> {{ p.name }}
           </a>
         </td>
         <td>
           <span style="font-weight: 600; color: #4299e1; font-size: 1.1rem;">{{ p.total|default:0 }}</span>
           <span style="color: #5f6368; font-size: 0.9rem; margin-left: 0.5rem;">person{{ p.total|pluralize }}</span>
-        </td>
-        <td style="text-align: center;">
-          <div class="table-actions">
-            <button type="button" class="btn btn-edit" onclick="openEditModal({{ p.id }})" title="Edit">
-              <i class="fas fa-edit"></i>
-              <span class="btn-action-label">Edit</span>
-            </button>
-            <button type="button" class="btn btn-delete" onclick="openDeleteModal({{ p.id }}, '{{ p.name|escapejs }}')" title="Delete">
-              <i class="fas fa-trash"></i>
-              <span class="btn-action-label">Delete</span>
-            </button>
-          </div>
         </td>
       </tr>
       {% endfor %}
@@ -518,7 +525,6 @@
   <div class="modal-content">
     <div class="modal-header">
       <h2 class="modal-title"><i class="fas fa-edit"></i> Edit Position</h2>
-      <button class="modal-close" onclick="closeEditModal()">&times;</button>
     </div>
     <form method="post" id="editForm">
       {% csrf_token %}
@@ -647,6 +653,43 @@ document.addEventListener('keydown', function(e) {
     });
   }
 });
+
+// Selectable rows: click row to select, header Edit/Delete act on selected
+(function() {
+  var rows = document.querySelectorAll('.position-row-clickable');
+  rows.forEach(function(row) {
+    row.addEventListener('click', function() {
+      rows.forEach(function(r) { r.classList.remove('selected'); });
+      row.classList.add('selected');
+    });
+  });
+
+  var headerEdit = document.getElementById('positionHeaderEditBtn');
+  var headerDelete = document.getElementById('positionHeaderDeleteBtn');
+  if (headerEdit) {
+    headerEdit.addEventListener('click', function() {
+      var selected = document.querySelector('.position-row-clickable.selected');
+      if (!selected) {
+        alert('Please select a position first.');
+        return;
+      }
+      openEditModal(parseInt(selected.getAttribute('data-id'), 10));
+    });
+  }
+  if (headerDelete) {
+    headerDelete.addEventListener('click', function() {
+      var selected = document.querySelector('.position-row-clickable.selected');
+      if (!selected) {
+        alert('Please select a position first.');
+        return;
+      }
+      openDeleteModal(
+        parseInt(selected.getAttribute('data-id'), 10),
+        selected.getAttribute('data-name') || ''
+      );
+    });
+  }
+})();
 
 // Auto-hide messages after 3 seconds
 document.addEventListener('DOMContentLoaded', function() {

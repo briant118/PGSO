@@ -328,7 +328,11 @@
   padding: 0;
   overflow: auto;
   flex: 1;
+  display: flex;
+  gap: 1rem;
+  min-height: 0;
 }
+.coord-positions-table-wrap { flex: 1; min-width: 0; overflow: auto; }
 .coord-positions-table {
   width: 100%;
   border-collapse: collapse;
@@ -348,18 +352,80 @@
   font-size: 0.9rem;
   color: #1a1d24;
 }
-.coord-positions-table tr:hover td {
-  background: #f8f9fa;
-}
+.coord-positions-table tbody tr.coord-pos-row-clickable { cursor: pointer; }
+.coord-positions-table tbody tr.coord-pos-row-clickable:hover td { background: #e8f4fc; }
+.coord-positions-table tbody tr.coord-pos-row-clickable.selected td { background: #bbdefb; }
 .coord-positions-table .coord-list-icon {
-  color: #9ca3af;
+  color: #1565c0;
   margin-right: 0.5rem;
 }
+.coord-positions-detail-panel {
+  width: 260px;
+  flex-shrink: 0;
+  background: #f8f9fa;
+  border-left: 1px solid #e0e0e0;
+  padding: 1rem;
+  overflow: auto;
+}
+.coord-positions-detail-empty { color: #5f6368; font-size: 0.9rem; text-align: center; }
+.coord-positions-detail-content { display: none; }
+.coord-positions-detail-content h4 { margin: 0 0 0.75rem; font-size: 1rem; color: #1565c0; }
+.coord-positions-detail-item { margin-bottom: 0.5rem; font-size: 0.85rem; }
+.coord-positions-detail-item strong { display: block; color: #5f6368; font-size: 0.75rem; }
+.coord-positions-detail-actions { margin-top: 1rem; display: flex; gap: 0.5rem; }
+.coord-positions-detail-actions .coord-btn-icon { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; padding: 0; border: none; border-radius: 6px; cursor: pointer; background: #fff; color: #5f6368; box-shadow: 0 1px 2px rgba(0,0,0,0.08); }
+.coord-positions-detail-actions .coord-btn-icon:hover { background: #e3f2fd; color: #1565c0; }
+.coord-positions-detail-actions .coord-btn-delete:hover { background: #ffebee; color: #c62828; }
 .coord-positions-empty {
   padding: 2rem;
   text-align: center;
   color: #5f6368;
   font-size: 0.95rem;
+}
+#coordEditPositionModal, #coordDeletePositionModal { z-index: 1002; }
+/* Edit Position modal: smaller size */
+.coord-edit-position-modal-content {
+  width: fit-content;
+  min-width: 280px;
+  max-width: 90vw;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.coord-edit-position-modal-content .modal-body {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding: 1rem 1.25rem;
+}
+.coord-edit-position-modal-content .modal-header,
+.coord-edit-position-modal-content .modal-footer {
+  padding: 0.75rem 1.25rem;
+}
+.coord-edit-position-modal-content .form-group { margin-bottom: 1rem; }
+/* Edit Position: Active checkbox - do not style as text input */
+#coordEditPositionModal .form-group-checkbox label {
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 0;
+  cursor: pointer;
+}
+#coordEditPositionModal .form-group-checkbox input[type="checkbox"] {
+  width: auto;
+  min-width: 1.1rem;
+  height: 1.1rem;
+  margin: 0 0.5rem 0 0;
+  padding: 0;
+  border: 2px solid #e8eaed;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+#coordEditPositionModal .form-group-checkbox input[type="checkbox"]:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
 }
 </style>
 
@@ -375,6 +441,14 @@
         <span class="btn-add-plus"><i class="fas fa-plus"></i></span>
       </span>
       <span class="btn-action-label">Add</span>
+    </button>
+    <button type="button" class="btn btn-edit-header" onclick="openCoordinatorEditModal()" title="Edit Coordinator">
+      <i class="fas fa-pen"></i>
+      <span class="btn-action-label">Edit</span>
+    </button>
+    <button type="button" class="btn btn-delete-header" onclick="openCoordinatorDeleteModal()" title="Delete Coordinator">
+      <i class="fas fa-trash"></i>
+      <span class="btn-action-label">Delete</span>
     </button>
     <button type="button" class="btn btn-position" onclick="openPositionsModal()" title="Positions">
       <i class="fas fa-user-tag"></i>
@@ -416,7 +490,7 @@
         </thead>
         <tbody>
           {% for c in coordinators %}
-          <tr class="coord-row-clickable" data-id="{{ c.id }}" data-fullname="{{ c.fullname }}" data-barangay="{{ c.barangay.name }}" data-position="{{ c.position.name }}" data-contact="{{ c.contact_no|default:'' }}" data-remarks="{{ c.remarks|default:'' }}" data-date-start="{{ c.date_start|date:'m/d/Y'|default:'' }}" data-active="{% if c.is_active %}YES{% else %}NO{% endif %}" data-edit-url="{% url 'operations:coordinator_edit' c.pk %}" data-delete-url="{% url 'operations:coordinator_delete' c.pk %}">
+          <tr class="coord-row-clickable" data-id="{{ c.id }}" data-fullname="{{ c.fullname }}" data-barangay-id="{{ c.barangay_id }}" data-position-id="{{ c.position_id }}" data-barangay="{{ c.barangay.name }}" data-position="{{ c.position.name }}" data-contact="{{ c.contact_no|default:'' }}" data-remarks="{{ c.remarks|default:'' }}" data-date-start="{{ c.date_start|date:'m/d/Y'|default:'' }}" data-date-iso="{{ c.date_start|date:'Y-m-d'|default:'' }}" data-active="{% if c.is_active %}YES{% else %}NO{% endif %}" data-edit-url="{% url 'operations:coordinator_edit' c.pk %}" data-delete-url="{% url 'operations:coordinator_delete' c.pk %}">
             <td><i class="fas fa-folder coord-list-icon"></i>{{ c.fullname }}</td>
             <td>{{ c.position.name }}</td>
             <td>{{ c.contact_no|default:"—" }}</td>
@@ -439,13 +513,6 @@
         <div class="coord-detail-item"><strong>Date Start</strong> <span id="coordDetailDateStart"></span></div>
         <div class="coord-detail-item"><strong>Remarks</strong> <span id="coordDetailRemarks"></span></div>
         <div class="coord-detail-item"><strong>Active</strong> <span id="coordDetailActive"></span></div>
-        <div class="coord-detail-actions">
-          <a href="#" id="coordDetailEditBtn" class="coord-btn-icon coord-btn-edit" title="Edit"><i class="fas fa-pen"></i></a>
-          <form method="post" action="#" id="coordDetailDeleteForm" style="display:inline;" onsubmit="return confirm('Delete this coordinator?');">
-            {% csrf_token %}
-            <button type="submit" class="coord-btn-icon coord-btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
-          </form>
-        </div>
       </div>
     </div>
   </div>
@@ -532,6 +599,94 @@
   </div>
 </div>
 
+<!-- Coordinator Edit Modal -->
+<div id="coordinatorEditModal" class="coordinator-modal">
+  <div class="coordinator-modal-content">
+    <div class="coordinator-modal-header">
+      <div class="coordinator-modal-title-row">
+        <span class="coordinator-modal-icon-wrap"><i class="fas fa-pen"></i></span>
+        <div>
+          <h2 class="coordinator-modal-title">Edit Coordinator</h2>
+          <span class="coordinator-modal-subtitle">(Update record)</span>
+        </div>
+      </div>
+    </div>
+    <form method="post" id="coordinatorEditForm" class="coordinator-modal-form">
+      {% csrf_token %}
+      <div class="coordinator-modal-body">
+        <div class="coordinator-form-grid">
+          <div class="coordinator-form-col">
+            <div class="form-group">
+              <label for="id_edit_barangay">Barangay <span style="color:#dc3545;">*</span></label>
+              <select id="id_edit_barangay" name="barangay" required>
+                <option value="">-- Select Barangay --</option>
+                {% for b in barangays %}
+                <option value="{{ b.id }}">{{ b.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="id_edit_fullname">Fullname <span style="color:#dc3545;">*</span></label>
+              <input type="text" id="id_edit_fullname" name="fullname" required placeholder="Enter full name">
+            </div>
+            <div class="form-group">
+              <label for="id_edit_position">Position <span style="color:#dc3545;">*</span></label>
+              <select id="id_edit_position" name="position" required>
+                <option value="">-- Select Position --</option>
+                {% for p in coordinator_positions %}
+                <option value="{{ p.id }}">{{ p.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="id_edit_contact_no">Contact No.</label>
+              <input type="text" id="id_edit_contact_no" name="contact_no" placeholder="Contact number">
+            </div>
+            <div class="form-group">
+              <label for="id_edit_remarks">Remarks</label>
+              <input type="text" id="id_edit_remarks" name="remarks" placeholder="Remarks">
+            </div>
+            <div class="form-group">
+              <label for="id_edit_date_start">Date Start</label>
+              <input type="date" id="id_edit_date_start" name="date_start">
+            </div>
+            <div class="form-group coordinator-toggle-wrap">
+              <label class="coordinator-toggle-label">Active?</label>
+              <label class="coordinator-toggle">
+                <input type="checkbox" id="id_edit_is_active" name="is_active">
+                <span class="coordinator-toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="coordinator-modal-footer">
+        <button type="submit" class="btn coordinator-btn-save"><i class="fas fa-save"></i> SAVE</button>
+        <button type="button" class="btn coordinator-btn-close" onclick="closeCoordinatorEditModal()"><i class="fas fa-arrow-left"></i> CLOSE</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Coordinator Delete Modal -->
+<div id="coordinatorDeleteModal" class="coordinator-modal">
+  <div class="coordinator-modal-content" style="max-width: 400px;">
+    <div class="coordinator-modal-header">
+      <h2 class="coordinator-modal-title" style="margin: 0;">Delete Coordinator</h2>
+    </div>
+    <div class="coordinator-modal-body">
+      <p style="margin: 0;">Are you sure you want to delete <strong id="coordDeleteName"></strong>? This cannot be undone.</p>
+    </div>
+    <form method="post" id="coordinatorDeleteForm">
+      {% csrf_token %}
+      <div class="coordinator-modal-footer">
+        <button type="button" class="btn coordinator-btn-close" onclick="closeCoordinatorDeleteModal()">Cancel</button>
+        <button type="submit" class="btn coordinator-btn-save" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">Delete</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- Coordinator - Positions Modal -->
 <div id="coordPositionsModal" class="coord-positions-modal">
   <div class="coord-positions-window">
@@ -544,8 +699,8 @@
     </div>
     <div class="coord-positions-toolbar">
       <button type="button" class="coord-toolbar-btn coord-toolbar-btn-add" onclick="openAddPositionModal()" title="Add New"><i class="fas fa-plus"></i></button>
-      <button type="button" class="coord-toolbar-btn" title="Edit"><i class="fas fa-edit"></i></button>
-      <button type="button" class="coord-toolbar-btn" title="Delete"><i class="fas fa-trash"></i></button>
+      <button type="button" class="coord-toolbar-btn" id="coordPosEditBtn" title="Edit" onclick="openCoordPositionEditModal()"><i class="fas fa-edit"></i></button>
+      <button type="button" class="coord-toolbar-btn" id="coordPosDeleteBtn" title="Delete" onclick="openCoordPositionDeleteModal()"><i class="fas fa-trash"></i></button>
       <button type="button" class="coord-toolbar-btn" onclick="coordRefreshPositions()" title="Refresh"><i class="fas fa-sync-alt"></i></button>
       <div class="coord-search-wrap">
         <input type="text" id="coordPositionSearch" placeholder="Search..." onkeyup="coordFilterPositions()">
@@ -553,23 +708,34 @@
       </div>
     </div>
     <div class="coord-positions-body">
-      {% if coordinator_positions %}
-      <table class="coord-positions-table" id="coordPositionsTable">
-        <thead>
-          <tr>
-            <th>Code No</th>
-            <th>Position</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for p in coordinator_positions %}
-          <tr>
-            <td>{{ p.code|default:"—" }}</td>
-            <td><i class="fas fa-folder coord-list-icon"></i>{{ p.name }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      {% if coordinator_positions_list %}
+      <div class="coord-positions-table-wrap">
+        <table class="coord-positions-table" id="coordPositionsTable">
+          <thead>
+            <tr>
+              <th>Code No</th>
+              <th>Position</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in coordinator_positions_list %}
+            <tr class="coord-pos-row-clickable" data-id="{{ p.id }}" data-name="{{ p.name }}" data-code="{{ p.code|default:'' }}" data-description="{{ p.description|default:'' }}" data-active="{% if p.is_active %}Yes{% else %}No{% endif %}" data-edit-url="{% url 'operations:coordinator_position_edit' p.pk %}" data-delete-url="{% url 'operations:coordinator_position_delete' p.pk %}">
+              <td>{{ p.code|default:"—" }}</td>
+              <td><i class="fas fa-folder coord-list-icon"></i>{{ p.name }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="coord-positions-detail-panel">
+        <div class="coord-positions-detail-empty" id="coordPosDetailEmpty">Select a position.</div>
+        <div class="coord-positions-detail-content" id="coordPosDetailContent">
+          <h4 id="coordPosDetailName"></h4>
+          <div class="coord-positions-detail-item"><strong>Code</strong> <span id="coordPosDetailCode"></span></div>
+          <div class="coord-positions-detail-item"><strong>Description</strong> <span id="coordPosDetailDesc"></span></div>
+          <div class="coord-positions-detail-item"><strong>Active</strong> <span id="coordPosDetailActive"></span></div>
+        </div>
+      </div>
       {% else %}
       <div class="coord-positions-empty">No coordinator positions yet. Click Add to create one.</div>
       {% endif %}
@@ -602,6 +768,61 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-cancel" onclick="closeAddPositionModal()">Cancel</button>
         <button type="submit" class="btn btn-submit">Add Position</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Position Modal -->
+<div id="coordEditPositionModal" class="modal">
+  <div class="modal-content coord-edit-position-modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title"><i class="fas fa-edit"></i> Edit Position</h2>
+    </div>
+    <form method="post" id="coordEditPositionForm">
+      {% csrf_token %}
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="coord_edit_pos_name">Position Name <span style="color: #dc3545;">*</span></label>
+          <input type="text" id="coord_edit_pos_name" name="name" required placeholder="Position name">
+        </div>
+        <div class="form-group">
+          <label for="coord_edit_pos_code">Code</label>
+          <input type="text" id="coord_edit_pos_code" name="code" placeholder="Code (optional)">
+        </div>
+        <div class="form-group">
+          <label for="coord_edit_pos_description">Description</label>
+          <textarea id="coord_edit_pos_description" name="description" placeholder="Description (optional)"></textarea>
+        </div>
+        <div class="form-group form-group-checkbox">
+          <label class="checkbox-label" for="coord_edit_pos_active">
+            <input type="checkbox" id="coord_edit_pos_active" name="is_active"> Active
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" onclick="closeCoordPositionEditModal()">Cancel</button>
+        <button type="submit" class="btn btn-submit">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete Position Modal -->
+<div id="coordDeletePositionModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title">Delete Position</h2>
+      <button class="modal-close" onclick="closeCoordPositionDeleteModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin: 0;">Delete position <strong id="coordDeletePosName"></strong>? This cannot be undone. You cannot delete if coordinators use this position.</p>
+    </div>
+    <form method="post" id="coordDeletePositionForm">
+      {% csrf_token %}
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" onclick="closeCoordPositionDeleteModal()">Cancel</button>
+        <button type="submit" class="btn btn-submit" style="background: #dc3545;">Delete</button>
       </div>
     </form>
   </div>
@@ -655,6 +876,117 @@ document.getElementById('coordPositionsModal').addEventListener('click', functio
   if (e.target === this) closePositionsModal();
 });
 
+// Coordinator Positions: selectable rows, detail panel, Edit/Delete modals
+(function() {
+  var posRows = document.querySelectorAll('.coord-pos-row-clickable');
+  var posDetailEmpty = document.getElementById('coordPosDetailEmpty');
+  var posDetailContent = document.getElementById('coordPosDetailContent');
+  var posDetailName = document.getElementById('coordPosDetailName');
+  var posDetailCode = document.getElementById('coordPosDetailCode');
+  var posDetailDesc = document.getElementById('coordPosDetailDesc');
+  var posDetailActive = document.getElementById('coordPosDetailActive');
+
+  function setPosDetail(row) {
+    if (!posDetailEmpty || !posDetailContent || !row) return;
+    posDetailEmpty.style.display = 'none';
+    posDetailContent.style.display = 'block';
+    posDetailName.textContent = row.getAttribute('data-name') || '—';
+    posDetailCode.textContent = row.getAttribute('data-code') || '—';
+    posDetailDesc.textContent = row.getAttribute('data-description') || '—';
+    posDetailActive.textContent = row.getAttribute('data-active') || '—';
+  }
+
+  function clearPosDetail() {
+    if (posDetailEmpty) posDetailEmpty.style.display = 'block';
+    if (posDetailContent) posDetailContent.style.display = 'none';
+  }
+
+  posRows.forEach(function(row) {
+    row.addEventListener('click', function() {
+      posRows.forEach(function(r) { r.classList.remove('selected'); });
+      row.classList.add('selected');
+      setPosDetail(row);
+    });
+  });
+
+  if (posRows.length === 0) clearPosDetail();
+})();
+
+function openCoordPositionEditModal() {
+  var row = document.querySelector('.coord-pos-row-clickable.selected');
+  if (!row) return;
+  var form = document.getElementById('coordEditPositionForm');
+  if (!form) return;
+  form.action = row.getAttribute('data-edit-url') || '';
+  document.getElementById('coord_edit_pos_name').value = row.getAttribute('data-name') || '';
+  document.getElementById('coord_edit_pos_code').value = row.getAttribute('data-code') || '';
+  document.getElementById('coord_edit_pos_description').value = row.getAttribute('data-description') || '';
+  document.getElementById('coord_edit_pos_active').checked = (row.getAttribute('data-active') || '').toLowerCase() === 'yes';
+  document.getElementById('coordEditPositionModal').classList.add('active');
+}
+function closeCoordPositionEditModal() {
+  document.getElementById('coordEditPositionModal').classList.remove('active');
+}
+document.getElementById('coordEditPositionModal').addEventListener('click', function(e) {
+  if (e.target.id === 'coordEditPositionModal') closeCoordPositionEditModal();
+});
+
+function openCoordPositionDeleteModal() {
+  var row = document.querySelector('.coord-pos-row-clickable.selected');
+  if (!row) return;
+  var form = document.getElementById('coordDeletePositionForm');
+  if (!form) return;
+  form.action = row.getAttribute('data-delete-url') || '';
+  document.getElementById('coordDeletePosName').textContent = row.getAttribute('data-name') || 'this position';
+  document.getElementById('coordDeletePositionModal').classList.add('active');
+}
+function closeCoordPositionDeleteModal() {
+  document.getElementById('coordDeletePositionModal').classList.remove('active');
+}
+document.getElementById('coordDeletePositionModal').addEventListener('click', function(e) {
+  if (e.target.id === 'coordDeletePositionModal') closeCoordPositionDeleteModal();
+});
+
+// Coordinator Edit Modal
+function openCoordinatorEditModal() {
+  var row = document.querySelector('.coord-row-clickable.selected');
+  if (!row) return;
+  var form = document.getElementById('coordinatorEditForm');
+  if (!form) return;
+  form.action = row.getAttribute('data-edit-url') || '';
+  document.getElementById('id_edit_barangay').value = row.getAttribute('data-barangay-id') || '';
+  document.getElementById('id_edit_fullname').value = row.getAttribute('data-fullname') || '';
+  document.getElementById('id_edit_position').value = row.getAttribute('data-position-id') || '';
+  document.getElementById('id_edit_contact_no').value = row.getAttribute('data-contact') || '';
+  document.getElementById('id_edit_remarks').value = row.getAttribute('data-remarks') || '';
+  document.getElementById('id_edit_date_start').value = row.getAttribute('data-date-iso') || '';
+  document.getElementById('id_edit_is_active').checked = (row.getAttribute('data-active') || '').toUpperCase() === 'YES';
+  document.getElementById('coordinatorEditModal').classList.add('active');
+}
+function closeCoordinatorEditModal() {
+  document.getElementById('coordinatorEditModal').classList.remove('active');
+}
+document.getElementById('coordinatorEditModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCoordinatorEditModal();
+});
+
+// Coordinator Delete Modal
+function openCoordinatorDeleteModal() {
+  var row = document.querySelector('.coord-row-clickable.selected');
+  if (!row) return;
+  var form = document.getElementById('coordinatorDeleteForm');
+  if (!form) return;
+  form.action = row.getAttribute('data-delete-url') || '';
+  document.getElementById('coordDeleteName').textContent = row.getAttribute('data-fullname') || 'this coordinator';
+  document.getElementById('coordinatorDeleteModal').classList.add('active');
+}
+function closeCoordinatorDeleteModal() {
+  document.getElementById('coordinatorDeleteModal').classList.remove('active');
+}
+document.getElementById('coordinatorDeleteModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCoordinatorDeleteModal();
+});
+
 // Coordinator Details: clickable rows, selection, detail panel
 (function() {
   var rows = document.querySelectorAll('.coord-row-clickable');
@@ -668,7 +1000,7 @@ document.getElementById('coordPositionsModal').addEventListener('click', functio
   var detailRemarks = document.getElementById('coordDetailRemarks');
   var detailActive = document.getElementById('coordDetailActive');
   var editBtn = document.getElementById('coordDetailEditBtn');
-  var deleteForm = document.getElementById('coordDetailDeleteForm');
+  var deleteBtn = document.getElementById('coordDetailDeleteBtn');
 
   function setDetail(row) {
     if (!panelEmpty || !panelContent || !row) return;
@@ -681,15 +1013,11 @@ document.getElementById('coordPositionsModal').addEventListener('click', functio
     detailRemarks.textContent = row.getAttribute('data-remarks') || '—';
     detailDateStart.textContent = row.getAttribute('data-date-start') || '—';
     detailActive.textContent = row.getAttribute('data-active') || '—';
-    if (editBtn) editBtn.href = row.getAttribute('data-edit-url') || '#';
-    if (deleteForm) deleteForm.action = row.getAttribute('data-delete-url') || '#';
   }
 
   function clearDetail() {
     if (panelEmpty) panelEmpty.style.display = 'block';
     if (panelContent) panelContent.style.display = 'none';
-    if (editBtn) editBtn.href = '#';
-    if (deleteForm) deleteForm.action = '#';
   }
 
   rows.forEach(function(row) {
@@ -700,7 +1028,26 @@ document.getElementById('coordPositionsModal').addEventListener('click', functio
     });
   });
 
+  if (editBtn) editBtn.addEventListener('click', function() { openCoordinatorEditModal(); });
+  if (deleteBtn) deleteBtn.addEventListener('click', function() { openCoordinatorDeleteModal(); });
+
   if (rows.length === 0) clearDetail();
+
+  // Open edit modal when arriving from /operations/coordinator/edit/<pk>/ (redirected with ?edit=pk)
+  var editPk = '{{ edit_pk|default:"" }}';
+  if (editPk) {
+    var row = document.querySelector('.coord-row-clickable[data-id="' + editPk + '"]');
+    if (row) {
+      rows.forEach(function(r) { r.classList.remove('selected'); });
+      row.classList.add('selected');
+      setDetail(row);
+      openCoordinatorEditModal();
+    }
+    if (window.history && window.history.replaceState) {
+      var u = window.location.pathname + window.location.search.replace(/\bedit=[^&]*&?/g, '').replace(/\?$/, '');
+      window.history.replaceState({}, '', u || window.location.pathname);
+    }
+  }
 })();
 </script>
 {% endblock %}

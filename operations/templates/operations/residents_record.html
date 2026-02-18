@@ -121,6 +121,18 @@
   background: #f8f9fa;
 }
 
+.residents-table tbody tr.resident-row-clickable {
+  cursor: pointer;
+}
+
+.residents-table tbody tr.resident-row-clickable:hover {
+  background: #e8f4fc;
+}
+
+.residents-table tbody tr.resident-row-clickable.selected {
+  background: #bbdefb;
+}
+
 .residents-table tbody tr:last-child {
   border-bottom: none;
 }
@@ -716,6 +728,18 @@
       </span>
       <span class="btn-action-label">Add</span>
     </button>
+    <button type="button" class="btn btn-view-header" id="residentsHeaderViewBtn" title="View Resident">
+      <i class="fas fa-eye"></i>
+      <span class="btn-action-label">View</span>
+    </button>
+    <button type="button" class="btn btn-edit-header" id="residentsHeaderEditBtn" title="Edit Resident">
+      <i class="fas fa-pen"></i>
+      <span class="btn-action-label">Edit</span>
+    </button>
+    <button type="button" class="btn btn-delete-header" id="residentsHeaderDeleteBtn" title="Delete Resident">
+      <i class="fas fa-trash"></i>
+      <span class="btn-action-label">Delete</span>
+    </button>
     <button type="button" class="btn btn-print" title="Print">
       <i class="fas fa-print"></i>
       <span class="btn-action-label">Print</span>
@@ -729,41 +753,28 @@
   <table class="residents-table">
     <thead>
       <tr>
-        <th style="width: 8%;">ID</th>
-        <th style="width: 12%;">Barangay</th>
-        <th style="width: 20%;">Name</th>
-        <th style="width: 10%;">Gender</th>
-        <th style="width: 12%;">Contact</th>
-        <th style="width: 10%;">Status</th>
-        <th style="width: 18%; text-align: center;">Actions</th>
+        <th style="width: 10%;">ID</th>
+        <th style="width: 14%;">Barangay</th>
+        <th style="width: 24%;">Resident</th>
+        <th style="width: 12%;">Gender</th>
+        <th style="width: 14%;">Contact</th>
+        <th style="width: 14%;">Status</th>
       </tr>
     </thead>
     <tbody>
       {% for resident in residents %}
-      <tr>
+      <tr class="resident-row-clickable" data-id="{{ resident.id }}" data-name="{{ resident.get_full_name|escapejs }}">
         <td>
           <span class="badge badge-id">{{ resident.resident_id }}</span>
         </td>
         <td>{{ resident.barangay.name }}</td>
-        <td><strong class="resident-name" data-resident-id="{{ resident.id }}" onclick="openViewModal(this.dataset.residentId)">{{ resident.get_full_name }}</strong></td>
+        <td><strong>{{ resident.get_full_name }}</strong></td>
         <td>{{ resident.get_gender_display }}</td>
         <td>{{ resident.contact_no }}</td>
         <td>
           <span class="status-badge status-{{ resident.status|lower }}">
             {{ resident.get_status_display }}
           </span>
-        </td>
-        <td style="text-align: center;">
-          <div class="table-actions">
-            <button type="button" class="btn btn-edit" data-resident-id="{{ resident.id }}" onclick="openEditModal(this.dataset.residentId)" title="Edit">
-              <i class="fas fa-edit"></i>
-              <span class="btn-action-label">Edit</span>
-            </button>
-            <button type="button" class="btn btn-delete" data-resident-id="{{ resident.id }}" data-resident-name="{{ resident.get_full_name|escapejs }}" onclick="openDeleteModal(this.dataset.residentId, this.dataset.residentName)" title="Delete">
-              <i class="fas fa-trash"></i>
-              <span class="btn-action-label">Delete</span>
-            </button>
-          </div>
         </td>
       </tr>
       {% endfor %}
@@ -1024,7 +1035,6 @@
   <div class="modal-content">
     <div class="modal-header">
       <h2 class="modal-title"><i class="fas fa-edit"></i> Edit Resident</h2>
-      <button class="modal-close" onclick="closeEditModal()">&times;</button>
     </div>
     <form method="post" id="editForm">
       {% csrf_token %}
@@ -1292,7 +1302,7 @@
   <div class="modal-content view-modal-size">
     <div class="modal-header" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
       <h2 class="modal-title"><i class="fas fa-user"></i> Resident Details</h2>
-      <button class="modal-close" onclick="closeViewModal()">&times;</button>
+      <button type="button" class="modal-close" onclick="closeViewModal()" aria-label="Close" title="Close"><i class="fas fa-times"></i></button>
     </div>
     <div class="modal-body">
       <div class="view-header-title">Residents Record Information</div>
@@ -1376,14 +1386,6 @@
           <td class="detail-value remarks-value" id="view_remarks">-</td>
         </tr>
       </table>
-    </div>
-    <div class="modal-footer">
-      <button type="button" class="btn btn-cancel" onclick="closeViewModal()">
-        <i class="fas fa-times"></i> Close
-      </button>
-      <button type="button" class="btn btn-edit" onclick="openEditFromView()">
-        <i class="fas fa-edit"></i> Edit
-      </button>
     </div>
   </div>
 </div>
@@ -1619,6 +1621,54 @@ document.querySelectorAll('.modal').forEach(modal => {
     }
   });
 });
+
+// Selectable rows: click row to select, header Edit/Delete act on selected
+(function() {
+  var rows = document.querySelectorAll('.resident-row-clickable');
+  rows.forEach(function(row) {
+    row.addEventListener('click', function() {
+      rows.forEach(function(r) { r.classList.remove('selected'); });
+      row.classList.add('selected');
+    });
+  });
+
+  var headerEdit = document.getElementById('residentsHeaderEditBtn');
+  var headerDelete = document.getElementById('residentsHeaderDeleteBtn');
+  var headerView = document.getElementById('residentsHeaderViewBtn');
+  if (headerView) {
+    headerView.addEventListener('click', function() {
+      var selected = document.querySelector('.resident-row-clickable.selected');
+      if (!selected) {
+        alert('Please select a resident first.');
+        return;
+      }
+      openViewModal(selected.getAttribute('data-id'));
+    });
+  }
+  if (headerEdit) {
+    headerEdit.addEventListener('click', function() {
+      var selected = document.querySelector('.resident-row-clickable.selected');
+      if (!selected) {
+        alert('Please select a resident first.');
+        return;
+      }
+      openEditModal(selected.getAttribute('data-id'));
+    });
+  }
+  if (headerDelete) {
+    headerDelete.addEventListener('click', function() {
+      var selected = document.querySelector('.resident-row-clickable.selected');
+      if (!selected) {
+        alert('Please select a resident first.');
+        return;
+      }
+      openDeleteModal(
+        selected.getAttribute('data-id'),
+        selected.getAttribute('data-name') || ''
+      );
+    });
+  }
+})();
 
 // Close modals with Escape key
 document.addEventListener('keydown', function(e) {

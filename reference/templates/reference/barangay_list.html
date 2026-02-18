@@ -83,11 +83,11 @@
   font-weight: 700;
 }
 
-/* Filter Section */
+/* Filter Section - sticky below page header */
 .filter-section {
   position: sticky;
-  top: 0;
-  z-index: 10;
+  top: 4.5rem;
+  z-index: 40;
   background: #fff;
   padding: 1.25rem 1.5rem;
   border-radius: 12px;
@@ -270,6 +270,18 @@
 
 .barangay-table tbody tr:hover {
   background: #f8f9fa;
+}
+
+.barangay-table tbody tr.barangay-row-clickable {
+  cursor: pointer;
+}
+
+.barangay-table tbody tr.barangay-row-clickable:hover {
+  background: #e8f4fc;
+}
+
+.barangay-table tbody tr.barangay-row-clickable.selected {
+  background: #bbdefb;
 }
 
 .barangay-table tbody tr:last-child {
@@ -569,6 +581,14 @@
       </span>
       <span class="btn-action-label">Add</span>
     </button>
+    <button type="button" class="btn btn-edit-header" id="barangayHeaderEditBtn" title="Edit Barangay">
+      <i class="fas fa-pen"></i>
+      <span class="btn-action-label">Edit</span>
+    </button>
+    <button type="button" class="btn btn-delete-header" id="barangayHeaderDeleteBtn" title="Delete Barangay">
+      <i class="fas fa-trash"></i>
+      <span class="btn-action-label">Delete</span>
+    </button>
     <button type="button" class="btn btn-print" title="Print">
       <i class="fas fa-print"></i>
       <span class="btn-action-label">Print</span>
@@ -604,15 +624,14 @@
   <table class="barangay-table">
     <thead>
       <tr>
-        <th style="width: 10%;">Code</th>
-        <th style="width: 30%;">Name</th>
-        <th style="width: 35%;">Municipality</th>
-        <th style="width: 25%; text-align: center;">Actions</th>
+        <th style="width: 15%;">Code</th>
+        <th style="width: 40%;">Barangay</th>
+        <th style="width: 45%;">Municipality</th>
       </tr>
     </thead>
     <tbody>
       {% for b in barangays %}
-      <tr>
+      <tr class="barangay-row-clickable" data-id="{{ b.id }}" data-name="{{ b.name|escapejs }}">
         <td>
           {% if b.code %}
           <span class="badge badge-code">{{ b.code }}</span>
@@ -627,18 +646,6 @@
           {% else %}
           <span style="color: #999; font-style: italic;">No municipality</span>
           {% endif %}
-        </td>
-        <td style="text-align: center;">
-          <div class="table-actions">
-            <button type="button" class="btn btn-edit" onclick="openEditModal({{ b.id }})" title="Edit">
-              <i class="fas fa-edit"></i>
-              <span class="btn-action-label">Edit</span>
-            </button>
-            <button type="button" class="btn btn-delete" onclick="openDeleteModal({{ b.id }}, '{{ b.name|escapejs }}')" title="Delete">
-              <i class="fas fa-trash"></i>
-              <span class="btn-action-label">Delete</span>
-            </button>
-          </div>
         </td>
       </tr>
       {% endfor %}
@@ -706,7 +713,6 @@
   <div class="modal-content">
     <div class="modal-header">
       <h2 class="modal-title"><i class="fas fa-edit"></i> Edit Barangay</h2>
-      <button class="modal-close" onclick="closeEditModal()">&times;</button>
     </div>
     <form method="post" id="editForm">
       {% csrf_token %}
@@ -883,6 +889,43 @@ document.addEventListener('keydown', function(e) {
     });
   }
 });
+
+// Selectable rows: click row to select, header Edit/Delete act on selected
+(function() {
+  var rows = document.querySelectorAll('.barangay-row-clickable');
+  rows.forEach(function(row) {
+    row.addEventListener('click', function() {
+      rows.forEach(function(r) { r.classList.remove('selected'); });
+      row.classList.add('selected');
+    });
+  });
+
+  var headerEdit = document.getElementById('barangayHeaderEditBtn');
+  var headerDelete = document.getElementById('barangayHeaderDeleteBtn');
+  if (headerEdit) {
+    headerEdit.addEventListener('click', function() {
+      var selected = document.querySelector('.barangay-row-clickable.selected');
+      if (!selected) {
+        alert('Please select a barangay first.');
+        return;
+      }
+      openEditModal(parseInt(selected.getAttribute('data-id'), 10));
+    });
+  }
+  if (headerDelete) {
+    headerDelete.addEventListener('click', function() {
+      var selected = document.querySelector('.barangay-row-clickable.selected');
+      if (!selected) {
+        alert('Please select a barangay first.');
+        return;
+      }
+      openDeleteModal(
+        parseInt(selected.getAttribute('data-id'), 10),
+        selected.getAttribute('data-name') || ''
+      );
+    });
+  }
+})();
 
 // Auto-hide messages after 3 seconds
 document.addEventListener('DOMContentLoaded', function() {

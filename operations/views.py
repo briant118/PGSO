@@ -18,6 +18,7 @@ def operations_index(request):
 def coordinator(request):
     """Coordinator page; positions are coordinator-only (CoordinatorPosition), not reference Position."""
     coordinator_positions = CoordinatorPosition.objects.filter(is_active=True).order_by('code')
+    coordinator_positions_list = CoordinatorPosition.objects.all().order_by('code', 'name')
     coordinators = Coordinator.objects.select_related('barangay', 'position').all().order_by('barangay', 'fullname')
     search_query = request.GET.get('q', '').strip()
     if search_query:
@@ -31,9 +32,11 @@ def coordinator(request):
     barangays = Barangay.objects.filter(is_active=True).order_by('name')
     context = {
         'coordinator_positions': coordinator_positions,
+        'coordinator_positions_list': coordinator_positions_list,
         'coordinators': coordinators,
         'barangays': barangays,
         'search_query': search_query,
+        'edit_pk': request.GET.get('edit'),
     }
     return render(request, "operations/coordinator.html", context)
 
@@ -75,8 +78,10 @@ def coordinator_add(request):
 
 
 def coordinator_edit(request, pk):
-    """Edit an existing coordinator."""
+    """Edit an existing coordinator. GET redirects to coordinator list and opens edit modal; POST saves."""
     obj = get_object_or_404(Coordinator, pk=pk)
+    if request.method == 'GET':
+        return redirect('operations:coordinator' + '?edit=' + str(pk))
     barangays = Barangay.objects.filter(is_active=True).order_by('name')
     coordinator_positions = CoordinatorPosition.objects.filter(is_active=True).order_by('code')
     if request.method == 'POST':
@@ -109,12 +114,7 @@ def coordinator_edit(request, pk):
         obj.save()
         messages.success(request, f'Coordinator "{fullname}" updated successfully.')
         return redirect('operations:coordinator')
-    context = {
-        'coordinator': obj,
-        'barangays': barangays,
-        'coordinator_positions': coordinator_positions,
-    }
-    return render(request, "operations/coordinator_edit.html", context)
+    return redirect('operations:coordinator')
 
 
 def coordinator_delete(request, pk):
@@ -148,6 +148,37 @@ def coordinator_position_add(request):
             is_active=True,
         )
         messages.success(request, f'Coordinator position "{name}" added with code {next_code}.')
+    return redirect('operations:coordinator')
+
+
+def coordinator_position_edit(request, pk):
+    """Edit a coordinator position."""
+    obj = get_object_or_404(CoordinatorPosition, pk=pk)
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        if not name:
+            messages.error(request, 'Position name is required.')
+            return redirect('operations:coordinator')
+        code = request.POST.get('code', '').strip()
+        obj.name = name
+        obj.code = code
+        obj.description = request.POST.get('description', '').strip()
+        obj.is_active = request.POST.get('is_active') == 'on'
+        obj.save()
+        messages.success(request, f'Position "{name}" updated.')
+    return redirect('operations:coordinator')
+
+
+def coordinator_position_delete(request, pk):
+    """Delete a coordinator position (only if no coordinators use it)."""
+    obj = get_object_or_404(CoordinatorPosition, pk=pk)
+    if request.method == 'POST':
+        if obj.coordinators.exists():
+            messages.error(request, f'Cannot delete "{obj.name}": it is assigned to coordinator(s).')
+        else:
+            name = obj.name
+            obj.delete()
+            messages.success(request, f'Position "{name}" deleted.')
     return redirect('operations:coordinator')
 
 
@@ -378,9 +409,12 @@ def barangay_official_get(request, pk):
         'resident': official.resident.id,
         'barangay': official.barangay.id,
         'position': official.position.id,
+        'resident_name': official.resident.get_full_name(),
+        'barangay_name': official.barangay.name,
+        'position_name': official.position.name,
         'start_date': official.start_date.strftime('%Y-%m-%d'),
         'end_date': official.end_date.strftime('%Y-%m-%d') if official.end_date else '',
-        'remarks': official.remarks,
+        'remarks': official.remarks or '',
     }
     return JsonResponse(data)
 
