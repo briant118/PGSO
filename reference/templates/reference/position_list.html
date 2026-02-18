@@ -44,12 +44,13 @@
 }
 
 .btn-add {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
+  background: #fff;
+  color: #1a1d24;
+  border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 .btn-add:hover {
-  background: linear-gradient(135deg, #218838 0%, #1aa179 100%);
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .btn-edit {
@@ -398,9 +399,19 @@
   <h1 class="page-title">
     <i class="fas fa-user-tag" style="color: #4299e1;"></i> Position Management
   </h1>
-  <button class="btn btn-add" onclick="openAddModal()">
-    <i class="fas fa-plus"></i> Add Position
-  </button>
+  <div class="page-header-actions">
+    <button type="button" class="btn btn-add" onclick="openAddModal()" title="Add Position">
+      <span class="btn-add-icon-wrap">
+        <i class="fas fa-file-lines"></i>
+        <span class="btn-add-plus"><i class="fas fa-plus"></i></span>
+      </span>
+      <span class="btn-action-label">Add</span>
+    </button>
+    <button type="button" class="btn btn-print" title="Print">
+      <i class="fas fa-print"></i>
+      <span class="btn-action-label">Print</span>
+    </button>
+  </div>
 </div>
 
 <!-- Position Table -->
@@ -436,11 +447,13 @@
         </td>
         <td style="text-align: center;">
           <div class="table-actions">
-            <button class="btn btn-edit" onclick="openEditModal({{ p.id }})">
-              <i class="fas fa-edit"></i> Edit
+            <button type="button" class="btn btn-edit" onclick="openEditModal({{ p.id }})" title="Edit">
+              <i class="fas fa-edit"></i>
+              <span class="btn-action-label">Edit</span>
             </button>
-            <button class="btn btn-delete" onclick="openDeleteModal({{ p.id }}, '{{ p.name|escapejs }}')">
-              <i class="fas fa-trash"></i> Delete
+            <button type="button" class="btn btn-delete" onclick="openDeleteModal({{ p.id }}, '{{ p.name|escapejs }}')" title="Delete">
+              <i class="fas fa-trash"></i>
+              <span class="btn-action-label">Delete</span>
             </button>
           </div>
         </td>
@@ -454,8 +467,12 @@
   <div class="empty-icon">👔</div>
   <h3>No Positions Yet</h3>
   <p>Start by adding your first position to the system.</p>
-  <button class="btn btn-add" onclick="openAddModal()">
-    <i class="fas fa-plus"></i> Add Your First Position
+  <button type="button" class="btn btn-add" onclick="openAddModal()" title="Add Your First Position">
+    <span class="btn-add-icon-wrap">
+      <i class="fas fa-file-lines"></i>
+      <span class="btn-add-plus"><i class="fas fa-plus"></i></span>
+    </span>
+    <span class="btn-action-label">Add</span>
   </button>
 </div>
 {% endif %}

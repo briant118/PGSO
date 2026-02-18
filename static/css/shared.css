@@ -24,6 +24,12 @@
   font-size: 0.95rem;
 }
 
+.page-header-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 /* ========== BUTTONS ========== */
 .btn {
   display: inline-flex;
@@ -49,14 +55,160 @@
   transform: translateY(0);
 }
 
-/* Button Variants */
+/* Button Variants - Add (white background, border, document + plus icon) */
 .btn-add {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
+  background: #fff;
+  color: #1a1d24;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  flex-direction: column;
+  padding: 0.6rem 0.75rem;
+  width: 4.25rem;
+  min-width: 4.25rem;
+  height: 4rem;
+  font-size: 0.7rem;
+  gap: 0.4rem;
+  border-radius: 12px;
+  box-shadow: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-add .btn-add-icon-wrap {
+  position: relative;
+  display: inline-block;
+  line-height: 1;
+}
+
+.btn-add .btn-add-icon-wrap .fa-file-lines {
+  font-size: 1.5rem;
+  color: #4b5563;
+}
+
+.btn-add .btn-add-icon-wrap .btn-add-plus {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 0.85rem;
+  height: 0.85rem;
+  border-radius: 50%;
+  background: #00f431;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.5rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+.btn-add .btn-action-label {
+  color: #9ca3af;
+  font-weight: 500;
+  line-height: 1.1;
 }
 
 .btn-add:hover {
-  background: linear-gradient(135deg, #218838 0%, #1aa179 100%);
+  background: #f0f0f0;
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-add:hover .btn-add-icon-wrap .fa-file-lines {
+  color: #4b5563;
+}
+
+.btn-add:hover .btn-action-label {
+  color: #9ca3af;
+}
+
+/* Print button (same style as Add, sits to the right of Add) */
+.btn-print {
+  background: #fff;
+  color: #1a1d24;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  flex-direction: column;
+  padding: 0.6rem 0.75rem;
+  width: 4.25rem;
+  min-width: 4.25rem;
+  height: 4rem;
+  font-size: 0.7rem;
+  gap: 0.4rem;
+  border-radius: 12px;
+  box-shadow: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-print i {
+  font-size: 1.5rem;
+  color: #4299e1;
+}
+
+.btn-print .btn-action-label {
+  color: #374151;
+  font-weight: 500;
+  line-height: 1.1;
+  font-size: 0.75rem;
+}
+
+.btn-print:hover {
+  background: #f0f0f0;
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-print:hover i {
+  color: #3182ce;
+}
+
+.btn-print:hover .btn-action-label {
+  color: #1a1d24;
+}
+
+/* Position button (same style as Add/Print, for coordinator page) */
+.btn-position {
+  background: #fff;
+  color: #1a1d24;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  flex-direction: column;
+  padding: 0.6rem 0.75rem;
+  width: 4.25rem;
+  min-width: 4.25rem;
+  height: 4rem;
+  font-size: 0.7rem;
+  gap: 0.4rem;
+  border-radius: 12px;
+  box-shadow: none;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.btn-position i {
+  font-size: 1.5rem;
+  color: #4299e1;
+}
+
+.btn-position .btn-action-label {
+  color: #374151;
+  font-weight: 500;
+  line-height: 1.1;
+  font-size: 0.75rem;
+}
+
+.btn-position:hover {
+  background: #f0f0f0;
+  box-shadow: none;
+  transform: none;
+  color: #1a1d24;
+  text-decoration: none;
+}
+
+.btn-position:hover i {
+  color: #3182ce;
+}
+
+.btn-position:hover .btn-action-label {
+  color: #1a1d24;
 }
 
 .btn-edit {
@@ -197,6 +349,33 @@
   display: flex;
   gap: 0.5rem;
   justify-content: center;
+}
+
+/* Small icon + label action buttons in tables */
+.table-actions .btn {
+  flex-direction: column;
+  padding: 0.4rem 0.5rem;
+  min-width: 2.5rem;
+  font-size: 0.7rem;
+  gap: 0.2rem;
+}
+
+.table-actions .btn i {
+  font-size: 0.95rem;
+}
+
+.table-actions .btn .btn-action-label {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.table-actions .btn:hover .btn-action-label {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.table-actions .btn:hover {
+  transform: none;
 }
 
 /* ========== MODALS ========== */
@@ -598,6 +777,9 @@
 
 /* ========== FILTER SECTION ========== */
 .filter-section {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   background: #fff;
   padding: 1.25rem 1.5rem;
   border-radius: 12px;

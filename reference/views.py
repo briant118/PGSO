@@ -209,6 +209,9 @@ def position_add(request):
         transaction.on_commit(lambda: None)
         
         messages.success(request, f'Position "{name}" has been added successfully with code {next_code}.')
+        next_url = request.POST.get('next', '').strip()
+        if next_url:
+            return redirect(next_url)
         return redirect('reference:position_list')
     
     return redirect('reference:position_list')
@@ -294,11 +297,8 @@ def position_detail(request, pk):
     # Get municipality filter from request
     selected_municipality = request.GET.get('municipality', '')
     
-    # Get unique municipalities from barangays
-    municipalities = Municipality.objects.filter(
-        is_active=True,
-        barangays__is_active=True
-    ).distinct().order_by('name')
+    # All active municipalities for the filter dropdown
+    municipalities = Municipality.objects.filter(is_active=True).order_by('name')
     
     # Get barangays - all if no filter, filtered by municipality if filter is selected
     if selected_municipality:

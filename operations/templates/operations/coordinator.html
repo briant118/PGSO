@@ -4,6 +4,9 @@
 <style>
 /* Page Header */
 .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 2rem;
 }
 
@@ -50,6 +53,314 @@
   color: #5f6368;
   font-size: 1rem;
 }
+
+/* Details section */
+.coord-details-section { margin-bottom: 2rem; }
+.coord-details-heading-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.coord-details-heading { color: #1976d2; font-size: 1.25rem; margin: 0; }
+.coord-details-heading-row .coord-search-form { max-width: 320px; margin: 0; }
+.coord-details-layout { display: grid; grid-template-columns: 1fr 320px; gap: 1.25rem; align-items: start; }
+@media (max-width: 900px) { .coord-details-layout { grid-template-columns: 1fr; } }
+.coord-details-table-wrap { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); overflow: hidden; }
+.coord-details-table { width: 100%; border-collapse: collapse; }
+.coord-details-table th { text-align: left; padding: 0.75rem 1rem; background: #f5f5f5; font-size: 0.85rem; font-weight: 600; color: #333; border-bottom: 1px solid #e0e0e0; }
+.coord-details-table td { padding: 0.75rem 1rem; border-bottom: 1px solid #eee; font-size: 0.9rem; color: #1a1d24; }
+.coord-details-table tbody tr.coord-row-clickable { cursor: pointer; }
+.coord-details-table tbody tr.coord-row-clickable:hover td { background: #e8f4fc; }
+.coord-details-table tbody tr.coord-row-clickable.selected td { background: #bbdefb; }
+.coord-details-table .coord-list-icon { color: #1976d2; margin-right: 0.5rem; }
+.coord-details-table .coord-row-actions { white-space: nowrap; }
+.coord-details-table .coord-row-actions .coord-btn-icon { display: inline-flex; align-items: center; justify-content: center; width: 1.75rem; height: 1.75rem; padding: 0; border: none; border-radius: 6px; cursor: pointer; margin: 0 0.15rem; background: transparent; color: #5f6368; }
+.coord-details-table .coord-row-actions .coord-btn-icon:hover { background: #f0f0f0; color: #1a1d24; }
+.coord-details-table .coord-row-actions .coord-btn-edit:hover { color: #1976d2; }
+.coord-details-table .coord-row-actions .coord-btn-delete:hover { color: #dc3545; }
+.coord-detail-panel { background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); padding: 1.25rem; position: sticky; top: 1rem; }
+.coord-detail-panel-empty { color: #5f6368; font-size: 0.95rem; text-align: center; padding: 2rem 1rem; }
+.coord-detail-panel h3 { margin: 0 0 1rem; font-size: 1.1rem; color: #1976d2; }
+.coord-detail-panel .coord-detail-item { margin-bottom: 0.75rem; font-size: 0.9rem; }
+.coord-detail-panel .coord-detail-item strong { display: inline-block; min-width: 6rem; color: #5f6368; }
+.coord-detail-panel .coord-detail-actions { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #eee; display: flex; gap: 0.5rem; }
+.coord-detail-panel .coord-detail-actions .coord-btn-icon { display: inline-flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; padding: 0; border: none; border-radius: 6px; cursor: pointer; background: #f0f0f0; color: #5f6368; text-decoration: none; }
+.coord-detail-panel .coord-detail-actions .coord-btn-icon:hover { background: #e0e0e0; color: #1a1d24; }
+.coord-detail-panel .coord-detail-actions .coord-btn-edit:hover { color: #1976d2; }
+.coord-detail-panel .coord-detail-actions .coord-btn-delete:hover { color: #dc3545; }
+.coord-details-empty { color: #5f6368; margin: 0; }
+.coord-search-form { display: flex; align-items: center; gap: 0.5rem; max-width: 360px; }
+.coord-search-form input { flex: 1; padding: 0.5rem 0.75rem 0.5rem 2.25rem; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 0.95rem; }
+.coord-search-form input:focus { outline: none; border-color: #1976d2; box-shadow: 0 0 0 2px rgba(25,118,210,0.2); }
+.coord-search-wrap { position: relative; flex: 1; }
+.coord-search-wrap .fa-search { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: #888; font-size: 0.9rem; pointer-events: none; }
+.coord-search-wrap input { width: 100%; }
+.coord-search-form button { padding: 0.5rem 1rem; background: #1976d2; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.coord-search-form button:hover { background: #1565c0; }
+
+/* Coordinator Create Modal (like image) */
+.coordinator-modal {
+  display: none;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5); z-index: 1001; align-items: center; justify-content: center;
+}
+.coordinator-modal.active { display: flex; }
+.coordinator-modal-content {
+  background: #fff; border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  width: 90%; max-width: 640px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column;
+}
+.coordinator-modal-form {
+  display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden;
+}
+.coordinator-modal-header {
+  display: flex; align-items: flex-start; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid #e8eaed;
+  flex-shrink: 0; background: #fff;
+}
+.coordinator-modal-title-row { display: flex; align-items: center; gap: 0.75rem; }
+.coordinator-modal-icon-wrap {
+  position: relative; width: 2.5rem; height: 2.5rem; border-radius: 50%; background: #1976d2; color: #fff;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.coordinator-modal-icon-wrap .fa-file-lines { font-size: 1.1rem; }
+.coordinator-modal-plus {
+  position: absolute; bottom: -2px; right: -2px; width: 1rem; height: 1rem; border-radius: 50%;
+  background: #28a745; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 0.5rem;
+}
+.coordinator-modal-title { margin: 0; font-size: 1.35rem; font-weight: 700; color: #1a1d24; }
+.coordinator-modal-subtitle { display: block; font-size: 0.85rem; color: #5f6368; margin-top: 0.15rem; }
+/* Cancel button - always visible in top right */
+.coordinator-modal-close {
+  background: #f0f0f0; border: 1px solid #ccc; font-size: 1rem; cursor: pointer; color: #1a1d24;
+  padding: 0.4rem 0.75rem; line-height: 1; display: inline-flex; align-items: center; gap: 0.4rem;
+  border-radius: 6px; flex-shrink: 0;
+}
+.coordinator-modal-close:hover { background: #e8e8e8; border-color: #999; color: #dc3545; }
+.coordinator-modal-close .fa-times { font-size: 1rem; }
+.coordinator-modal-cancel-label { font-size: 0.9rem; font-weight: 600; }
+.coordinator-modal-body {
+  padding: 1.25rem; overflow-y: auto; flex: 1 1 auto; min-height: 0;
+}
+.coordinator-form-grid { display: block; }
+.coordinator-form-col .form-group { margin-bottom: 1rem; }
+.coordinator-form-col .form-group label { display: block; font-weight: 600; color: #1a1d24; margin-bottom: 0.35rem; font-size: 0.9rem; }
+.coordinator-form-col .form-group input[type="text"],
+.coordinator-form-col .form-group input[type="date"],
+.coordinator-form-col .form-group select { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #e0e0e0; border-radius: 6px; font-size: 0.95rem; }
+.coordinator-form-col .form-group input:focus { outline: none; border-color: #28a745; box-shadow: 0 0 0 2px rgba(40,167,69,0.2); }
+.coordinator-toggle-wrap { display: flex; align-items: center; gap: 0.75rem; }
+.coordinator-toggle-label { margin: 0; }
+.coordinator-toggle { position: relative; display: inline-block; width: 48px; height: 26px; }
+.coordinator-toggle input { opacity: 0; width: 0; height: 0; }
+.coordinator-toggle-slider {
+  position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+  background: #ccc; border-radius: 26px; transition: 0.3s;
+}
+.coordinator-toggle-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: 0.3s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.coordinator-toggle input:checked + .coordinator-toggle-slider { background: #fd7e14; }
+.coordinator-toggle input:checked + .coordinator-toggle-slider:before { transform: translateX(22px); }
+/* Footer with Save and Close - always visible at bottom */
+.coordinator-modal-footer {
+  padding: 1rem 1.25rem; border-top: 1px solid #e8eaed; display: flex; gap: 0.75rem; flex-wrap: wrap;
+  flex-shrink: 0; background: #fff;
+}
+.coordinator-btn-save {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: #fff !important; padding: 0.6rem 1rem;
+  border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;
+  font-size: 0.95rem; visibility: visible; opacity: 1;
+}
+.coordinator-btn-close {
+  background: #6c757d; color: #fff !important; padding: 0.6rem 1rem; border: none; border-radius: 6px;
+  font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 0.5rem;
+  font-size: 0.95rem; visibility: visible; opacity: 1;
+}
+
+/* Coordinator - Positions Modal (like image) */
+.coord-positions-modal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.coord-positions-modal.active { display: flex; }
+
+.coord-positions-window {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  width: 90%;
+  max-width: 560px;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.coord-positions-header {
+  background: linear-gradient(180deg, #e3f2fd 0%, #bbdefb 100%);
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #90caf9;
+}
+.coord-positions-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1565c0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.coord-positions-header .coord-positions-subtitle {
+  display: block;
+  font-size: 0.8rem;
+  color: #5f6368;
+  font-style: italic;
+  margin-top: 0.2rem;
+}
+.coord-positions-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  cursor: pointer;
+  color: #333;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.coord-positions-toolbar {
+  background: #90caf9;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+}
+/* White circular icon buttons with blue border - ensure Add is visible */
+.coord-positions-toolbar .coord-toolbar-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  border: 2px solid #42a5f5;
+  border-radius: 50%;
+  background: #fff;
+  color: #1565c0;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+.coord-positions-toolbar .coord-toolbar-btn:hover {
+  background: #e3f2fd;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.coord-positions-toolbar .coord-toolbar-btn i {
+  font-size: 1rem;
+}
+.coord-positions-toolbar .coord-toolbar-btn-add i {
+  font-size: 1.1rem;
+  font-weight: bold;
+}
+/* Search area: white rounded bar integrated into blue toolbar, right side - like image */
+.coord-positions-toolbar .coord-search-wrap {
+  margin-left: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 2.5rem;
+  padding-left: 0.75rem;
+  padding-right: 0.35rem;
+  gap: 0.35rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  min-width: 200px;
+  max-width: 320px;
+  flex: 1;
+}
+.coord-positions-toolbar .coord-search-wrap input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: none;
+  font-size: 0.9rem;
+  background: transparent;
+  color: #1a1d24;
+  outline: none;
+  height: 100%;
+}
+.coord-positions-toolbar .coord-search-wrap input::placeholder {
+  color: #9ca3af;
+}
+.coord-positions-toolbar .coord-search-wrap .coord-search-btn {
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #e0e0e0;
+  color: #616161;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.coord-positions-toolbar .coord-search-wrap .coord-search-btn:hover {
+  background: #bdbdbd;
+  color: #424242;
+}
+.coord-positions-toolbar .coord-search-wrap .coord-search-btn i {
+  font-size: 0.8rem;
+  line-height: 1;
+}
+
+.coord-positions-body {
+  padding: 0;
+  overflow: auto;
+  flex: 1;
+}
+.coord-positions-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.coord-positions-table th {
+  text-align: left;
+  padding: 0.6rem 1rem;
+  background: #f5f5f5;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #e0e0e0;
+}
+.coord-positions-table td {
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9rem;
+  color: #1a1d24;
+}
+.coord-positions-table tr:hover td {
+  background: #f8f9fa;
+}
+.coord-positions-table .coord-list-icon {
+  color: #9ca3af;
+  margin-right: 0.5rem;
+}
+.coord-positions-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #5f6368;
+  font-size: 0.95rem;
+}
 </style>
 
 <!-- Page Header -->
@@ -57,13 +368,340 @@
   <h1 class="page-title">
     <i class="fas fa-user-tie" style="color: #4299e1;"></i> Coordinator
   </h1>
+  <div class="page-header-actions">
+    <button type="button" class="btn btn-add" onclick="openCoordinatorModal()" title="Add Coordinator">
+      <span class="btn-add-icon-wrap">
+        <i class="fas fa-file-lines"></i>
+        <span class="btn-add-plus"><i class="fas fa-plus"></i></span>
+      </span>
+      <span class="btn-action-label">Add</span>
+    </button>
+    <button type="button" class="btn btn-position" onclick="openPositionsModal()" title="Positions">
+      <i class="fas fa-user-tag"></i>
+      <span class="btn-action-label">Position</span>
+    </button>
+    <button type="button" class="btn btn-print" title="Print">
+      <i class="fas fa-print"></i>
+      <span class="btn-action-label">Print</span>
+    </button>
+  </div>
 </div>
 
-<!-- Coming Soon Content -->
-<div class="coming-soon-card">
-  <div class="coming-soon-icon">🚧</div>
-  <h2>Coming Soon</h2>
-  <p>This feature is currently under development and will be available soon.</p>
+<!-- Details Table (like image) -->
+<div class="coord-details-section">
+  <div class="coord-details-heading-row">
+    <h2 class="coord-details-heading">Details</h2>
+    <form method="get" action="{% url 'operations:coordinator' %}" class="coord-search-form">
+      <div class="coord-search-wrap">
+        <i class="fas fa-search"></i>
+        <input type="text" name="q" value="{{ search_query|default:'' }}" placeholder="Search barangay, fullname, position..." autocomplete="off">
+      </div>
+      <button type="submit">Search</button>
+    </form>
+  </div>
+  {% if coordinators %}
+  <div class="coord-details-layout">
+    <div class="coord-details-table-wrap">
+      <table class="coord-details-table">
+        <thead>
+          <tr>
+            <th>Fullname</th>
+            <th>Position</th>
+            <th>Contact No.</th>
+            <th>Date Start</th>
+            <th>Remarks</th>
+            <th>ACTIVE</th>
+            <th>Barangay</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in coordinators %}
+          <tr class="coord-row-clickable" data-id="{{ c.id }}" data-fullname="{{ c.fullname }}" data-barangay="{{ c.barangay.name }}" data-position="{{ c.position.name }}" data-contact="{{ c.contact_no|default:'' }}" data-remarks="{{ c.remarks|default:'' }}" data-date-start="{{ c.date_start|date:'m/d/Y'|default:'' }}" data-active="{% if c.is_active %}YES{% else %}NO{% endif %}" data-edit-url="{% url 'operations:coordinator_edit' c.pk %}" data-delete-url="{% url 'operations:coordinator_delete' c.pk %}">
+            <td><i class="fas fa-folder coord-list-icon"></i>{{ c.fullname }}</td>
+            <td>{{ c.position.name }}</td>
+            <td>{{ c.contact_no|default:"—" }}</td>
+            <td>{{ c.date_start|date:"m/d/Y"|default:"—" }}</td>
+            <td>{{ c.remarks|default:"—"|truncatewords:8 }}</td>
+            <td>{% if c.is_active %}YES{% else %}NO{% endif %}</td>
+            <td>{{ c.barangay.name }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="coord-detail-panel" id="coordDetailPanel">
+      <div class="coord-detail-panel-empty" id="coordDetailEmpty">Select a row to view details.</div>
+      <div id="coordDetailContent" style="display: none;">
+        <h3 id="coordDetailName"></h3>
+        <div class="coord-detail-item"><strong>Barangay</strong> <span id="coordDetailBarangay"></span></div>
+        <div class="coord-detail-item"><strong>Position</strong> <span id="coordDetailPosition"></span></div>
+        <div class="coord-detail-item"><strong>Contact No.</strong> <span id="coordDetailContact"></span></div>
+        <div class="coord-detail-item"><strong>Date Start</strong> <span id="coordDetailDateStart"></span></div>
+        <div class="coord-detail-item"><strong>Remarks</strong> <span id="coordDetailRemarks"></span></div>
+        <div class="coord-detail-item"><strong>Active</strong> <span id="coordDetailActive"></span></div>
+        <div class="coord-detail-actions">
+          <a href="#" id="coordDetailEditBtn" class="coord-btn-icon coord-btn-edit" title="Edit"><i class="fas fa-pen"></i></a>
+          <form method="post" action="#" id="coordDetailDeleteForm" style="display:inline;" onsubmit="return confirm('Delete this coordinator?');">
+            {% csrf_token %}
+            <button type="submit" class="coord-btn-icon coord-btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <p class="coord-details-empty">
+    {% if search_query %}No coordinators match "{{ search_query }}". Try a different search or <a href="{% url 'operations:coordinator' %}">clear search</a>.{% else %}No coordinator records yet. Click <strong>Add</strong> to create one.{% endif %}
+  </p>
+  {% endif %}
 </div>
+
+<!-- Coordinator Create Modal (like image) -->
+<div id="coordinatorModal" class="coordinator-modal">
+  <div class="coordinator-modal-content">
+    <div class="coordinator-modal-header">
+      <div class="coordinator-modal-title-row">
+        <span class="coordinator-modal-icon-wrap">
+          <i class="fas fa-file-lines"></i>
+          <span class="coordinator-modal-plus"><i class="fas fa-plus"></i></span>
+        </span>
+        <div>
+          <h2 class="coordinator-modal-title">Coordinator</h2>
+          <span class="coordinator-modal-subtitle">(Create new record/)</span>
+        </div>
+      </div>
+    </div>
+    <form method="post" action="{% url 'operations:coordinator_add' %}" id="coordinatorForm" class="coordinator-modal-form">
+      {% csrf_token %}
+      <div class="coordinator-modal-body">
+        <div class="coordinator-form-grid">
+          <div class="coordinator-form-col">
+            <div class="form-group">
+              <label for="id_barangay">Barangay <span style="color:#dc3545;">*</span></label>
+              <select id="id_barangay" name="barangay" required>
+                <option value="">-- Select Barangay --</option>
+                {% for b in barangays %}
+                <option value="{{ b.id }}">{{ b.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="id_fullname">Fullname <span style="color:#dc3545;">*</span></label>
+              <input type="text" id="id_fullname" name="fullname" required placeholder="Enter full name">
+            </div>
+            <div class="form-group">
+              <label for="id_position">Position <span style="color:#dc3545;">*</span></label>
+              <select id="id_position" name="position" required>
+                <option value="">-- Select Position --</option>
+                {% for p in coordinator_positions %}
+                <option value="{{ p.id }}">{{ p.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="id_contact_no">Contact No.</label>
+              <input type="text" id="id_contact_no" name="contact_no" placeholder="Contact number">
+            </div>
+            <div class="form-group">
+              <label for="id_remarks">Remarks</label>
+              <input type="text" id="id_remarks" name="remarks" placeholder="Remarks">
+            </div>
+            <div class="form-group">
+              <label for="id_date_start">Date Start</label>
+              <input type="date" id="id_date_start" name="date_start">
+            </div>
+            <div class="form-group coordinator-toggle-wrap">
+              <label class="coordinator-toggle-label">Active?</label>
+              <label class="coordinator-toggle">
+                <input type="checkbox" name="is_active" checked>
+                <span class="coordinator-toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="coordinator-modal-footer">
+        <button type="submit" class="btn coordinator-btn-save" accesskey="s" title="Save and add this coordinator (F2)">
+          <i class="fas fa-save"></i> [F2] - SAVE
+        </button>
+        <button type="button" class="btn coordinator-btn-close" onclick="closeCoordinatorModal()" title="Close without saving">
+          <i class="fas fa-arrow-left"></i> CLOSE
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Coordinator - Positions Modal -->
+<div id="coordPositionsModal" class="coord-positions-modal">
+  <div class="coord-positions-window">
+    <div class="coord-positions-header">
+      <div>
+        <h2><i class="fas fa-file-alt"></i> Coordinator - Positions</h2>
+        <span class="coord-positions-subtitle">{/Positions for coordinators/}</span>
+      </div>
+      <button type="button" class="coord-positions-close" onclick="closePositionsModal()" aria-label="Close">&times;</button>
+    </div>
+    <div class="coord-positions-toolbar">
+      <button type="button" class="coord-toolbar-btn coord-toolbar-btn-add" onclick="openAddPositionModal()" title="Add New"><i class="fas fa-plus"></i></button>
+      <button type="button" class="coord-toolbar-btn" title="Edit"><i class="fas fa-edit"></i></button>
+      <button type="button" class="coord-toolbar-btn" title="Delete"><i class="fas fa-trash"></i></button>
+      <button type="button" class="coord-toolbar-btn" onclick="coordRefreshPositions()" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+      <div class="coord-search-wrap">
+        <input type="text" id="coordPositionSearch" placeholder="Search..." onkeyup="coordFilterPositions()">
+        <button type="button" class="coord-search-btn" title="Search"><i class="fas fa-search"></i></button>
+      </div>
+    </div>
+    <div class="coord-positions-body">
+      {% if coordinator_positions %}
+      <table class="coord-positions-table" id="coordPositionsTable">
+        <thead>
+          <tr>
+            <th>Code No</th>
+            <th>Position</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in coordinator_positions %}
+          <tr>
+            <td>{{ p.code|default:"—" }}</td>
+            <td><i class="fas fa-folder coord-list-icon"></i>{{ p.name }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="coord-positions-empty">No coordinator positions yet. Click Add to create one.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Add Position Modal (inside coordinator) -->
+<div id="coordAddPositionModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title"><i class="fas fa-plus-circle"></i> Add New Position</h2>
+      <button class="modal-close" onclick="closeAddPositionModal()">&times;</button>
+    </div>
+    <form method="post" action="{% url 'operations:coordinator_position_add' %}">
+      {% csrf_token %}
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="coord_add_name">Position Name <span style="color: #dc3545;">*</span></label>
+          <input type="text" id="coord_add_name" name="name" required placeholder="Enter position name">
+        </div>
+        <div class="form-group">
+          <label for="coord_add_description">Description</label>
+          <textarea id="coord_add_description" name="description" placeholder="Enter description (optional)"></textarea>
+        </div>
+        <p style="margin: 0; padding: 0.75rem; background: #e8f4f8; border-radius: 6px; color: #0056b3; font-size: 0.9rem;">
+          <i class="fas fa-info-circle"></i> Code will be automatically assigned
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" onclick="closeAddPositionModal()">Cancel</button>
+        <button type="submit" class="btn btn-submit">Add Position</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openCoordinatorModal() {
+  document.getElementById('coordinatorModal').classList.add('active');
+}
+function closeCoordinatorModal() {
+  document.getElementById('coordinatorModal').classList.remove('active');
+}
+document.getElementById('coordinatorModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCoordinatorModal();
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'F2') {
+    var modal = document.getElementById('coordinatorModal');
+    if (modal && modal.classList.contains('active')) {
+      e.preventDefault();
+      document.getElementById('coordinatorForm').submit();
+    }
+  }
+});
+
+function openPositionsModal() {
+  document.getElementById('coordPositionsModal').classList.add('active');
+}
+function closePositionsModal() {
+  document.getElementById('coordPositionsModal').classList.remove('active');
+}
+function openAddPositionModal() {
+  document.getElementById('coordAddPositionModal').classList.add('active');
+}
+function closeAddPositionModal() {
+  document.getElementById('coordAddPositionModal').classList.remove('active');
+}
+function coordRefreshPositions() {
+  window.location.reload();
+}
+function coordFilterPositions() {
+  var q = document.getElementById('coordPositionSearch').value.toLowerCase();
+  var rows = document.querySelectorAll('#coordPositionsTable tbody tr');
+  rows.forEach(function(row) {
+    var code = (row.cells[0].textContent || '').toLowerCase();
+    var name = (row.cells[1].textContent || '').toLowerCase();
+    row.style.display = (code.indexOf(q) !== -1 || name.indexOf(q) !== -1) ? '' : 'none';
+  });
+}
+document.getElementById('coordPositionsModal').addEventListener('click', function(e) {
+  if (e.target === this) closePositionsModal();
+});
+
+// Coordinator Details: clickable rows, selection, detail panel
+(function() {
+  var rows = document.querySelectorAll('.coord-row-clickable');
+  var panelEmpty = document.getElementById('coordDetailEmpty');
+  var panelContent = document.getElementById('coordDetailContent');
+  var detailName = document.getElementById('coordDetailName');
+  var detailBarangay = document.getElementById('coordDetailBarangay');
+  var detailPosition = document.getElementById('coordDetailPosition');
+  var detailContact = document.getElementById('coordDetailContact');
+  var detailDateStart = document.getElementById('coordDetailDateStart');
+  var detailRemarks = document.getElementById('coordDetailRemarks');
+  var detailActive = document.getElementById('coordDetailActive');
+  var editBtn = document.getElementById('coordDetailEditBtn');
+  var deleteForm = document.getElementById('coordDetailDeleteForm');
+
+  function setDetail(row) {
+    if (!panelEmpty || !panelContent || !row) return;
+    panelEmpty.style.display = 'none';
+    panelContent.style.display = 'block';
+    detailName.textContent = row.getAttribute('data-fullname') || '—';
+    detailBarangay.textContent = row.getAttribute('data-barangay') || '—';
+    detailPosition.textContent = row.getAttribute('data-position') || '—';
+    detailContact.textContent = row.getAttribute('data-contact') || '—';
+    detailRemarks.textContent = row.getAttribute('data-remarks') || '—';
+    detailDateStart.textContent = row.getAttribute('data-date-start') || '—';
+    detailActive.textContent = row.getAttribute('data-active') || '—';
+    if (editBtn) editBtn.href = row.getAttribute('data-edit-url') || '#';
+    if (deleteForm) deleteForm.action = row.getAttribute('data-delete-url') || '#';
+  }
+
+  function clearDetail() {
+    if (panelEmpty) panelEmpty.style.display = 'block';
+    if (panelContent) panelContent.style.display = 'none';
+    if (editBtn) editBtn.href = '#';
+    if (deleteForm) deleteForm.action = '#';
+  }
+
+  rows.forEach(function(row) {
+    row.addEventListener('click', function() {
+      rows.forEach(function(r) { r.classList.remove('selected'); });
+      row.classList.add('selected');
+      setDetail(row);
+    });
+  });
+
+  if (rows.length === 0) clearDetail();
+})();
+</script>
 {% endblock %}
 

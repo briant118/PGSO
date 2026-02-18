@@ -134,6 +134,9 @@
 
 /* Filter Styles */
 .filter-section {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   background: #fff;
   border-radius: 12px;
   padding: 1.5rem;
@@ -223,81 +226,92 @@
   font-size: 0.9rem;
 }
 
-/* Barangay Cards */
-.barangay-cards-container {
+/* Barangay Details List (file-explorer style) */
+.barangay-details-container {
   margin-bottom: 2rem;
 }
 
-.barangay-cards-title {
+.barangay-details-title {
   font-size: 1.5rem;
   font-weight: 700;
   color: #1a1d24;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
-.barangay-cards-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.5rem;
-}
-
-.barangay-card {
+.barangay-details-list {
+  width: 100%;
+  border-collapse: collapse;
   background: #fff;
-  border-radius: 12px;
-  padding: 1.5rem;
-  text-decoration: none;
-  color: inherit;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: transform 0.2s, box-shadow 0.2s;
-  display: block;
-  border: 2px solid #e8eaed;
-  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e8eaed;
 }
 
-.barangay-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-  text-decoration: none;
-  color: inherit;
-  border-color: #4299e1;
+.barangay-details-list thead th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #5f6368;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e8eaed;
 }
 
-.barangay-card.selected {
-  border-color: #4299e1;
+.barangay-details-list thead th:first-child { width: 50%; }
+.barangay-details-list thead th:nth-child(2) { width: 25%; }
+.barangay-details-list thead th:nth-child(3) { width: 25%; }
+
+.barangay-details-list tbody tr {
+  border-bottom: 1px solid #e8eaed;
+  transition: background 0.12s ease;
+}
+
+.barangay-details-list tbody tr:hover {
   background: #f0f7ff;
-  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.2);
 }
 
-.barangay-card-icon {
-  font-size: 2.5rem;
-  display: block;
-  margin-bottom: 1rem;
-  color: #4299e1;
+.barangay-details-list tbody tr:last-child {
+  border-bottom: none;
 }
 
-.barangay-card h3 {
-  margin: 0 0 0.5rem;
-  font-size: 1.25rem;
+.barangay-details-list tbody td {
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
   color: #1a1d24;
-  font-weight: 600;
+  vertical-align: middle;
 }
 
-.barangay-card-code {
-  display: inline-block;
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  background: #e8f4f8;
-  color: #0056b3;
-  margin-top: 0.5rem;
+.barangay-details-list tbody a {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.barangay-card p {
-  margin: 0.5rem 0 0;
+.barangay-details-list .details-list-icon {
+  font-size: 1.25rem;
+  color: #4299e1;
+  flex-shrink: 0;
+}
+
+.barangay-details-list .details-list-name {
+  color: #1a1d24;
+  font-weight: 500;
+}
+
+.barangay-details-list .details-list-date {
+  color: #5f6368;
+  font-size: 0.9rem;
+}
+
+.barangay-details-list .details-list-type {
   color: #5f6368;
   font-size: 0.9rem;
 }
@@ -393,10 +407,10 @@
   {% endif %}
 </div>
 
-<!-- Barangay Cards -->
+<!-- Barangay Details List -->
 {% if barangays %}
-<div class="barangay-cards-container">
-  <h2 class="barangay-cards-title">
+<div class="barangay-details-container">
+  <h2 class="barangay-details-title">
     <i class="fas fa-folder-open" style="color: #4299e1;"></i>
     {% if selected_municipality %}
     Barangays in {{ selected_municipality }}
@@ -404,29 +418,29 @@
     All Barangays
     {% endif %}
   </h2>
-  <div class="barangay-cards-grid">
-    {% for barangay in barangays %}
-    <a href="{% url 'reference:position_barangay_officials' position.id barangay.id %}" 
-       class="barangay-card">
-      <span class="barangay-card-icon">
-        <i class="fas fa-folder"></i>
-      </span>
-      <h3>{{ barangay.name }}</h3>
-      {% if barangay.code %}
-      <span class="barangay-card-code">Code: {{ barangay.code }}</span>
-      {% endif %}
-      {% if barangay.municipality %}
-      <p style="font-size: 0.85rem; color: #5f6368; margin-top: 0.5rem;">
-        <i class="fas fa-map-marker-alt"></i> {{ barangay.municipality }}
-      </p>
-      {% endif %}
-      <p style="margin-top: 0.5rem; font-weight: 600; color: #1a1d24;">
-        <i class="fas fa-users"></i> Total: {{ barangay.officials_count }}
-      </p>
-      <p style="margin-top: 0.5rem;">Click to view officials</p>
-    </a>
-    {% endfor %}
-  </div>
+  <table class="barangay-details-list">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Municipality</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for barangay in barangays %}
+      <tr>
+        <td>
+          <a href="{% url 'reference:position_barangay_officials' position.id barangay.id %}">
+            <span class="details-list-icon"><i class="fas fa-folder"></i></span>
+            <span class="details-list-name">{{ barangay.name }}</span>
+          </a>
+        </td>
+        <td class="details-list-date">{% if barangay.municipality %}{{ barangay.municipality.name }}{% else %}—{% endif %}</td>
+        <td class="details-list-type">{{ barangay.officials_count }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endif %}
 

@@ -167,3 +167,42 @@ class BarangayOfficial(models.Model):
     
     def __str__(self):
         return f"{self.resident.get_full_name()} - {self.position.name} ({self.barangay.name})"
+
+
+class CoordinatorPosition(models.Model):
+    """Positions for coordinators only (separate from reference Position management)."""
+    name = models.CharField(max_length=100)
+    code = models.CharField(max_length=20, blank=True)
+    description = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['code', 'name']
+        verbose_name = 'Coordinator Position'
+        verbose_name_plural = 'Coordinator Positions'
+
+    def __str__(self):
+        return self.name
+
+
+class Coordinator(models.Model):
+    """Coordinator record (barangay coordinator with position, contact, etc.)."""
+    barangay = models.ForeignKey(Barangay, on_delete=models.PROTECT, related_name='coordinators')
+    fullname = models.CharField(max_length=200)
+    position = models.ForeignKey(CoordinatorPosition, on_delete=models.PROTECT, related_name='coordinators')
+    contact_no = models.CharField(max_length=50, blank=True)
+    remarks = models.TextField(blank=True)
+    date_start = models.DateField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['barangay', 'fullname']
+        verbose_name = 'Coordinator'
+        verbose_name_plural = 'Coordinators'
+
+    def __str__(self):
+        return f"{self.fullname} – {self.position.name}"

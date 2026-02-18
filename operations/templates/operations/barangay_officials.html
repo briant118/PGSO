@@ -43,12 +43,13 @@
 }
 
 .btn-add {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
+  background: #fff;
+  color: #1a1d24;
+  border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 .btn-add:hover {
-  background: linear-gradient(135deg, #218838 0%, #1aa179 100%);
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .btn-edit {
@@ -397,9 +398,19 @@
   <h1 class="page-title">
     <i class="fas fa-users-cog" style="color: #4299e1;"></i> Barangay Officials
   </h1>
-  <button class="btn btn-add" onclick="openAddModal()">
-    <i class="fas fa-plus"></i> Add Official
-  </button>
+  <div class="page-header-actions">
+    <button type="button" class="btn btn-add" onclick="openAddModal()" title="Add Official">
+      <span class="btn-add-icon-wrap">
+        <i class="fas fa-file-lines"></i>
+        <span class="btn-add-plus"><i class="fas fa-plus"></i></span>
+      </span>
+      <span class="btn-action-label">Add</span>
+    </button>
+    <button type="button" class="btn btn-print" title="Print">
+      <i class="fas fa-print"></i>
+      <span class="btn-action-label">Print</span>
+    </button>
+  </div>
 </div>
 
 <!-- Officials Table -->
@@ -426,11 +437,13 @@
         <td style="color: #5f6368;">{% if official.end_date %}{{ official.end_date|date:"M d, Y" }}{% else %}<span style="color: #28a745; font-weight: 600;">Present</span>{% endif %}</td>
         <td style="text-align: center;">
           <div class="table-actions">
-            <button class="btn btn-edit" onclick="openEditModal({{ official.id }})">
-              <i class="fas fa-edit"></i> Edit
+            <button type="button" class="btn btn-edit" onclick="openEditModal({{ official.id }})" title="Edit">
+              <i class="fas fa-edit"></i>
+              <span class="btn-action-label">Edit</span>
             </button>
-            <button class="btn btn-delete" onclick="openDeleteModal({{ official.id }}, '{{ official.resident.get_full_name|escapejs }}')">
-              <i class="fas fa-trash"></i> Delete
+            <button type="button" class="btn btn-delete" onclick="openDeleteModal({{ official.id }}, '{{ official.resident.get_full_name|escapejs }}')" title="Delete">
+              <i class="fas fa-trash"></i>
+              <span class="btn-action-label">Delete</span>
             </button>
           </div>
         </td>
@@ -444,8 +457,12 @@
   <div class="empty-icon">👥</div>
   <h3>No Barangay Officials Yet</h3>
   <p>Start by adding your first barangay official to the system.</p>
-  <button class="btn btn-add" onclick="openAddModal()">
-    <i class="fas fa-plus"></i> Add Your First Official
+  <button type="button" class="btn btn-add" onclick="openAddModal()" title="Add Your First Official">
+    <span class="btn-add-icon-wrap">
+      <i class="fas fa-file-lines"></i>
+      <span class="btn-add-plus"><i class="fas fa-plus"></i></span>
+    </span>
+    <span class="btn-action-label">Add</span>
   </button>
 </div>
 {% endif %}

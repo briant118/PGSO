@@ -2,8 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db import transaction
+from django.db.models import Q
 from reference.models import Barangay, Position
-from .models import Resident, BarangayOfficial
+from .models import Resident, BarangayOfficial, CoordinatorPosition, Coordinator
 import logging
 
 # Set up logging
@@ -15,7 +16,139 @@ def operations_index(request):
 
 
 def coordinator(request):
-    return render(request, "operations/coordinator.html")
+    """Coordinator page; positions are coordinator-only (CoordinatorPosition), not reference Position."""
+    coordinator_positions = CoordinatorPosition.objects.filter(is_active=True).order_by('code')
+    coordinators = Coordinator.objects.select_related('barangay', 'position').all().order_by('barangay', 'fullname')
+    search_query = request.GET.get('q', '').strip()
+    if search_query:
+        coordinators = coordinators.filter(
+            Q(fullname__icontains=search_query)
+            | Q(barangay__name__icontains=search_query)
+            | Q(position__name__icontains=search_query)
+            | Q(contact_no__icontains=search_query)
+            | Q(remarks__icontains=search_query)
+        )
+    barangays = Barangay.objects.filter(is_active=True).order_by('name')
+    context = {
+        'coordinator_positions': coordinator_positions,
+        'coordinators': coordinators,
+        'barangays': barangays,
+        'search_query': search_query,
+    }
+    return render(request, "operations/coordinator.html", context)
+
+
+@transaction.atomic
+def coordinator_add(request):
+    """Create a new coordinator record."""
+    if request.method == 'POST':
+        fullname = request.POST.get('fullname', '').strip()
+        if not fullname:
+            messages.error(request, 'Fullname is required.')
+            return redirect('operations:coordinator')
+        barangay_id = request.POST.get('barangay')
+        position_id = request.POST.get('position')
+        if not barangay_id or not position_id:
+            messages.error(request, 'Barangay and Position are required.')
+            return redirect('operations:coordinator')
+        barangay = get_object_or_404(Barangay, id=barangay_id)
+        position = get_object_or_404(CoordinatorPosition, id=position_id)
+        date_start_val = request.POST.get('date_start', '').strip()
+        from datetime import datetime
+        date_start = None
+        if date_start_val:
+            try:
+                date_start = datetime.strptime(date_start_val, '%Y-%m-%d').date()
+            except ValueError:
+                pass
+        Coordinator.objects.create(
+            barangay=barangay,
+            fullname=fullname,
+            position=position,
+            contact_no=request.POST.get('contact_no', ''),
+            remarks=request.POST.get('remarks', ''),
+            date_start=date_start,
+            is_active=request.POST.get('is_active') == 'on',
+        )
+        messages.success(request, f'Coordinator "{fullname}" added successfully.')
+    return redirect('operations:coordinator')
+
+
+def coordinator_edit(request, pk):
+    """Edit an existing coordinator."""
+    obj = get_object_or_404(Coordinator, pk=pk)
+    barangays = Barangay.objects.filter(is_active=True).order_by('name')
+    coordinator_positions = CoordinatorPosition.objects.filter(is_active=True).order_by('code')
+    if request.method == 'POST':
+        fullname = request.POST.get('fullname', '').strip()
+        if not fullname:
+            messages.error(request, 'Fullname is required.')
+            return redirect('operations:coordinator_edit', pk=pk)
+        barangay_id = request.POST.get('barangay')
+        position_id = request.POST.get('position')
+        if not barangay_id or not position_id:
+            messages.error(request, 'Barangay and Position are required.')
+            return redirect('operations:coordinator_edit', pk=pk)
+        barangay = get_object_or_404(Barangay, id=barangay_id)
+        position = get_object_or_404(CoordinatorPosition, id=position_id)
+        date_start_val = request.POST.get('date_start', '').strip()
+        from datetime import datetime
+        date_start = None
+        if date_start_val:
+            try:
+                date_start = datetime.strptime(date_start_val, '%Y-%m-%d').date()
+            except ValueError:
+                pass
+        obj.barangay = barangay
+        obj.fullname = fullname
+        obj.position = position
+        obj.contact_no = request.POST.get('contact_no', '')
+        obj.remarks = request.POST.get('remarks', '')
+        obj.date_start = date_start
+        obj.is_active = request.POST.get('is_active') == 'on'
+        obj.save()
+        messages.success(request, f'Coordinator "{fullname}" updated successfully.')
+        return redirect('operations:coordinator')
+    context = {
+        'coordinator': obj,
+        'barangays': barangays,
+        'coordinator_positions': coordinator_positions,
+    }
+    return render(request, "operations/coordinator_edit.html", context)
+
+
+def coordinator_delete(request, pk):
+    """Delete a coordinator."""
+    obj = get_object_or_404(Coordinator, pk=pk)
+    if request.method == 'POST':
+        name = obj.fullname
+        obj.delete()
+        messages.success(request, f'Coordinator "{name}" deleted.')
+        return redirect('operations:coordinator')
+    messages.error(request, 'Invalid request.')
+    return redirect('operations:coordinator')
+
+
+@transaction.atomic
+def coordinator_position_add(request):
+    """Add a coordinator position (for coordinator module only, not reference Position)."""
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        if not name:
+            messages.error(request, 'Position name is required.')
+            return redirect('operations:coordinator')
+        existing_codes = CoordinatorPosition.objects.exclude(code='').values_list('code', flat=True)
+        numeric_codes = [int(c) for c in existing_codes if c.isdigit()]
+        next_code = max(numeric_codes) + 1 if numeric_codes else 1
+        CoordinatorPosition.objects.create(
+            name=name,
+            code=str(next_code),
+            description=description,
+            is_active=True,
+        )
+        messages.success(request, f'Coordinator position "{name}" added with code {next_code}.')
+    return redirect('operations:coordinator')
 
 
 def barangay_officials(request):
