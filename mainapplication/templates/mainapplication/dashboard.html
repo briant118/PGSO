@@ -5,13 +5,25 @@
   <h1 class="dashboard-header">Dashboard</h1>
   <p class="dashboard-subtitle">Welcome. Use the side menu to navigate through the application.</p>
 
-  <!-- Stats Summary Chart -->
-  <section class="dashboard-chart-section dashboard-chart-section-top">
-    <h2 class="dashboard-chart-title"><i class="fas fa-chart-pie"></i> Resident Statistics Overview</h2>
-    <p class="dashboard-chart-subtitle">Summary of all resident categories and counts</p>
-    <div class="dashboard-chart-wrap dashboard-chart-wrap-large">
-      <canvas id="statsChart" height="280"></canvas>
+  <!-- Resident Statistics Overview: old-style dashboard only (no chart) -->
+  <section class="resident-overview-section resident-dashboard-old">
+    <h2 class="resident-dashboard-title">Resident Statistics Overview</h2>
+    <div class="resident-total-container">
+      <label class="resident-total-label">Total Residents</label>
+      <input type="text" class="resident-total-field" value="{{ stats.total_residents_record|default:0 }}" readonly>
     </div>
+    <table class="resident-dashboard-table">
+      <tbody>
+        <tr><td>Total Male</td><td>{{ stats.total_male|default:0 }}</td></tr>
+        <tr><td>Total Female</td><td>{{ stats.total_female|default:0 }}</td></tr>
+        <tr><td>Total Senior</td><td>{{ stats.total_senior_citizen|default:0 }}</td></tr>
+        <tr><td>Total PWD</td><td>{{ stats.total_pwd|default:0 }}</td></tr>
+        <tr><td>Total Solo Parents</td><td>{{ stats.total_solo_parent|default:0 }}</td></tr>
+        <tr><td>Total Voters</td><td>{{ stats.total_voters|default:0 }}</td></tr>
+        <tr><td>Resident Records</td><td>{{ stats.total_residents_record|default:0 }}</td></tr>
+        <tr><td>4Ps</td><td>{{ stats.total_4ps_member|default:0 }}</td></tr>
+      </tbody>
+    </table>
   </section>
 
   <!-- Charts Grid -->
@@ -181,61 +193,5 @@
   });
 })();
 
-// Stats Summary Chart
-(function() {
-  var statsChartData = {{ stats_chart_data_json|safe }};
-  if (!statsChartData || !statsChartData.labels || !statsChartData.labels.length) {
-    var statsChartEl = document.getElementById('statsChart');
-    if (statsChartEl) {
-      statsChartEl.parentElement.innerHTML = '<p class="dashboard-chart-empty">No statistics data available yet.</p>';
-    }
-    return;
-  }
-  var ctx = document.getElementById('statsChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: statsChartData.labels,
-      datasets: [{
-        label: 'Count',
-        data: statsChartData.counts,
-        backgroundColor: statsChartData.colors,
-        borderColor: statsChartData.borderColors,
-        borderWidth: 1
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          display: false
-        },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              return context.parsed.y + ' resident' + (context.parsed.y !== 1 ? 's' : '');
-            }
-          }
-        }
-      },
-      scales: {
-        x: {
-          title: { display: true, text: 'Category' },
-          grid: { display: false },
-          ticks: {
-            maxRotation: 45,
-            minRotation: 45
-          }
-        },
-        y: {
-          beginAtZero: true,
-          title: { display: true, text: 'Count' },
-          ticks: { stepSize: 1 }
-        }
-      }
-    }
-  });
-})();
 </script>
 {% endblock %}

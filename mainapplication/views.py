@@ -75,55 +75,9 @@ def dashboard(request):
     }
     birth_year_data_json = json.dumps(birth_year_data)
 
-    # Stats chart: convert stat cards to chart data
-    stats_chart_data = {
-        'labels': [
-            'Total Male',
-            'Total Female',
-            'Total Senior Citizen',
-            'Total PWD',
-            'Total Solo Parent',
-            'Total Voters',
-            'Total Residents Record',
-            'Total 4P\'s Member'
-        ],
-        'counts': [
-            stats['total_male'],
-            stats['total_female'],
-            stats['total_senior_citizen'],
-            stats['total_pwd'],
-            stats['total_solo_parent'],
-            stats['total_voters'],
-            stats['total_residents_record'],
-            stats['total_4ps_member'],
-        ],
-        'colors': [
-            'rgba(91, 192, 222, 0.8)',  # Light blue (male)
-            'rgba(232, 62, 140, 0.8)',  # Pink/magenta (female)
-            'rgba(40, 167, 69, 0.8)',   # Green (senior)
-            'rgba(255, 193, 7, 0.8)',   # Yellow (PWD)
-            'rgba(108, 117, 125, 0.8)', # Dark grey (solo parent)
-            'rgba(253, 126, 20, 0.8)',  # Orange (voters)
-            'rgba(0, 123, 255, 0.8)',   # Blue (residents)
-            'rgba(111, 66, 193, 0.8)',  # Purple (4Ps)
-        ],
-        'borderColors': [
-            'rgb(91, 192, 222)',
-            'rgb(232, 62, 140)',
-            'rgb(40, 167, 69)',
-            'rgb(255, 193, 7)',
-            'rgb(108, 117, 125)',
-            'rgb(253, 126, 20)',
-            'rgb(0, 123, 255)',
-            'rgb(111, 66, 193)',
-        ]
-    }
-    stats_chart_data_json = json.dumps(stats_chart_data)
-
     return render(request, 'mainapplication/dashboard.html', {
         'stats': stats,
         'chart_data_json': chart_data_json,
         'birth_year_data_json': birth_year_data_json,
-        'stats_chart_data_json': stats_chart_data_json,
     })
 
