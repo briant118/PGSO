@@ -279,13 +279,16 @@ def position_delete(request, pk):
 
 
 def position_get(request, pk):
-    """Get position details as JSON for editing."""
+    """Get position details as JSON for editing and view."""
     position = get_object_or_404(Position, pk=pk, is_active=True)
+    total = BarangayOfficial.objects.filter(position=position, is_active=True).count()
     data = {
         'id': position.id,
         'name': position.name,
         'code': position.code,
         'description': position.description,
+        'created_at': position.created_at.strftime('%B %d, %Y') if position.created_at else '',
+        'total': total,
     }
     return JsonResponse(data)
 

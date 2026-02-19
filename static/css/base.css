@@ -272,3 +272,101 @@ body {
 .dashboard-card.card-voters { background: linear-gradient(135deg, #fd7e14 0%, #e96a0a 100%); }
 .dashboard-card.card-residents { background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); }
 .dashboard-card.card-4ps { background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%); }
+
+/* Dashboard charts grid */
+.dashboard-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Dashboard chart: Alive vs Deceased by year and month */
+.dashboard-chart-section {
+  padding: 1.25rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+.dashboard-chart-title {
+  margin: 0 0 0.35rem;
+  font-size: 1.35rem;
+  color: #1a1d24;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.dashboard-chart-title i {
+  color: #4299e1;
+}
+.dashboard-chart-subtitle {
+  margin: 0 0 1rem;
+  color: #5f6368;
+  font-size: 0.9rem;
+}
+.dashboard-chart-totals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.chart-total-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+.chart-total-alive {
+  background: rgba(40, 167, 69, 0.15);
+  color: #155724;
+}
+.chart-total-dead {
+  background: rgba(220, 53, 69, 0.15);
+  color: #721c24;
+}
+.dashboard-chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  margin: 0 auto;
+}
+.dashboard-chart-wrap-large {
+  height: 280px;
+}
+.dashboard-chart-section-top {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.dashboard-chart-section-full {
+  margin-top: 1.5rem;
+}
+.dashboard-chart-empty {
+  margin: 0;
+  padding: 2rem;
+  text-align: center;
+  color: #5f6368;
+}
+.dashboard-chart-peak {
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 193, 7, 0.15);
+  border-left: 4px solid #ffc107;
+  border-radius: 6px;
+  color: #856404;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.dashboard-chart-peak i {
+  color: #ffc107;
+}

@@ -51,6 +51,7 @@ class Resident(models.Model):
         ('HYPERTENSION', 'Hypertension'),
         ('DIABETIC', 'Diabetic'),
         ('MENTAL HEALTH', 'Mental Health'),
+        ('HEALTHY', 'Healthy'),
     ]
     
     # Economic Status choices

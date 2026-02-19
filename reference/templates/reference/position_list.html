@@ -392,6 +392,39 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* View modal */
+.modal-content.view-modal-size {
+  max-width: 550px;
+}
+.view-header-title {
+  font-size: 0.9rem;
+  color: #5f6368;
+  margin-bottom: 0.5rem;
+}
+.view-position-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1d24;
+  margin-bottom: 1rem;
+}
+.detail-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.detail-table .detail-row {
+  border-bottom: 1px solid #e8eaed;
+}
+.detail-table .detail-label {
+  padding: 0.5rem 0.5rem 0.5rem 0;
+  font-weight: 600;
+  color: #5f6368;
+  width: 35%;
+}
+.detail-table .detail-value {
+  padding: 0.5rem 0;
+  color: #1a1d24;
+}
 </style>
 
 <!-- Messages -->
@@ -418,6 +451,10 @@
         <span class="btn-add-plus"><i class="fas fa-plus"></i></span>
       </span>
       <span class="btn-action-label">Add</span>
+    </button>
+    <button type="button" class="btn btn-view-header" id="positionHeaderViewBtn" title="View Position">
+      <i class="fas fa-eye"></i>
+      <span class="btn-action-label">View</span>
     </button>
     <button type="button" class="btn btn-edit-header" id="positionHeaderEditBtn" title="Edit Position">
       <i class="fas fa-pen"></i>
@@ -483,6 +520,38 @@
   </button>
 </div>
 {% endif %}
+
+<!-- View Modal -->
+<div id="viewPositionModal" class="modal">
+  <div class="modal-content view-modal-size">
+    <div class="modal-header" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);">
+      <h2 class="modal-title"><i class="fas fa-folder-open"></i> Position Details</h2>
+      <button type="button" class="modal-close" onclick="closeViewPositionModal()" aria-label="Close" title="Close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="view-header-title">Position Information</div>
+      <div class="view-position-name" id="view_position_name">-</div>
+      <table class="detail-table">
+        <tr class="detail-row">
+          <td class="detail-label">Code</td>
+          <td class="detail-value" id="view_position_code">-</td>
+        </tr>
+        <tr class="detail-row">
+          <td class="detail-label">Created Date</td>
+          <td class="detail-value" id="view_position_created">-</td>
+        </tr>
+        <tr class="detail-row">
+          <td class="detail-label">Total</td>
+          <td class="detail-value" id="view_position_total">-</td>
+        </tr>
+        <tr class="detail-row">
+          <td class="detail-label">Description</td>
+          <td class="detail-value" id="view_position_description">-</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
 
 <!-- Add Modal -->
 <div id="addModal" class="modal">
@@ -625,6 +694,32 @@ function closeEditModal() {
   document.getElementById('editModal').classList.remove('active');
 }
 
+// View Modal Functions
+function openViewPositionModal(id) {
+  fetch(`/reference/positions/get/${id}/`)
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('view_position_name').textContent = data.name || '-';
+      document.getElementById('view_position_code').textContent = data.code || '-';
+      document.getElementById('view_position_created').textContent = data.created_at || '-';
+      var totalEl = document.getElementById('view_position_total');
+      var total = data.total != null ? data.total : 0;
+      totalEl.textContent = total + ' person' + (total !== 1 ? 's' : '');
+      document.getElementById('view_position_description').textContent = data.description || '-';
+      document.getElementById('viewPositionModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Failed to load position data.');
+    });
+}
+
+function closeViewPositionModal() {
+  document.getElementById('viewPositionModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
 // Delete Modal Functions
 function openDeleteModal(id, name) {
   document.getElementById('deletePositionName').textContent = name;
@@ -664,6 +759,17 @@ document.addEventListener('keydown', function(e) {
     });
   });
 
+  var headerView = document.getElementById('positionHeaderViewBtn');
+  if (headerView) {
+    headerView.addEventListener('click', function() {
+      var selected = document.querySelector('.position-row-clickable.selected');
+      if (!selected) {
+        alert('Please select a position first.');
+        return;
+      }
+      openViewPositionModal(parseInt(selected.getAttribute('data-id'), 10));
+    });
+  }
   var headerEdit = document.getElementById('positionHeaderEditBtn');
   var headerDelete = document.getElementById('positionHeaderDeleteBtn');
   if (headerEdit) {
