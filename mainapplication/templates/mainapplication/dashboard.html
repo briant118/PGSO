@@ -1,64 +1,108 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard – PGSO{% endblock %}
 {% block content %}
-<div class="dashboard">
-  <h1 class="dashboard-header">Dashboard</h1>
-  <p class="dashboard-subtitle">Welcome. Use the side menu to navigate through the application.</p>
+<div class="dashboard dashboard-rms">
+  <header class="dashboard-rms-header">
+    <h1 class="dashboard-rms-title">Dashboard</h1>
+    <p class="dashboard-rms-subtitle">Resident Management System</p>
+  </header>
 
-  <!-- Resident Statistics Overview: old-style dashboard only (no chart) -->
-  <section class="resident-overview-section resident-dashboard-old">
-    <h2 class="resident-dashboard-title">Resident Statistics Overview</h2>
-    <div class="resident-total-container">
-      <label class="resident-total-label">Total Residents</label>
-      <input type="text" class="resident-total-field" value="{{ stats.total_residents_record|default:0 }}" readonly>
+  <!-- Top row: 4 stat cards -->
+  <div class="dashboard-rms-cards">
+    <div class="dashboard-rms-card">
+      <div class="dashboard-rms-card-icon-wrap dashboard-rms-icon-blue">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="dashboard-rms-card-body">
+        <span class="dashboard-rms-card-value">{{ stats.total_residents_record|default:0 }}</span>
+        <span class="dashboard-rms-card-label">Total Residents</span>
+      </div>
     </div>
-    <table class="resident-dashboard-table">
-      <tbody>
-        <tr><td>Total Male</td><td>{{ stats.total_male|default:0 }}</td></tr>
-        <tr><td>Total Female</td><td>{{ stats.total_female|default:0 }}</td></tr>
-        <tr><td>Total Senior</td><td>{{ stats.total_senior_citizen|default:0 }}</td></tr>
-        <tr><td>Total PWD</td><td>{{ stats.total_pwd|default:0 }}</td></tr>
-        <tr><td>Total Solo Parents</td><td>{{ stats.total_solo_parent|default:0 }}</td></tr>
-        <tr><td>Total Voters</td><td>{{ stats.total_voters|default:0 }}</td></tr>
-        <tr><td>Resident Records</td><td>{{ stats.total_residents_record|default:0 }}</td></tr>
-        <tr><td>4Ps</td><td>{{ stats.total_4ps_member|default:0 }}</td></tr>
-      </tbody>
-    </table>
+    <div class="dashboard-rms-card">
+      <div class="dashboard-rms-card-icon-wrap dashboard-rms-icon-green">
+        <i class="fas fa-mars"></i>
+      </div>
+      <div class="dashboard-rms-card-body">
+        <span class="dashboard-rms-card-value">{{ stats.total_male|default:0 }}</span>
+        <span class="dashboard-rms-card-label">Male</span>
+      </div>
+    </div>
+    <div class="dashboard-rms-card">
+      <div class="dashboard-rms-card-icon-wrap dashboard-rms-icon-purple">
+        <i class="fas fa-venus"></i>
+      </div>
+      <div class="dashboard-rms-card-body">
+        <span class="dashboard-rms-card-value">{{ stats.total_female|default:0 }}</span>
+        <span class="dashboard-rms-card-label">Female</span>
+      </div>
+    </div>
+    <div class="dashboard-rms-card">
+      <div class="dashboard-rms-card-icon-wrap dashboard-rms-icon-orange">
+        <i class="fas fa-chart-line"></i>
+      </div>
+      <div class="dashboard-rms-card-body">
+        <span class="dashboard-rms-card-value">{{ stats.total_voters|default:0 }}</span>
+        <span class="dashboard-rms-card-label">Voters</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Statistics -->
+  <section class="dashboard-rms-additional">
+    <h2 class="dashboard-rms-additional-title">Additional Statistics</h2>
+    <div class="dashboard-rms-additional-grid">
+      <div class="dashboard-rms-additional-item">
+        <span class="dashboard-rms-additional-label">Senior Citizens</span>
+        <span class="dashboard-rms-additional-value">{{ stats.total_senior_citizen|default:0 }}</span>
+      </div>
+      <div class="dashboard-rms-additional-item">
+        <span class="dashboard-rms-additional-label">PWD</span>
+        <span class="dashboard-rms-additional-value">{{ stats.total_pwd|default:0 }}</span>
+      </div>
+      <div class="dashboard-rms-additional-item">
+        <span class="dashboard-rms-additional-label">Sole Parents</span>
+        <span class="dashboard-rms-additional-value">{{ stats.total_solo_parent|default:0 }}</span>
+      </div>
+      <div class="dashboard-rms-additional-item">
+        <span class="dashboard-rms-additional-label">4Ps</span>
+        <span class="dashboard-rms-additional-value">{{ stats.total_4ps_member|default:0 }}</span>
+      </div>
+    </div>
   </section>
 
-  <!-- Charts Grid -->
-  <div class="dashboard-charts-grid">
-    <!-- Alive vs Deceased by Year and Month -->
-    <section class="dashboard-chart-section">
-      <h2 class="dashboard-chart-title"><i class="fas fa-chart-bar"></i> Alive vs Deceased by Year and Month</h2>
-      <p class="dashboard-chart-subtitle">Resident count by registration month (current status: Alive / Deceased)</p>
-      <div class="dashboard-chart-totals">
-        <span class="chart-total-badge chart-total-alive"><i class="fas fa-heart"></i> Total Alive: <strong>{{ stats.total_alive|default:0 }}</strong></span>
-        <span class="chart-total-badge chart-total-dead"><i class="fas fa-cross"></i> Total Deceased: <strong>{{ stats.total_dead|default:0 }}</strong></span>
+  <!-- Charts row -->
+  <div class="dashboard-rms-charts">
+    <section class="dashboard-rms-chart-card">
+      <h2 class="dashboard-rms-chart-title">Alive & Deceased</h2>
+      <p class="dashboard-rms-chart-subtitle">By registration month</p>
+      <div class="dashboard-rms-chart-legend">
+        <span class="dashboard-rms-legend-item dashboard-rms-legend-alive"><i class="fas fa-circle"></i> Alive: <strong>{{ stats.total_alive|default:0 }}</strong></span>
+        <span class="dashboard-rms-legend-item dashboard-rms-legend-dead"><i class="fas fa-circle"></i> Deceased: <strong>{{ stats.total_dead|default:0 }}</strong></span>
       </div>
-      <div class="dashboard-chart-wrap">
+      <div class="dashboard-rms-chart-wrap">
         <canvas id="aliveDeadChart" height="220"></canvas>
       </div>
     </section>
-
-    <!-- Birth Year Chart -->
-    <section class="dashboard-chart-section">
-      <h2 class="dashboard-chart-title"><i class="fas fa-birthday-cake"></i> Residents Born by Year</h2>
-      <p class="dashboard-chart-subtitle">Track which birth year has the most residents</p>
-      <div id="birthYearPeak" class="dashboard-chart-peak" style="display: none;"></div>
-      <div class="dashboard-chart-wrap">
+    <section class="dashboard-rms-chart-card">
+      <h2 class="dashboard-rms-chart-title">Residents by Birth Year</h2>
+      <p class="dashboard-rms-chart-subtitle">Distribution by birth year</p>
+      <div id="birthYearPeak" class="dashboard-rms-chart-peak" style="display: none;"></div>
+      <div class="dashboard-rms-chart-wrap">
         <canvas id="birthYearChart" height="220"></canvas>
       </div>
     </section>
   </div>
 </div>
 
+<!-- Custom chart tooltip (used by both charts) -->
+<div id="chartTooltip" class="chart-tooltip-custom" style="display: none;"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 (function() {
   var chartData = {{ chart_data_json|safe }};
   if (!chartData || !chartData.labels || !chartData.labels.length) {
-    document.getElementById('aliveDeadChart').parentElement.innerHTML = '<p class="dashboard-chart-empty">No resident data by month yet.</p>';
+    document.getElementById('aliveDeadChart').parentElement.innerHTML = '<p class="dashboard-rms-chart-empty">No resident data by month yet.</p>';
     return;
   }
   var ctx = document.getElementById('aliveDeadChart').getContext('2d');
@@ -87,23 +131,37 @@
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          position: 'top'
-        },
+        legend: { display: false },
         tooltip: {
-          callbacks: {
-            afterBody: function(tooltipItems) {
-              var idx = tooltipItems[0].dataIndex;
-              var a = chartData.alive[idx] || 0;
-              var d = chartData.dead[idx] || 0;
-              return 'Total: ' + (a + d);
+          enabled: false,
+          external: function(context) {
+            var el = document.getElementById('chartTooltip');
+            if (!context.tooltip || context.tooltip.opacity === 0) {
+              el.style.display = 'none';
+              return;
             }
+            var tooltip = context.tooltip;
+            var idx = tooltip.dataPoints && tooltip.dataPoints[0] ? tooltip.dataPoints[0].dataIndex : 0;
+            var label = (chartData.labels && chartData.labels[idx]) ? chartData.labels[idx] : '';
+            var aliveVal = chartData.alive[idx] != null ? chartData.alive[idx] : 0;
+            var deadVal = chartData.dead[idx] != null ? chartData.dead[idx] : 0;
+            el.innerHTML =
+              '<div class="chart-tooltip-title">' + (label || '') + '</div>' +
+              '<div class="chart-tooltip-line chart-tooltip-alive">Alive : ' + aliveVal + '</div>' +
+              '<div class="chart-tooltip-line chart-tooltip-dead">Deceased : ' + deadVal + '</div>';
+            el.style.display = 'block';
+            el.style.opacity = '1';
+            var canvas = context.chart.canvas.getBoundingClientRect();
+            var left = canvas.left + tooltip.caretX + 10;
+            var top = canvas.top + tooltip.caretY - el.offsetHeight / 2;
+            el.style.left = left + 'px';
+            el.style.top = top + 'px';
           }
         }
       },
       scales: {
         x: {
-          title: { display: true, text: 'Year – Month' },
+          title: { display: false },
           grid: { display: false }
         },
         y: {
@@ -116,46 +174,30 @@
   });
 })();
 
-// Birth Year Chart
 (function() {
   var birthYearData = {{ birth_year_data_json|safe }};
   if (!birthYearData || !birthYearData.labels || !birthYearData.labels.length) {
-    document.getElementById('birthYearChart').parentElement.innerHTML = '<p class="dashboard-chart-empty">No birth year data available yet.</p>';
+    document.getElementById('birthYearChart').parentElement.innerHTML = '<p class="dashboard-rms-chart-empty">No birth year data available yet.</p>';
     return;
   }
   var ctx = document.getElementById('birthYearChart').getContext('2d');
   var maxCount = Math.max.apply(null, birthYearData.counts);
   var maxYearIdx = birthYearData.counts.indexOf(maxCount);
   var maxYear = birthYearData.labels[maxYearIdx];
-  
-  // Show peak year info
   var peakEl = document.getElementById('birthYearPeak');
   if (peakEl) {
-    peakEl.innerHTML = '<i class="fas fa-star"></i> Peak Year: <strong>' + maxYear + '</strong> with <strong>' + maxCount + '</strong> residents';
-    peakEl.style.display = 'block';
+    peakEl.innerHTML = '<i class="fas fa-chart-line"></i> Peak Year: ' + maxYear + ' with ' + maxCount + ' residents';
+    peakEl.style.display = 'flex';
   }
-  
   new Chart(ctx, {
     type: 'bar',
     data: {
       labels: birthYearData.labels,
       datasets: [{
-        label: 'Residents Born',
+        label: 'Residents',
         data: birthYearData.counts,
-        backgroundColor: function(context) {
-          var idx = context.dataIndex;
-          if (birthYearData.labels[idx] === maxYear) {
-            return 'rgba(255, 193, 7, 0.9)'; // Highlight max year in gold/yellow
-          }
-          return 'rgba(66, 153, 225, 0.6)';
-        },
-        borderColor: function(context) {
-          var idx = context.dataIndex;
-          if (birthYearData.labels[idx] === maxYear) {
-            return 'rgb(255, 193, 7)';
-          }
-          return 'rgb(66, 153, 225)';
-        },
+        backgroundColor: 'rgba(66, 153, 225, 0.8)',
+        borderColor: 'rgb(66, 153, 225)',
         borderWidth: 1
       }]
     },
@@ -163,35 +205,45 @@
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: false
-        },
+        legend: { display: false },
         tooltip: {
-          callbacks: {
-            afterLabel: function(context) {
-              var year = birthYearData.labels[context.dataIndex];
-              if (year === maxYear) {
-                return 'Peak year';
-              }
-              return '';
+          enabled: false,
+          external: function(context) {
+            var el = document.getElementById('chartTooltip');
+            if (!context.tooltip || context.tooltip.opacity === 0) {
+              el.style.display = 'none';
+              return;
             }
+            var tooltip = context.tooltip;
+            var idx = tooltip.dataPoints && tooltip.dataPoints[0] ? tooltip.dataPoints[0].dataIndex : 0;
+            var year = birthYearData.labels[idx] != null ? birthYearData.labels[idx] : '';
+            var count = birthYearData.counts[idx] != null ? birthYearData.counts[idx] : 0;
+            el.innerHTML =
+              '<div class="chart-tooltip-title">' + year + '</div>' +
+              '<div class="chart-tooltip-line chart-tooltip-residents">residents : ' + count + '</div>';
+            el.style.display = 'block';
+            el.style.opacity = '1';
+            var canvas = context.chart.canvas.getBoundingClientRect();
+            var left = canvas.left + tooltip.caretX + 10;
+            var top = canvas.top + tooltip.caretY - el.offsetHeight / 2;
+            el.style.left = left + 'px';
+            el.style.top = top + 'px';
           }
         }
       },
       scales: {
         x: {
-          title: { display: true, text: 'Birth Year' },
+          title: { display: false },
           grid: { display: false }
         },
         y: {
           beginAtZero: true,
-          title: { display: true, text: 'Number of Residents' },
+          title: { display: true, text: 'Count' },
           ticks: { stepSize: 1 }
         }
       }
     }
   });
 })();
-
 </script>
 {% endblock %}
