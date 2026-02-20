@@ -91,6 +91,13 @@
         <canvas id="birthYearChart" height="220"></canvas>
       </div>
     </section>
+    <section class="dashboard-rms-chart-card dashboard-rms-chart-card-full">
+      <h2 class="dashboard-rms-chart-title">Total Barangays &amp; Municipalities</h2>
+      <p class="dashboard-rms-chart-subtitle">Active barangays and municipalities in the system</p>
+      <div class="dashboard-rms-chart-wrap dashboard-rms-chart-wrap-bar-muni">
+        <canvas id="barMuniChart" height="220"></canvas>
+      </div>
+    </section>
   </div>
 </div>
 
@@ -226,6 +233,75 @@
             var canvas = context.chart.canvas.getBoundingClientRect();
             var left = canvas.left + tooltip.caretX + 10;
             var top = canvas.top + tooltip.caretY - el.offsetHeight / 2;
+            el.style.left = left + 'px';
+            el.style.top = top + 'px';
+          }
+        }
+      },
+      scales: {
+        x: {
+          title: { display: false },
+          grid: { display: false }
+        },
+        y: {
+          beginAtZero: true,
+          title: { display: true, text: 'Count' },
+          ticks: { stepSize: 1 }
+        }
+      }
+    }
+  });
+})();
+
+(function() {
+  var barMuniData = {{ bar_muni_chart_json|safe }};
+  var canvas = document.getElementById('barMuniChart');
+  if (!canvas || !barMuniData || !barMuniData.labels || !barMuniData.labels.length) {
+    if (canvas && canvas.parentElement) {
+      canvas.parentElement.innerHTML = '<p class="dashboard-rms-chart-empty">No barangay or municipality data yet.</p>';
+    }
+    return;
+  }
+  var ctx = canvas.getContext('2d');
+  var colors = ['rgba(66, 153, 225, 0.8)', 'rgba(124, 58, 237, 0.8)'];
+  var borders = ['rgb(66, 153, 225)', 'rgb(124, 58, 237)'];
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: barMuniData.labels,
+      datasets: [{
+        label: 'Count',
+        data: barMuniData.counts,
+        backgroundColor: colors,
+        borderColor: borders,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: false,
+          external: function(context) {
+            var el = document.getElementById('chartTooltip');
+            if (!context.tooltip || context.tooltip.opacity === 0) {
+              el.style.display = 'none';
+              return;
+            }
+            var tooltip = context.tooltip;
+            var idx = tooltip.dataPoints && tooltip.dataPoints[0] ? tooltip.dataPoints[0].dataIndex : 0;
+            var label = barMuniData.labels[idx] != null ? barMuniData.labels[idx] : '';
+            var count = barMuniData.counts[idx] != null ? barMuniData.counts[idx] : 0;
+            el.innerHTML =
+              '<div class="chart-tooltip-title">' + label + '</div>' +
+              '<div class="chart-tooltip-line chart-tooltip-residents">total : ' + count + '</div>';
+            el.style.display = 'block';
+            el.style.opacity = '1';
+            var rect = context.chart.canvas.getBoundingClientRect();
+            var left = rect.left + tooltip.caretX + 10;
+            var top = rect.top + tooltip.caretY - (el.offsetHeight / 2);
             el.style.left = left + 'px';
             el.style.top = top + 'px';
           }

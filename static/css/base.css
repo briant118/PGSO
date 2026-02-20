@@ -573,6 +573,13 @@ body {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   overflow: hidden;
 }
+.dashboard-rms-chart-card-full {
+  grid-column: 1 / -1;
+}
+.dashboard-rms-chart-wrap-bar-muni {
+  max-width: 400px;
+  margin-left: 0;
+}
 .dashboard-rms-chart-title {
   margin: 0 0 0.25rem;
   font-size: 1.1rem;

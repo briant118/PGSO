@@ -4,6 +4,7 @@ from django.views.decorators.cache import never_cache
 from django.db.models import Q, Count
 from django.db.models.functions import TruncMonth, ExtractYear
 from operations.models import Resident
+from reference.models import Barangay, Municipality
 from datetime import date
 
 
@@ -75,9 +76,19 @@ def dashboard(request):
     }
     birth_year_data_json = json.dumps(birth_year_data)
 
+    # Barangays and municipalities totals for chart
+    total_barangays = Barangay.objects.filter(is_active=True).count()
+    total_municipalities = Municipality.objects.filter(is_active=True).count()
+    bar_muni_chart_data = {
+        'labels': ['Barangays', 'Municipalities'],
+        'counts': [total_barangays, total_municipalities],
+    }
+    bar_muni_chart_json = json.dumps(bar_muni_chart_data)
+
     return render(request, 'mainapplication/dashboard.html', {
         'stats': stats,
         'chart_data_json': chart_data_json,
         'birth_year_data_json': birth_year_data_json,
+        'bar_muni_chart_json': bar_muni_chart_json,
     })
 
