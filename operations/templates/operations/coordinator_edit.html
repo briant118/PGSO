@@ -31,8 +31,8 @@
       </select>
     </div>
     <div class="form-group">
-      <label for="id_contact_no">Contact No.</label>
-      <input type="text" id="id_contact_no" name="contact_no" value="{{ coordinator.contact_no|default:'' }}">
+      <label for="id_contact_no">Contact No. <span style="color:#dc3545;">*</span></label>
+      <input type="text" id="id_contact_no" name="contact_no" value="{{ coordinator.contact_no|default:'' }}" required>
     </div>
   </div>
   <div class="form-group">

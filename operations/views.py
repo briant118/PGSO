@@ -41,6 +41,18 @@ def coordinator(request):
     return render(request, "operations/coordinator.html", context)
 
 
+def _fullname_matches_resident_in_barangay(barangay, fullname):
+    """Return True if fullname matches an active resident in the barangay (case-insensitive)."""
+    if not fullname or not barangay:
+        return False
+    residents = Resident.objects.filter(barangay=barangay, status=Resident.STATUS_ALIVE)
+    fullname_clean = fullname.strip().lower()
+    for r in residents:
+        if r.get_full_name().strip().lower() == fullname_clean:
+            return True
+    return False
+
+
 @transaction.atomic
 def coordinator_add(request):
     """Create a new coordinator record."""
@@ -55,7 +67,17 @@ def coordinator_add(request):
             messages.error(request, 'Barangay and Position are required.')
             return redirect('operations:coordinator')
         barangay = get_object_or_404(Barangay, id=barangay_id)
+        if not _fullname_matches_resident_in_barangay(barangay, fullname):
+            messages.error(
+                request,
+                'The fullname must be a resident of the selected barangay. Please select a name from the list or enter a valid resident name.',
+            )
+            return redirect('operations:coordinator')
         position = get_object_or_404(CoordinatorPosition, id=position_id)
+        contact_no = request.POST.get('contact_no', '').strip()
+        if not contact_no:
+            messages.error(request, 'Contact number is required.')
+            return redirect('operations:coordinator')
         date_start_val = request.POST.get('date_start', '').strip()
         from datetime import datetime
         date_start = None
@@ -68,7 +90,7 @@ def coordinator_add(request):
             barangay=barangay,
             fullname=fullname,
             position=position,
-            contact_no=request.POST.get('contact_no', ''),
+            contact_no=contact_no,
             remarks=request.POST.get('remarks', ''),
             date_start=date_start,
             is_active=request.POST.get('is_active') == 'on',
@@ -95,7 +117,17 @@ def coordinator_edit(request, pk):
             messages.error(request, 'Barangay and Position are required.')
             return redirect('operations:coordinator_edit', pk=pk)
         barangay = get_object_or_404(Barangay, id=barangay_id)
+        if not _fullname_matches_resident_in_barangay(barangay, fullname):
+            messages.error(
+                request,
+                'The fullname must be a resident of the selected barangay. Please select a name from the list or enter a valid resident name.',
+            )
+            return redirect('operations:coordinator' + '?edit=' + str(pk))
         position = get_object_or_404(CoordinatorPosition, id=position_id)
+        contact_no = request.POST.get('contact_no', '').strip()
+        if not contact_no:
+            messages.error(request, 'Contact number is required.')
+            return redirect('operations:coordinator' + '?edit=' + str(pk))
         date_start_val = request.POST.get('date_start', '').strip()
         from datetime import datetime
         date_start = None
@@ -107,7 +139,7 @@ def coordinator_edit(request, pk):
         obj.barangay = barangay
         obj.fullname = fullname
         obj.position = position
-        obj.contact_no = request.POST.get('contact_no', '')
+        obj.contact_no = contact_no
         obj.remarks = request.POST.get('remarks', '')
         obj.date_start = date_start
         obj.is_active = request.POST.get('is_active') == 'on'
@@ -115,6 +147,41 @@ def coordinator_edit(request, pk):
         messages.success(request, f'Coordinator "{fullname}" updated successfully.')
         return redirect('operations:coordinator')
     return redirect('operations:coordinator')
+
+
+def get_residents_by_barangay(request):
+    """API endpoint to get residents by barangay with optional search."""
+    barangay_id = request.GET.get('barangay_id')
+    search = request.GET.get('search', '').strip()
+    
+    if not barangay_id:
+        return JsonResponse({'residents': []}, safe=False)
+    
+    try:
+        barangay = Barangay.objects.get(id=barangay_id, is_active=True)
+        residents = Resident.objects.filter(barangay=barangay, status=Resident.STATUS_ALIVE)
+        
+        if search:
+            residents = residents.filter(
+                Q(firstname__icontains=search) |
+                Q(lastname__icontains=search) |
+                Q(middlename__icontains=search)
+            )
+        
+        residents = residents.order_by('lastname', 'firstname')[:50]  # Limit to 50 results
+        
+        residents_data = [{
+            'id': r.id,
+            'fullname': r.get_full_name(),
+            'firstname': r.firstname,
+            'lastname': r.lastname,
+            'middlename': r.middlename,
+            'suffix': r.suffix,
+        } for r in residents]
+        
+        return JsonResponse({'residents': residents_data}, safe=False)
+    except Barangay.DoesNotExist:
+        return JsonResponse({'residents': []}, safe=False)
 
 
 def coordinator_delete(request, pk):

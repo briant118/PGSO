@@ -24,5 +24,6 @@ urlpatterns = [
     path("resident/edit/<int:pk>/", views.resident_edit, name="resident_edit"),
     path("resident/delete/<int:pk>/", views.resident_delete, name="resident_delete"),
     path("voters-registration/", views.voters_registration, name="voters_registration"),
+    path("api/residents-by-barangay/", views.get_residents_by_barangay, name="get_residents_by_barangay"),
 ]
 

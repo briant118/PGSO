@@ -170,6 +170,106 @@
   font-size: 0.95rem; visibility: visible; opacity: 1;
 }
 
+/* Residents List Container */
+.residents-list-container {
+  margin-top: 0.75rem;
+  display: none;
+}
+.residents-list-container.active {
+  display: block;
+}
+.residents-list-search {
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+.residents-list-search input {
+  width: 100%;
+  padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.residents-list-search input:focus {
+  outline: none;
+  border-color: #28a745;
+  box-shadow: 0 0 0 2px rgba(40,167,69,0.2);
+}
+.residents-list-search .fa-search {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+.residents-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fff;
+}
+.residents-list-item {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 0.9rem;
+  color: #1a1d24;
+}
+.residents-list-item:hover {
+  background: #e8f4fc;
+}
+.residents-list-item:last-child {
+  border-bottom: none;
+}
+.residents-list-empty {
+  padding: 1.5rem;
+  text-align: center;
+  color: #5f6368;
+  font-size: 0.9rem;
+}
+.residents-list-loading {
+  padding: 1rem;
+  text-align: center;
+  color: #5f6368;
+  font-size: 0.9rem;
+}
+
+/* Fullname select-only (readonly) */
+.fullname-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.fullname-select-wrap input[readonly] {
+  flex: 1;
+  background: #f5f5f5;
+  cursor: default;
+  color: #1a1d24;
+}
+.fullname-clear-btn {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #5f6368;
+  white-space: nowrap;
+}
+.fullname-clear-btn:hover {
+  background: #e8e8e8;
+  color: #1a1d24;
+}
+.form-hint {
+  display: block;
+  margin-top: 0.35rem;
+  color: #5f6368;
+  font-size: 0.8rem;
+}
+
 /* Coordinator - Positions Modal (like image) */
 .coord-positions-modal {
   display: none;
@@ -556,10 +656,23 @@
                 <option value="{{ b.id }}">{{ b.name }}</option>
                 {% endfor %}
               </select>
+              <div id="residentsListContainer" class="residents-list-container">
+                <div class="residents-list-search">
+                  <i class="fas fa-search"></i>
+                  <input type="text" id="residentsListSearch" placeholder="Search by name...">
+                </div>
+                <div id="residentsList" class="residents-list">
+                  <div class="residents-list-loading">Loading residents...</div>
+                </div>
+              </div>
             </div>
             <div class="form-group">
               <label for="id_fullname">Fullname <span style="color:#dc3545;">*</span></label>
-              <input type="text" id="id_fullname" name="fullname" required placeholder="Enter full name">
+              <div class="fullname-select-wrap">
+                <input type="text" id="id_fullname" name="fullname" required readonly placeholder="Select from list above">
+                <button type="button" class="fullname-clear-btn" id="fullnameClearBtn" title="Clear and select another">Clear</button>
+              </div>
+              <small class="form-hint">Select a barangay, then choose a resident from the list. Name cannot be typed.</small>
             </div>
             <div class="form-group">
               <label for="id_position">Position <span style="color:#dc3545;">*</span></label>
@@ -571,8 +684,8 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="id_contact_no">Contact No.</label>
-              <input type="text" id="id_contact_no" name="contact_no" placeholder="Contact number">
+              <label for="id_contact_no">Contact No. <span style="color:#dc3545;">*</span></label>
+              <input type="text" id="id_contact_no" name="contact_no" required placeholder="Contact number">
             </div>
             <div class="form-group">
               <label for="id_remarks">Remarks</label>
@@ -629,10 +742,23 @@
                 <option value="{{ b.id }}">{{ b.name }}</option>
                 {% endfor %}
               </select>
+              <div id="residentsListContainerEdit" class="residents-list-container">
+                <div class="residents-list-search">
+                  <i class="fas fa-search"></i>
+                  <input type="text" id="residentsListSearchEdit" placeholder="Search by name...">
+                </div>
+                <div id="residentsListEdit" class="residents-list">
+                  <div class="residents-list-loading">Loading residents...</div>
+                </div>
+              </div>
             </div>
             <div class="form-group">
               <label for="id_edit_fullname">Fullname <span style="color:#dc3545;">*</span></label>
-              <input type="text" id="id_edit_fullname" name="fullname" required placeholder="Enter full name">
+              <div class="fullname-select-wrap">
+                <input type="text" id="id_edit_fullname" name="fullname" required readonly placeholder="Select from list above">
+                <button type="button" class="fullname-clear-btn" id="fullnameClearBtnEdit" title="Clear and select another">Clear</button>
+              </div>
+              <small class="form-hint">Select a barangay, then choose a resident from the list. Name cannot be typed.</small>
             </div>
             <div class="form-group">
               <label for="id_edit_position">Position <span style="color:#dc3545;">*</span></label>
@@ -644,8 +770,8 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="id_edit_contact_no">Contact No.</label>
-              <input type="text" id="id_edit_contact_no" name="contact_no" placeholder="Contact number">
+              <label for="id_edit_contact_no">Contact No. <span style="color:#dc3545;">*</span></label>
+              <input type="text" id="id_edit_contact_no" name="contact_no" required placeholder="Contact number">
             </div>
             <div class="form-group">
               <label for="id_edit_remarks">Remarks</label>
@@ -1053,6 +1179,194 @@ document.getElementById('coordinatorDeleteModal').addEventListener('click', func
       window.history.replaceState({}, '', u || window.location.pathname);
     }
   }
+})();
+
+// Residents List: Show residents when barangay is selected
+(function() {
+  var barangaySelect = document.getElementById('id_barangay');
+  var fullnameInput = document.getElementById('id_fullname');
+  var residentsContainer = document.getElementById('residentsListContainer');
+  var residentsList = document.getElementById('residentsList');
+  var residentsSearch = document.getElementById('residentsListSearch');
+  var currentResidents = [];
+  var searchTimeout = null;
+
+  if (!barangaySelect || !fullnameInput || !residentsContainer || !residentsList) return;
+
+  function loadResidents(barangayId, searchTerm) {
+    if (!barangayId) {
+      residentsContainer.classList.remove('active');
+      return;
+    }
+
+    residentsList.innerHTML = '<div class="residents-list-loading">Loading residents...</div>';
+    residentsContainer.classList.add('active');
+
+    var url = '{% url "operations:get_residents_by_barangay" %}?barangay_id=' + encodeURIComponent(barangayId);
+    if (searchTerm) {
+      url += '&search=' + encodeURIComponent(searchTerm);
+    }
+
+    fetch(url)
+      .then(function(response) { return response.json(); })
+      .then(function(data) {
+        currentResidents = data.residents || [];
+        displayResidents(currentResidents);
+      })
+      .catch(function(error) {
+        console.error('Error loading residents:', error);
+        residentsList.innerHTML = '<div class="residents-list-empty">Error loading residents. Please try again.</div>';
+      });
+  }
+
+  function displayResidents(residents) {
+    if (!residents || residents.length === 0) {
+      residentsList.innerHTML = '<div class="residents-list-empty">No residents found.</div>';
+      return;
+    }
+
+    residentsList.innerHTML = '';
+    residents.forEach(function(resident) {
+      var item = document.createElement('div');
+      item.className = 'residents-list-item';
+      item.textContent = resident.fullname;
+      item.addEventListener('click', function() {
+        fullnameInput.value = resident.fullname;
+        residentsContainer.classList.remove('active');
+        fullnameInput.focus();
+      });
+      residentsList.appendChild(item);
+    });
+  }
+
+  barangaySelect.addEventListener('change', function() {
+    var barangayId = this.value;
+    residentsSearch.value = '';
+    fullnameInput.value = '';
+    loadResidents(barangayId, '');
+  });
+
+  var clearBtn = document.getElementById('fullnameClearBtn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+      fullnameInput.value = '';
+      residentsContainer.classList.add('active');
+      var barangayId = barangaySelect.value;
+      if (barangayId) {
+        loadResidents(barangayId, residentsSearch.value.trim());
+      }
+      residentsSearch.focus();
+    });
+  }
+
+  residentsSearch.addEventListener('input', function() {
+    var searchTerm = this.value.trim();
+    var barangayId = barangaySelect.value;
+
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() {
+      loadResidents(barangayId, searchTerm);
+    }, 300);
+  });
+
+  // Close residents list when clicking outside
+  document.addEventListener('click', function(e) {
+    if (!residentsContainer.contains(e.target) && e.target !== barangaySelect) {
+      // Keep it open if user is interacting with the form
+      if (!fullnameInput.contains(e.target)) {
+        // residentsContainer.classList.remove('active');
+      }
+    }
+  });
+})();
+
+// Residents List for Edit Modal
+(function() {
+  var barangaySelectEdit = document.getElementById('id_edit_barangay');
+  var fullnameInputEdit = document.getElementById('id_edit_fullname');
+  var residentsContainerEdit = document.getElementById('residentsListContainerEdit');
+  var residentsListEdit = document.getElementById('residentsListEdit');
+  var residentsSearchEdit = document.getElementById('residentsListSearchEdit');
+  var currentResidentsEdit = [];
+  var searchTimeoutEdit = null;
+
+  if (!barangaySelectEdit || !fullnameInputEdit || !residentsContainerEdit || !residentsListEdit) return;
+
+  function loadResidentsEdit(barangayId, searchTerm) {
+    if (!barangayId) {
+      residentsContainerEdit.classList.remove('active');
+      return;
+    }
+
+    residentsListEdit.innerHTML = '<div class="residents-list-loading">Loading residents...</div>';
+    residentsContainerEdit.classList.add('active');
+
+    var url = '{% url "operations:get_residents_by_barangay" %}?barangay_id=' + encodeURIComponent(barangayId);
+    if (searchTerm) {
+      url += '&search=' + encodeURIComponent(searchTerm);
+    }
+
+    fetch(url)
+      .then(function(response) { return response.json(); })
+      .then(function(data) {
+        currentResidentsEdit = data.residents || [];
+        displayResidentsEdit(currentResidentsEdit);
+      })
+      .catch(function(error) {
+        console.error('Error loading residents:', error);
+        residentsListEdit.innerHTML = '<div class="residents-list-empty">Error loading residents. Please try again.</div>';
+      });
+  }
+
+  function displayResidentsEdit(residents) {
+    if (!residents || residents.length === 0) {
+      residentsListEdit.innerHTML = '<div class="residents-list-empty">No residents found.</div>';
+      return;
+    }
+
+    residentsListEdit.innerHTML = '';
+    residents.forEach(function(resident) {
+      var item = document.createElement('div');
+      item.className = 'residents-list-item';
+      item.textContent = resident.fullname;
+      item.addEventListener('click', function() {
+        fullnameInputEdit.value = resident.fullname;
+        residentsContainerEdit.classList.remove('active');
+        fullnameInputEdit.focus();
+      });
+      residentsListEdit.appendChild(item);
+    });
+  }
+
+  barangaySelectEdit.addEventListener('change', function() {
+    var barangayId = this.value;
+    residentsSearchEdit.value = '';
+    fullnameInputEdit.value = '';
+    loadResidentsEdit(barangayId, '');
+  });
+
+  var clearBtnEdit = document.getElementById('fullnameClearBtnEdit');
+  if (clearBtnEdit) {
+    clearBtnEdit.addEventListener('click', function() {
+      fullnameInputEdit.value = '';
+      residentsContainerEdit.classList.add('active');
+      var barangayId = barangaySelectEdit.value;
+      if (barangayId) {
+        loadResidentsEdit(barangayId, residentsSearchEdit.value.trim());
+      }
+      residentsSearchEdit.focus();
+    });
+  }
+
+  residentsSearchEdit.addEventListener('input', function() {
+    var searchTerm = this.value.trim();
+    var barangayId = barangaySelectEdit.value;
+
+    clearTimeout(searchTimeoutEdit);
+    searchTimeoutEdit = setTimeout(function() {
+      loadResidentsEdit(barangayId, searchTerm);
+    }, 300);
+  });
 })();
 </script>
 {% endblock %}
