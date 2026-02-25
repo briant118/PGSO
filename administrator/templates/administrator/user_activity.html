@@ -110,20 +110,28 @@
 /* Badge Styles */
 .badge {
   display: inline-block;
-  padding: 0.375rem 0.75rem;
-  border-radius: 6px;
   font-size: 0.875rem;
   font-weight: 600;
 }
 
 .badge-login {
-  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-  color: white;
+  color: #28a745;
+}
+
+.badge-logout {
+  color: #6c757d;
+}
+
+.badge-create {
+  color: #17a2b8;
 }
 
 .badge-update {
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-  color: white;
+  color: #007bff;
+}
+
+.badge-delete {
+  color: #dc3545;
 }
 
 /* Empty State */
@@ -175,25 +183,28 @@
       </tr>
     </thead>
     <tbody>
+      {% for act in activities %}
       <tr>
-        <td style="color: #5f6368;">2026-02-11 10:30:15</td>
-        <td><strong>admin</strong></td>
-        <td><span class="badge badge-login">Login</span></td>
-        <td>User logged in successfully</td>
-        <td style="color: #5f6368;">127.0.0.1</td>
+        <td style="color: #5f6368;">{{ act.created_at|date:"Y-m-d H:i:s" }}</td>
+        <td><strong>{% if act.user %}{{ act.user.get_full_name|default:act.user.username }} ({{ act.user.username }}){% else %}—{% endif %}</strong></td>
+        <td>
+          {% if act.action == 'login' %}<span class="badge badge-login">Login</span>
+          {% elif act.action == 'logout' %}<span class="badge badge-logout">Logout</span>
+          {% elif act.action == 'create' %}<span class="badge badge-create">Create</span>
+          {% elif act.action == 'update' %}<span class="badge badge-update">Update</span>
+          {% elif act.action == 'delete' %}<span class="badge badge-delete">Delete</span>
+          {% else %}<span class="badge">{{ act.get_action_display }}</span>{% endif %}
+        </td>
+        <td>{{ act.description|default:"—" }}</td>
+        <td style="color: #5f6368;">{{ act.ip_address|default:"—" }}</td>
       </tr>
-      <tr>
-        <td style="color: #5f6368;">2026-02-11 09:45:22</td>
-        <td><strong>admin</strong></td>
-        <td><span class="badge badge-update">Update</span></td>
-        <td>Updated resident record #1234</td>
-        <td style="color: #5f6368;">127.0.0.1</td>
-      </tr>
+      {% empty %}
       <tr>
         <td colspan="5" class="empty-state">
-          End of activity logs. More logs will appear as users interact with the system.
+          No activity yet. Logins and logouts will appear here as users sign in and sign out.
         </td>
       </tr>
+      {% endfor %}
     </tbody>
   </table>
 </div>

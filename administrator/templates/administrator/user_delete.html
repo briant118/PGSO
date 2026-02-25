@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete user – {{ target_user.username }} – PGSO{% endblock %}
+
+{% block content %}
+<style>
+.page-header { margin-bottom: 2rem; }
+.page-title { margin: 0 0 0.5rem; font-size: 2rem; color: #1a1d24; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+.page-subtitle { margin: 0; color: #5f6368; font-size: 0.95rem; }
+.card-container { background: #fff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); overflow: hidden; max-width: 520px; }
+.card-header { padding: 1.5rem; border-bottom: 1px solid #e8eaed; }
+.card-header h2 { margin: 0; font-size: 1.25rem; color: #1a1d24; }
+.form-body { padding: 1.5rem; }
+.form-actions { padding: 1rem 1.5rem; border-top: 1px solid #e8eaed; display: flex; gap: 0.75rem; }
+.btn { padding: 0.6rem 1.25rem; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; text-decoration: none; border: none; display: inline-flex; align-items: center; gap: 0.5rem; }
+.btn-primary { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: #fff; }
+.btn-secondary { background: #e8eaed; color: #1a1d24; }
+.warning-text { font-size: 0.95rem; color: #5f6368; }
+</style>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title"><i class="fas fa-user-times" style="color: #dc3545;"></i> Delete user</h1>
+    <p class="page-subtitle">User: <strong>{{ target_user.username }}</strong>{% if target_user.get_full_name %} ({{ target_user.get_full_name }}){% endif %}</p>
+  </div>
+  <a href="{% url 'administrator:user_accounts' %}" class="btn btn-secondary">Back to User Accounts</a>
+</div>
+
+<div class="card-container">
+  <div class="card-header"><h2>Confirm delete</h2></div>
+  <form method="post" action="{% url 'administrator:user_delete' target_user.pk %}">
+    {% csrf_token %}
+    <div class="form-body">
+      <p class="warning-text">
+        Are you sure you want to permanently delete the Staff user
+        <strong>{{ target_user.username }}</strong>?
+      </p>
+      <p class="warning-text">
+        This will remove their access to the system. This action cannot be undone.
+      </p>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary"><i class="fas fa-trash"></i> Yes, delete user</button>
+      <a href="{% url 'administrator:user_accounts' %}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+

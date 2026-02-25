@@ -55,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'main.middleware.LoginRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'main.urls'
@@ -77,7 +78,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'main.wsgi.application'
 
 
-# Database
+# Database (Supabase PostgreSQL)
+# All data—including user accounts (auth_user), residents, barangays, etc.—is stored in Supabase.
+# Set SUPABASE_DB_HOST, SUPABASE_DB_PASSWORD (and optionally NAME, USER, PORT) in .env
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
@@ -133,3 +136,11 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Authentication
+LOGIN_URL = '/sign-in/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/sign-in/'
+
+# Fixed admin account: this username cannot be modified (no password change or permissions edit from app)
+FIXED_ADMIN_USERNAME = 'admin'

@@ -843,4 +843,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<script>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var flag = params.get('no_delete_perm');
+    if (!flag) return;
+    if (window.showPermissionDenied) {
+      window.showPermissionDenied('You do not have permission to delete in Reference.');
+    }
+  })();
+</script>
+
 {% endblock %}

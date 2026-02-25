@@ -424,6 +424,102 @@
   padding: 0.5rem 0;
   color: #1a1d24;
 }
+
+/* Residents list (same as coordinator) */
+.residents-list-container {
+  margin-top: 0.75rem;
+  display: none;
+}
+.residents-list-container.active {
+  display: block;
+}
+.residents-list-search {
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+.residents-list-search input {
+  width: 100%;
+  padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.residents-list-search input:focus {
+  outline: none;
+  border-color: #28a745;
+  box-shadow: 0 0 0 2px rgba(40,167,69,0.2);
+}
+.residents-list-search .fa-search {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+.residents-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #fff;
+}
+.residents-list-item {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 0.9rem;
+  color: #1a1d24;
+}
+.residents-list-item:hover {
+  background: #e8f4fc;
+}
+.residents-list-item:last-child {
+  border-bottom: none;
+}
+.residents-list-item.disabled-official {
+  color: #c53030;
+  cursor: not-allowed;
+  opacity: 0.9;
+  pointer-events: none;
+}
+.residents-list-item.disabled-official:hover {
+  background: transparent;
+}
+.residents-list-empty, .residents-list-loading {
+  padding: 1rem;
+  text-align: center;
+  color: #5f6368;
+  font-size: 0.9rem;
+}
+.fullname-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.fullname-select-wrap input[readonly] {
+  flex: 1;
+  background: #f5f5f5;
+  cursor: default;
+  color: #1a1d24;
+}
+.fullname-clear-btn {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #5f6368;
+}
+.form-hint {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.8rem;
+  color: #5f6368;
+}
 </style>
 
 <!-- Messages -->
@@ -522,23 +618,58 @@
       {% csrf_token %}
       <div class="modal-body">
         <div class="form-group">
-          <label for="add_resident">Name <span class="required">*</span></label>
-          <select id="add_resident" name="resident" required>
-            <option value="">Select a resident</option>
-            {% for resident in residents %}
-            <option value="{{ resident.id }}">{{ resident.get_full_name }}</option>
-            {% endfor %}
-          </select>
+          <label for="add_municipality_display">Municipality <span class="required">*</span></label>
+          <input type="hidden" id="add_municipality" name="add_municipality_id" required>
+          <div id="addMunicipalitiesListContainer" class="residents-list-container">
+            <div class="residents-list-search">
+              <i class="fas fa-search"></i>
+              <input type="text" id="addMunicipalitiesListSearch" placeholder="Search municipality...">
+            </div>
+            <div id="addMunicipalitiesList" class="residents-list">
+              <div class="residents-list-loading">Loading municipalities...</div>
+            </div>
+          </div>
+          <div class="fullname-select-wrap">
+            <input type="text" id="add_municipality_display" readonly placeholder="Search and choose municipality">
+            <button type="button" class="fullname-clear-btn" id="addMunicipalityClearBtn" title="Clear and select another">Clear</button>
+          </div>
+          <small class="form-hint">Search and choose a municipality from the list.</small>
         </div>
-
         <div class="form-group">
-          <label for="add_barangay">Barangay <span class="required">*</span></label>
-          <select id="add_barangay" name="barangay" required>
-            <option value="">Select a barangay</option>
-            {% for barangay in barangays %}
-            <option value="{{ barangay.id }}">{{ barangay.name }}</option>
-            {% endfor %}
-          </select>
+          <label for="add_barangay_display">Barangay <span class="required">*</span></label>
+          <input type="hidden" id="add_barangay" name="barangay" required>
+          <div id="addBarangaysListContainer" class="residents-list-container">
+            <div class="residents-list-search">
+              <i class="fas fa-search"></i>
+              <input type="text" id="addBarangaysListSearch" placeholder="Search barangay...">
+            </div>
+            <div id="addBarangaysList" class="residents-list">
+              <div class="residents-list-loading">Select municipality first.</div>
+            </div>
+          </div>
+          <div class="fullname-select-wrap">
+            <input type="text" id="add_barangay_display" readonly placeholder="Select municipality, then search and choose barangay">
+            <button type="button" class="fullname-clear-btn" id="addBarangayClearBtn" title="Clear and select another">Clear</button>
+          </div>
+          <small class="form-hint">Select a municipality, then search and choose a barangay from the list.</small>
+        </div>
+        <div class="form-group">
+          <label for="add_resident_display">Name <span class="required">*</span></label>
+          <input type="hidden" id="add_resident" name="resident" required>
+          <div id="addResidentsListContainer" class="residents-list-container">
+            <div class="residents-list-search">
+              <i class="fas fa-search"></i>
+              <input type="text" id="addResidentsListSearch" placeholder="Search by name...">
+            </div>
+            <div id="addResidentsList" class="residents-list">
+              <div class="residents-list-loading">Select barangay first.</div>
+            </div>
+          </div>
+          <div class="fullname-select-wrap">
+            <input type="text" id="add_resident_display" readonly placeholder="Select barangay, then choose resident from list above">
+            <button type="button" class="fullname-clear-btn" id="addResidentClearBtn" title="Clear and select another">Clear</button>
+          </div>
+          <small class="form-hint">Select a barangay, then search and choose a resident from the list.</small>
         </div>
 
         <div class="form-group">
@@ -591,23 +722,58 @@
       {% csrf_token %}
       <div class="modal-body">
         <div class="form-group">
-          <label for="edit_resident">Name <span class="required">*</span></label>
-          <select id="edit_resident" name="resident" required>
-            <option value="">Select a resident</option>
-            {% for resident in residents %}
-            <option value="{{ resident.id }}">{{ resident.get_full_name }}</option>
-            {% endfor %}
-          </select>
+          <label for="edit_municipality_display">Municipality <span class="required">*</span></label>
+          <input type="hidden" id="edit_municipality" name="edit_municipality_id" required>
+          <div id="editMunicipalitiesListContainer" class="residents-list-container">
+            <div class="residents-list-search">
+              <i class="fas fa-search"></i>
+              <input type="text" id="editMunicipalitiesListSearch" placeholder="Search municipality...">
+            </div>
+            <div id="editMunicipalitiesList" class="residents-list">
+              <div class="residents-list-loading">Loading municipalities...</div>
+            </div>
+          </div>
+          <div class="fullname-select-wrap">
+            <input type="text" id="edit_municipality_display" readonly placeholder="Search and choose municipality">
+            <button type="button" class="fullname-clear-btn" id="editMunicipalityClearBtn" title="Clear and select another">Clear</button>
+          </div>
+          <small class="form-hint">Search and choose a municipality from the list.</small>
         </div>
-
         <div class="form-group">
-          <label for="edit_barangay">Barangay <span class="required">*</span></label>
-          <select id="edit_barangay" name="barangay" required>
-            <option value="">Select a barangay</option>
-            {% for barangay in barangays %}
-            <option value="{{ barangay.id }}">{{ barangay.name }}</option>
-            {% endfor %}
-          </select>
+          <label for="edit_barangay_display">Barangay <span class="required">*</span></label>
+          <input type="hidden" id="edit_barangay" name="barangay" required>
+          <div id="editBarangaysListContainer" class="residents-list-container">
+            <div class="residents-list-search">
+              <i class="fas fa-search"></i>
+              <input type="text" id="editBarangaysListSearch" placeholder="Search barangay...">
+            </div>
+            <div id="editBarangaysList" class="residents-list">
+              <div class="residents-list-loading">Select municipality first.</div>
+            </div>
+          </div>
+          <div class="fullname-select-wrap">
+            <input type="text" id="edit_barangay_display" readonly placeholder="Select municipality, then search and choose barangay">
+            <button type="button" class="fullname-clear-btn" id="editBarangayClearBtn" title="Clear and select another">Clear</button>
+          </div>
+          <small class="form-hint">Select a municipality, then search and choose a barangay from the list.</small>
+        </div>
+        <div class="form-group">
+          <label for="edit_resident_display">Name <span class="required">*</span></label>
+          <input type="hidden" id="edit_resident" name="resident" required>
+          <div id="editResidentsListContainer" class="residents-list-container">
+            <div class="residents-list-search">
+              <i class="fas fa-search"></i>
+              <input type="text" id="editResidentsListSearch" placeholder="Search by name...">
+            </div>
+            <div id="editResidentsList" class="residents-list">
+              <div class="residents-list-loading">Select barangay first.</div>
+            </div>
+          </div>
+          <div class="fullname-select-wrap">
+            <input type="text" id="edit_resident_display" readonly placeholder="Select barangay, then choose from list above">
+            <button type="button" class="fullname-clear-btn" id="editResidentClearBtn" title="Clear and select another">Clear</button>
+          </div>
+          <small class="form-hint">Select a barangay, then search and choose a resident from the list.</small>
         </div>
 
         <div class="form-group">
@@ -722,13 +888,22 @@
 function openAddModal() {
   document.getElementById('addModal').classList.add('active');
   document.body.style.overflow = 'hidden';
+  if (window.loadMunicipalitiesAdd) window.loadMunicipalitiesAdd('');
 }
 
 function closeAddModal() {
   document.getElementById('addModal').classList.remove('active');
   document.body.style.overflow = '';
-  // Reset form
   document.querySelector('#addModal form').reset();
+  document.getElementById('add_resident_display').value = '';
+  document.getElementById('add_municipality_display').value = '';
+  document.getElementById('add_barangay_display').value = '';
+  document.getElementById('addResidentsListContainer').classList.remove('active');
+  document.getElementById('addResidentsListSearch').value = '';
+  document.getElementById('addBarangaysListContainer').classList.remove('active');
+  document.getElementById('addBarangaysListSearch').value = '';
+  document.getElementById('addMunicipalitiesListContainer').classList.remove('active');
+  document.getElementById('addMunicipalitiesListSearch').value = '';
 }
 
 // Edit Modal Functions
@@ -736,13 +911,20 @@ function openEditModal(id) {
   fetch(`/operations/barangay-official/get/${id}/`)
     .then(response => response.json())
     .then(data => {
-      document.getElementById('edit_resident').value = data.resident;
+      document.getElementById('edit_municipality').value = data.municipality || '';
+      document.getElementById('edit_municipality_display').value = data.municipality_name || '';
       document.getElementById('edit_barangay').value = data.barangay;
+      document.getElementById('edit_barangay_display').value = data.barangay_name || '';
+      document.getElementById('edit_resident').value = data.resident;
+      document.getElementById('edit_resident_display').value = data.resident_name || '';
       document.getElementById('edit_position').value = data.position;
       document.getElementById('edit_start_date').value = data.start_date;
       document.getElementById('edit_end_date').value = data.end_date;
       document.getElementById('edit_remarks').value = data.remarks;
-      
+      document.getElementById('editBarangaysListSearch').value = '';
+      document.getElementById('editResidentsListSearch').value = '';
+      if (window.loadBarangaysEdit) window.loadBarangaysEdit(data.municipality || '', '');
+      if (window.loadResidentsEdit) window.loadResidentsEdit(data.barangay, '');
       document.getElementById('editForm').action = `/operations/barangay-official/edit/${id}/`;
       document.getElementById('editModal').classList.add('active');
       document.body.style.overflow = 'hidden';
@@ -908,6 +1090,441 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 });
+
+// Municipalities list for Add modal (searchable)
+(function() {
+  var municipalityInput = document.getElementById('add_municipality');
+  var municipalityDisplay = document.getElementById('add_municipality_display');
+  var container = document.getElementById('addMunicipalitiesListContainer');
+  var listEl = document.getElementById('addMunicipalitiesList');
+  var searchInput = document.getElementById('addMunicipalitiesListSearch');
+  var searchTimeout = null;
+  var municipalitiesUrl = '{% url "operations:get_municipalities" %}';
+
+  if (!municipalityInput || !container || !listEl) return;
+
+  window.loadMunicipalitiesAdd = function(searchTerm) {
+    listEl.innerHTML = '<div class="residents-list-loading">Loading municipalities...</div>';
+    container.classList.add('active');
+    var url = municipalitiesUrl;
+    if (searchTerm) url += '?search=' + encodeURIComponent(searchTerm);
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var municipalities = data.municipalities || [];
+        if (!municipalities.length) {
+          listEl.innerHTML = '<div class="residents-list-empty">No municipalities found.</div>';
+          return;
+        }
+        listEl.innerHTML = '';
+        municipalities.forEach(function(m) {
+          var item = document.createElement('div');
+          item.className = 'residents-list-item';
+          item.textContent = m.name;
+          item.addEventListener('click', function() {
+            municipalityInput.value = m.id;
+            municipalityDisplay.value = m.name;
+            container.classList.remove('active');
+            document.getElementById('add_barangay').value = '';
+            document.getElementById('add_barangay_display').value = '';
+            document.getElementById('add_resident').value = '';
+            document.getElementById('add_resident_display').value = '';
+            if (window.loadBarangaysAdd) window.loadBarangaysAdd(m.id, '');
+          });
+          listEl.appendChild(item);
+        });
+      })
+      .catch(function() {
+        listEl.innerHTML = '<div class="residents-list-empty">Error loading municipalities. Please try again.</div>';
+      });
+  };
+
+  searchInput.addEventListener('input', function() {
+    var term = this.value.trim();
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() { loadMunicipalitiesAdd(term); }, 300);
+  });
+  searchInput.addEventListener('focus', function() {
+    if (!container.classList.contains('active')) loadMunicipalitiesAdd(searchInput.value.trim());
+  });
+
+  var clearBtn = document.getElementById('addMunicipalityClearBtn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+      municipalityInput.value = '';
+      municipalityDisplay.value = '';
+      document.getElementById('add_barangay').value = '';
+      document.getElementById('add_barangay_display').value = '';
+      document.getElementById('add_resident').value = '';
+      document.getElementById('add_resident_display').value = '';
+      container.classList.add('active');
+      loadMunicipalitiesAdd(searchInput.value.trim());
+    });
+  }
+
+})();
+
+// Barangays list for Add modal (load by municipality, searchable)
+(function() {
+  var municipalityInput = document.getElementById('add_municipality');
+  var barangayInput = document.getElementById('add_barangay');
+  var barangayDisplay = document.getElementById('add_barangay_display');
+  var container = document.getElementById('addBarangaysListContainer');
+  var listEl = document.getElementById('addBarangaysList');
+  var searchInput = document.getElementById('addBarangaysListSearch');
+  var searchTimeout = null;
+  var barangaysUrl = '{% url "operations:get_barangays_by_municipality" %}';
+
+  if (!municipalityInput || !barangayInput || !container || !listEl) return;
+
+  window.loadBarangaysAdd = function(municipalityId, searchTerm) {
+    if (!municipalityId) {
+      container.classList.remove('active');
+      listEl.innerHTML = '<div class="residents-list-loading">Select municipality first.</div>';
+      return;
+    }
+    listEl.innerHTML = '<div class="residents-list-loading">Loading barangays...</div>';
+    container.classList.add('active');
+    var url = barangaysUrl + '?municipality_id=' + encodeURIComponent(municipalityId);
+    if (searchTerm) url += '&search=' + encodeURIComponent(searchTerm);
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var barangays = data.barangays || [];
+        if (!barangays.length) {
+          listEl.innerHTML = '<div class="residents-list-empty">No barangays found.</div>';
+          return;
+        }
+        listEl.innerHTML = '';
+        barangays.forEach(function(b) {
+          var item = document.createElement('div');
+          item.className = 'residents-list-item';
+          item.textContent = b.name;
+          item.addEventListener('click', function() {
+            barangayInput.value = b.id;
+            barangayDisplay.value = b.name;
+            container.classList.remove('active');
+            if (window.loadResidentsAdd) window.loadResidentsAdd(b.id, '');
+          });
+          listEl.appendChild(item);
+        });
+      })
+      .catch(function() {
+        listEl.innerHTML = '<div class="residents-list-empty">Error loading barangays. Please try again.</div>';
+      });
+  };
+
+  searchInput.addEventListener('input', function() {
+    var term = this.value.trim();
+    var id = municipalityInput.value;
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() { loadBarangaysAdd(id, term); }, 300);
+  });
+
+  var clearBtn = document.getElementById('addBarangayClearBtn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+      barangayInput.value = '';
+      barangayDisplay.value = '';
+      document.getElementById('add_resident').value = '';
+      document.getElementById('add_resident_display').value = '';
+      container.classList.add('active');
+      if (municipalityInput.value) loadBarangaysAdd(municipalityInput.value, searchInput.value.trim());
+    });
+  }
+})();
+
+// Residents list for Add modal (same as coordinator; triggered when barangay is selected)
+(function() {
+  var barangayInput = document.getElementById('add_barangay');
+  var residentInput = document.getElementById('add_resident');
+  var residentDisplay = document.getElementById('add_resident_display');
+  var container = document.getElementById('addResidentsListContainer');
+  var listEl = document.getElementById('addResidentsList');
+  var searchInput = document.getElementById('addResidentsListSearch');
+  var searchTimeout = null;
+  var residentsUrl = '{% url "operations:get_residents_by_barangay" %}';
+
+  if (!barangayInput || !residentInput || !container || !listEl) return;
+
+  window.loadResidentsAdd = function(barangayId, searchTerm) {
+    if (!barangayId) {
+      container.classList.remove('active');
+      listEl.innerHTML = '<div class="residents-list-loading">Select barangay first.</div>';
+      return;
+    }
+    listEl.innerHTML = '<div class="residents-list-loading">Loading residents...</div>';
+    container.classList.add('active');
+    var url = residentsUrl + '?barangay_id=' + encodeURIComponent(barangayId);
+    if (searchTerm) url += '&search=' + encodeURIComponent(searchTerm);
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var residents = data.residents || [];
+        if (!residents.length) {
+          listEl.innerHTML = '<div class="residents-list-empty">No residents found.</div>';
+          return;
+        }
+        listEl.innerHTML = '';
+        residents.forEach(function(r) {
+          var item = document.createElement('div');
+          item.className = 'residents-list-item';
+          if (r.is_already_official) {
+            item.className += ' disabled-official';
+            item.textContent = r.fullname + ' (Already registered)';
+          } else {
+            item.textContent = r.fullname;
+            item.addEventListener('click', function() {
+              residentInput.value = r.id;
+              residentDisplay.value = r.fullname;
+              container.classList.remove('active');
+            });
+          }
+          listEl.appendChild(item);
+        });
+      })
+      .catch(function() {
+        listEl.innerHTML = '<div class="residents-list-empty">Error loading residents. Please try again.</div>';
+      });
+  };
+
+  searchInput.addEventListener('input', function() {
+    var term = this.value.trim();
+    var id = barangayInput.value;
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() { loadResidentsAdd(id, term); }, 300);
+  });
+
+  var clearBtn = document.getElementById('addResidentClearBtn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+      residentInput.value = '';
+      residentDisplay.value = '';
+      container.classList.add('active');
+      if (barangayInput.value) loadResidentsAdd(barangayInput.value, searchInput.value.trim());
+    });
+  }
+})();
+
+// Municipalities list for Edit modal (searchable)
+(function() {
+  var municipalityInput = document.getElementById('edit_municipality');
+  var municipalityDisplay = document.getElementById('edit_municipality_display');
+  var container = document.getElementById('editMunicipalitiesListContainer');
+  var listEl = document.getElementById('editMunicipalitiesList');
+  var searchInput = document.getElementById('editMunicipalitiesListSearch');
+  var searchTimeout = null;
+  var municipalitiesUrl = '{% url "operations:get_municipalities" %}';
+
+  if (!municipalityInput || !container || !listEl) return;
+
+  window.loadMunicipalitiesEdit = function(searchTerm) {
+    listEl.innerHTML = '<div class="residents-list-loading">Loading municipalities...</div>';
+    container.classList.add('active');
+    var url = municipalitiesUrl;
+    if (searchTerm) url += '?search=' + encodeURIComponent(searchTerm);
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var municipalities = data.municipalities || [];
+        if (!municipalities.length) {
+          listEl.innerHTML = '<div class="residents-list-empty">No municipalities found.</div>';
+          return;
+        }
+        listEl.innerHTML = '';
+        municipalities.forEach(function(m) {
+          var item = document.createElement('div');
+          item.className = 'residents-list-item';
+          item.textContent = m.name;
+          item.addEventListener('click', function() {
+            municipalityInput.value = m.id;
+            municipalityDisplay.value = m.name;
+            container.classList.remove('active');
+            document.getElementById('edit_barangay').value = '';
+            document.getElementById('edit_barangay_display').value = '';
+            document.getElementById('edit_resident').value = '';
+            document.getElementById('edit_resident_display').value = '';
+            if (window.loadBarangaysEdit) window.loadBarangaysEdit(m.id, '');
+          });
+          listEl.appendChild(item);
+        });
+      })
+      .catch(function() {
+        listEl.innerHTML = '<div class="residents-list-empty">Error loading municipalities. Please try again.</div>';
+      });
+  };
+
+  searchInput.addEventListener('input', function() {
+    var term = this.value.trim();
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() { loadMunicipalitiesEdit(term); }, 300);
+  });
+  searchInput.addEventListener('focus', function() {
+    if (!container.classList.contains('active')) loadMunicipalitiesEdit(searchInput.value.trim());
+  });
+
+  var clearBtn = document.getElementById('editMunicipalityClearBtn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+      municipalityInput.value = '';
+      municipalityDisplay.value = '';
+      document.getElementById('edit_barangay').value = '';
+      document.getElementById('edit_barangay_display').value = '';
+      document.getElementById('edit_resident').value = '';
+      document.getElementById('edit_resident_display').value = '';
+      container.classList.add('active');
+      loadMunicipalitiesEdit(searchInput.value.trim());
+    });
+  }
+})();
+
+// Barangays list for Edit modal
+(function() {
+  var municipalityInput = document.getElementById('edit_municipality');
+  var barangayInput = document.getElementById('edit_barangay');
+  var barangayDisplay = document.getElementById('edit_barangay_display');
+  var container = document.getElementById('editBarangaysListContainer');
+  var listEl = document.getElementById('editBarangaysList');
+  var searchInput = document.getElementById('editBarangaysListSearch');
+  var searchTimeout = null;
+  var barangaysUrl = '{% url "operations:get_barangays_by_municipality" %}';
+
+  if (!municipalityInput || !barangayInput || !container || !listEl) return;
+
+  window.loadBarangaysEdit = function(municipalityId, searchTerm) {
+    if (!municipalityId) {
+      container.classList.remove('active');
+      listEl.innerHTML = '<div class="residents-list-loading">Select municipality first.</div>';
+      return;
+    }
+    listEl.innerHTML = '<div class="residents-list-loading">Loading barangays...</div>';
+    container.classList.add('active');
+    var url = barangaysUrl + '?municipality_id=' + encodeURIComponent(municipalityId);
+    if (searchTerm) url += '&search=' + encodeURIComponent(searchTerm);
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var barangays = data.barangays || [];
+        if (!barangays.length) {
+          listEl.innerHTML = '<div class="residents-list-empty">No barangays found.</div>';
+          return;
+        }
+        listEl.innerHTML = '';
+        barangays.forEach(function(b) {
+          var item = document.createElement('div');
+          item.className = 'residents-list-item';
+          item.textContent = b.name;
+          item.addEventListener('click', function() {
+            barangayInput.value = b.id;
+            barangayDisplay.value = b.name;
+            container.classList.remove('active');
+            if (window.loadResidentsEdit) window.loadResidentsEdit(b.id, '');
+          });
+          listEl.appendChild(item);
+        });
+      })
+      .catch(function() {
+        listEl.innerHTML = '<div class="residents-list-empty">Error loading barangays. Please try again.</div>';
+      });
+  };
+
+  searchInput.addEventListener('input', function() {
+    var term = this.value.trim();
+    var id = municipalityInput.value;
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() { loadBarangaysEdit(id, term); }, 300);
+  });
+
+  var clearBtn = document.getElementById('editBarangayClearBtn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+      barangayInput.value = '';
+      barangayDisplay.value = '';
+      document.getElementById('edit_resident').value = '';
+      document.getElementById('edit_resident_display').value = '';
+      container.classList.add('active');
+      if (municipalityInput.value) loadBarangaysEdit(municipalityInput.value, searchInput.value.trim());
+    });
+  }
+})();
+
+// Residents list for Edit modal
+(function() {
+  var barangayInput = document.getElementById('edit_barangay');
+  var residentInput = document.getElementById('edit_resident');
+  var residentDisplay = document.getElementById('edit_resident_display');
+  var container = document.getElementById('editResidentsListContainer');
+  var listEl = document.getElementById('editResidentsList');
+  var searchInput = document.getElementById('editResidentsListSearch');
+  var searchTimeout = null;
+  var residentsUrl = '{% url "operations:get_residents_by_barangay" %}';
+
+  if (!barangayInput || !residentInput || !container || !listEl) return;
+
+  window.loadResidentsEdit = function(barangayId, searchTerm) {
+    if (!barangayId) {
+      container.classList.remove('active');
+      listEl.innerHTML = '<div class="residents-list-loading">Select barangay first.</div>';
+      return;
+    }
+    listEl.innerHTML = '<div class="residents-list-loading">Loading residents...</div>';
+    container.classList.add('active');
+    var url = residentsUrl + '?barangay_id=' + encodeURIComponent(barangayId);
+    if (searchTerm) url += '&search=' + encodeURIComponent(searchTerm);
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var residents = data.residents || [];
+        if (!residents.length) {
+          listEl.innerHTML = '<div class="residents-list-empty">No residents found.</div>';
+          return;
+        }
+        listEl.innerHTML = '';
+        residents.forEach(function(r) {
+          var item = document.createElement('div');
+          item.className = 'residents-list-item';
+          item.textContent = r.fullname;
+          item.addEventListener('click', function() {
+            residentInput.value = r.id;
+            residentDisplay.value = r.fullname;
+            container.classList.remove('active');
+          });
+          listEl.appendChild(item);
+        });
+      })
+      .catch(function() {
+        listEl.innerHTML = '<div class="residents-list-empty">Error loading residents. Please try again.</div>';
+      });
+  };
+
+  searchInput.addEventListener('input', function() {
+    var term = this.value.trim();
+    var id = barangayInput.value;
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(function() { loadResidentsEdit(id, term); }, 300);
+  });
+
+  var clearBtn = document.getElementById('editResidentClearBtn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+      residentInput.value = '';
+      residentDisplay.value = '';
+      container.classList.add('active');
+      if (barangayInput.value) loadResidentsEdit(barangayInput.value, searchInput.value.trim());
+    });
+  }
+})();
+</script>
+
+<script>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    var flag = params.get('no_delete_perm');
+    if (!flag) return;
+    if (window.showPermissionDenied) {
+      window.showPermissionDenied('You do not have permission to delete in Operations.');
+    }
+  })();
 </script>
 
 {% endblock %}

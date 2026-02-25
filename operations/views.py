@@ -3,7 +3,10 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db import transaction
 from django.db.models import Q
-from reference.models import Barangay, Position
+from django.urls import reverse
+from reference.models import Barangay, Municipality, Position
+from administrator.utils import user_can_delete_in_operations
+from administrator.activity_log import log_activity, ACTION_CREATE, ACTION_UPDATE, ACTION_DELETE
 from .models import Resident, BarangayOfficial, CoordinatorPosition, Coordinator
 import logging
 
@@ -95,6 +98,7 @@ def coordinator_add(request):
             date_start=date_start,
             is_active=request.POST.get('is_active') == 'on',
         )
+        log_activity(request, ACTION_CREATE, f'Added coordinator "{fullname}" ({position.name}, {barangay.name}).')
         messages.success(request, f'Coordinator "{fullname}" added successfully.')
     return redirect('operations:coordinator')
 
@@ -144,6 +148,7 @@ def coordinator_edit(request, pk):
         obj.date_start = date_start
         obj.is_active = request.POST.get('is_active') == 'on'
         obj.save()
+        log_activity(request, ACTION_UPDATE, f'Updated coordinator "{fullname}".')
         messages.success(request, f'Coordinator "{fullname}" updated successfully.')
         return redirect('operations:coordinator')
     return redirect('operations:coordinator')
@@ -170,6 +175,12 @@ def get_residents_by_barangay(request):
         
         residents = residents.order_by('lastname', 'firstname')[:50]  # Limit to 50 results
         
+        official_resident_ids = set(
+            BarangayOfficial.objects.filter(
+                barangay=barangay, is_active=True
+            ).values_list('resident_id', flat=True)
+        )
+        
         residents_data = [{
             'id': r.id,
             'fullname': r.get_full_name(),
@@ -177,6 +188,7 @@ def get_residents_by_barangay(request):
             'lastname': r.lastname,
             'middlename': r.middlename,
             'suffix': r.suffix,
+            'is_already_official': r.id in official_resident_ids,
         } for r in residents]
         
         return JsonResponse({'residents': residents_data}, safe=False)
@@ -184,12 +196,47 @@ def get_residents_by_barangay(request):
         return JsonResponse({'residents': []}, safe=False)
 
 
+def get_municipalities(request):
+    """API endpoint to get municipalities with optional search."""
+    search = request.GET.get('search', '').strip()
+    municipalities_qs = Municipality.objects.filter(is_active=True).order_by('name')
+    if search:
+        municipalities_qs = municipalities_qs.filter(name__icontains=search)
+    municipalities_qs = municipalities_qs[:100]
+    data = [{'id': m.id, 'name': m.name} for m in municipalities_qs]
+    return JsonResponse({'municipalities': data}, safe=False)
+
+
+def get_barangays_by_municipality(request):
+    """API endpoint to get barangays by municipality with optional search."""
+    municipality_id = request.GET.get('municipality_id')
+    search = request.GET.get('search', '').strip()
+    
+    if not municipality_id:
+        return JsonResponse({'barangays': []}, safe=False)
+    
+    try:
+        municipality = Municipality.objects.get(id=municipality_id)
+        barangays = Barangay.objects.filter(municipality=municipality, is_active=True)
+        if search:
+            barangays = barangays.filter(name__icontains=search)
+        barangays = barangays.order_by('name')[:100]
+        data = [{'id': b.id, 'name': b.name} for b in barangays]
+        return JsonResponse({'barangays': data}, safe=False)
+    except Exception:
+        return JsonResponse({'barangays': []}, safe=False)
+
+
 def coordinator_delete(request, pk):
     """Delete a coordinator."""
+    if request.method == 'POST' and not user_can_delete_in_operations(request.user):
+        messages.error(request, 'You do not have permission to delete in Operations.')
+        return redirect(f"{reverse('operations:coordinator')}?no_delete_perm=ops")
     obj = get_object_or_404(Coordinator, pk=pk)
     if request.method == 'POST':
         name = obj.fullname
         obj.delete()
+        log_activity(request, ACTION_DELETE, f'Deleted coordinator "{name}".')
         messages.success(request, f'Coordinator "{name}" deleted.')
         return redirect('operations:coordinator')
     messages.error(request, 'Invalid request.')
@@ -214,6 +261,7 @@ def coordinator_position_add(request):
             description=description,
             is_active=True,
         )
+        log_activity(request, ACTION_CREATE, f'Added coordinator position "{name}" (code {next_code}).')
         messages.success(request, f'Coordinator position "{name}" added with code {next_code}.')
     return redirect('operations:coordinator')
 
@@ -232,12 +280,16 @@ def coordinator_position_edit(request, pk):
         obj.description = request.POST.get('description', '').strip()
         obj.is_active = request.POST.get('is_active') == 'on'
         obj.save()
+        log_activity(request, ACTION_UPDATE, f'Updated coordinator position "{name}".')
         messages.success(request, f'Position "{name}" updated.')
     return redirect('operations:coordinator')
 
 
 def coordinator_position_delete(request, pk):
     """Delete a coordinator position (only if no coordinators use it)."""
+    if request.method == 'POST' and not user_can_delete_in_operations(request.user):
+        messages.error(request, 'You do not have permission to delete in Operations.')
+        return redirect(f"{reverse('operations:coordinator')}?no_delete_perm=ops")
     obj = get_object_or_404(CoordinatorPosition, pk=pk)
     if request.method == 'POST':
         if obj.coordinators.exists():
@@ -245,22 +297,25 @@ def coordinator_position_delete(request, pk):
         else:
             name = obj.name
             obj.delete()
+            log_activity(request, ACTION_DELETE, f'Deleted coordinator position "{name}".')
             messages.success(request, f'Position "{name}" deleted.')
     return redirect('operations:coordinator')
 
 
 def barangay_officials(request):
     """Display list of barangay officials."""
-    officials = BarangayOfficial.objects.select_related('resident', 'barangay', 'position').filter(is_active=True)
+    officials = BarangayOfficial.objects.select_related('resident', 'barangay', 'barangay__municipality', 'position').filter(is_active=True)
     residents = Resident.objects.filter(status='ALIVE').order_by('lastname', 'firstname')
-    barangays = Barangay.objects.filter(is_active=True)
+    barangays = Barangay.objects.filter(is_active=True).select_related('municipality')
     positions = Position.objects.filter(is_active=True)
+    municipalities = Municipality.objects.filter(is_active=True).order_by('name')
     
     context = {
         'officials': officials,
         'residents': residents,
         'barangays': barangays,
         'positions': positions,
+        'municipalities': municipalities,
     }
     return render(request, "operations/barangay_officials.html", context)
 
@@ -315,6 +370,7 @@ def resident_add(request):
             # Log successful save to Supabase
             logger.info(f'Resident {resident.get_full_name()} (ID: {resident.resident_id}) added to Supabase database successfully')
             
+            log_activity(request, ACTION_CREATE, f'Added resident "{resident.get_full_name()}" ({barangay.name}).')
             messages.success(request, f'Resident {resident.get_full_name()} added successfully!')
             return redirect('operations:residents_record')
         except Exception as e:
@@ -395,6 +451,7 @@ def resident_edit(request, pk):
             # Log successful update to Supabase
             logger.info(f'Resident {old_name} (ID: {resident.resident_id}) updated to {resident.get_full_name()} in Supabase database')
             
+            log_activity(request, ACTION_UPDATE, f'Updated resident "{resident.get_full_name()}".')
             messages.success(request, f'Resident {resident.get_full_name()} updated successfully!')
             return redirect('operations:residents_record')
         except Exception as e:
@@ -408,6 +465,9 @@ def resident_edit(request, pk):
 @transaction.atomic
 def resident_delete(request, pk):
     """Delete a resident - removed from Supabase database."""
+    if request.method == 'POST' and not user_can_delete_in_operations(request.user):
+        messages.error(request, 'You do not have permission to delete in Operations.')
+        return redirect(f"{reverse('operations:residents_record')}?no_delete_perm=ops")
     resident = get_object_or_404(Resident, pk=pk)
     
     if request.method == 'POST':
@@ -421,6 +481,7 @@ def resident_delete(request, pk):
             # Log successful deletion from Supabase
             logger.info(f'Resident {name} (ID: {resident_id}) deleted from Supabase database')
             
+            log_activity(request, ACTION_DELETE, f'Deleted resident "{name}".')
             messages.success(request, f'Resident {name} deleted successfully!')
         except Exception as e:
             logger.error(f'Error deleting resident from Supabase: {str(e)}')
@@ -446,6 +507,14 @@ def barangay_official_add(request):
             barangay = get_object_or_404(Barangay, id=barangay_id)
             position = get_object_or_404(Position, id=position_id)
             
+            if BarangayOfficial.objects.filter(resident=resident, barangay=barangay, is_active=True).exists():
+                messages.error(
+                    request,
+                    f'{resident.get_full_name()} is already registered as an official in {barangay.name}. '
+                    'The same person cannot be added twice in the same barangay.'
+                )
+                return redirect('operations:barangay_officials')
+            
             official = BarangayOfficial(
                 resident=resident,
                 barangay=barangay,
@@ -456,6 +525,7 @@ def barangay_official_add(request):
             )
             official.save()
             
+            log_activity(request, ACTION_CREATE, f'Added barangay official "{resident.get_full_name()}" as {position.name} in {barangay.name}.')
             logger.info(f'Barangay official {resident.get_full_name()} added as {position.name} in {barangay.name}')
             
             messages.success(request, f'{resident.get_full_name()} added as {position.name} successfully!')
@@ -470,14 +540,20 @@ def barangay_official_add(request):
 
 def barangay_official_get(request, pk):
     """Get barangay official data as JSON."""
-    official = get_object_or_404(BarangayOfficial, pk=pk)
+    official = get_object_or_404(
+        BarangayOfficial.objects.select_related('barangay', 'barangay__municipality'),
+        pk=pk
+    )
+    barangay = official.barangay
     data = {
         'id': official.id,
         'resident': official.resident.id,
-        'barangay': official.barangay.id,
+        'barangay': barangay.id,
+        'municipality': barangay.municipality_id if barangay.municipality_id else '',
+        'municipality_name': barangay.municipality.name if barangay.municipality else '',
         'position': official.position.id,
         'resident_name': official.resident.get_full_name(),
-        'barangay_name': official.barangay.name,
+        'barangay_name': barangay.name,
         'position_name': official.position.name,
         'start_date': official.start_date.strftime('%Y-%m-%d'),
         'end_date': official.end_date.strftime('%Y-%m-%d') if official.end_date else '',
@@ -497,15 +573,31 @@ def barangay_official_edit(request, pk):
             barangay_id = request.POST.get('barangay')
             position_id = request.POST.get('position')
             
-            official.resident = get_object_or_404(Resident, id=resident_id)
-            official.barangay = get_object_or_404(Barangay, id=barangay_id)
-            official.position = get_object_or_404(Position, id=position_id)
+            resident = get_object_or_404(Resident, id=resident_id)
+            barangay = get_object_or_404(Barangay, id=barangay_id)
+            position = get_object_or_404(Position, id=position_id)
+            
+            existing = BarangayOfficial.objects.filter(
+                resident=resident, barangay=barangay, is_active=True
+            ).exclude(pk=pk)
+            if existing.exists():
+                messages.error(
+                    request,
+                    f'{resident.get_full_name()} is already registered as an official in {barangay.name}. '
+                    'The same person cannot be listed twice in the same barangay.'
+                )
+                return redirect('operations:barangay_officials')
+            
+            official.resident = resident
+            official.barangay = barangay
+            official.position = position
             official.start_date = request.POST.get('start_date')
             official.end_date = request.POST.get('end_date') or None
             official.remarks = request.POST.get('remarks', '')
             
             official.save()
             
+            log_activity(request, ACTION_UPDATE, f'Updated barangay official "{official.resident.get_full_name()}" ({barangay.name}).')
             logger.info(f'Barangay official {official.resident.get_full_name()} updated')
             
             messages.success(request, f'{official.resident.get_full_name()} updated successfully!')
@@ -521,6 +613,9 @@ def barangay_official_edit(request, pk):
 @transaction.atomic
 def barangay_official_delete(request, pk):
     """Delete a barangay official."""
+    if request.method == 'POST' and not user_can_delete_in_operations(request.user):
+        messages.error(request, 'You do not have permission to delete in Operations.')
+        return redirect(f"{reverse('operations:barangay_officials')}?no_delete_perm=ops")
     official = get_object_or_404(BarangayOfficial, pk=pk)
     
     if request.method == 'POST':
@@ -530,6 +625,7 @@ def barangay_official_delete(request, pk):
             
             official.delete()
             
+            log_activity(request, ACTION_DELETE, f'Deleted barangay official "{name}" ({position}).')
             logger.info(f'Barangay official {name} ({position}) deleted')
             
             messages.success(request, f'{name} removed from {position} successfully!')

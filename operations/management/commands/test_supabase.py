@@ -1,7 +1,10 @@
 from django.core.management.base import BaseCommand
 from django.db import connection
+from django.contrib.auth import get_user_model
 from operations.models import Resident
 from reference.models import Barangay
+
+User = get_user_model()
 
 
 class Command(BaseCommand):
@@ -26,6 +29,9 @@ class Command(BaseCommand):
             # Test models
             self.stdout.write(self.style.SUCCESS('\n=== Database Statistics ===\n'))
             
+            user_count = User.objects.count()
+            self.stdout.write(self.style.SUCCESS(f'[OK] User accounts (in Supabase auth_user): {user_count}'))
+            
             barangay_count = Barangay.objects.count()
             self.stdout.write(self.style.SUCCESS(f'[OK] Total Barangays: {barangay_count}'))
             
@@ -46,16 +52,16 @@ class Command(BaseCommand):
                     SELECT table_name 
                     FROM information_schema.tables 
                     WHERE table_schema = 'public' 
-                    AND table_name LIKE 'operations_%'
+                    AND (table_name LIKE 'operations_%' OR table_name = 'auth_user' OR table_name LIKE 'administrator_%')
                     ORDER BY table_name;
                 """)
                 tables = cursor.fetchall()
-                self.stdout.write(self.style.SUCCESS(f'\n[OK] Operations Tables in Supabase:'))
+                self.stdout.write(self.style.SUCCESS(f'\n[OK] Tables in Supabase (includes auth_user & administrator):'))
                 for table in tables:
                     self.stdout.write(self.style.SUCCESS(f'  - {table[0]}'))
             
             self.stdout.write(self.style.SUCCESS('\n[SUCCESS] All Supabase operations are working correctly!\n'))
-            self.stdout.write(self.style.SUCCESS('All data is being saved to Supabase database.\n'))
+            self.stdout.write(self.style.SUCCESS('User accounts and all other data are saved to the Supabase database.\n'))
             
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'\n[ERROR] Error connecting to Supabase: {str(e)}\n'))

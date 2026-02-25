@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In – PGSO</title>
+  {% load static %}
+  <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #1e3a5f 0%, #152a45 50%, #0f1f33 100%);
+      color: #1a1d24;
+    }
+    .login-bg-pattern {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(66, 153, 225, 0.15) 0%, transparent 45%),
+        radial-gradient(circle at 80% 70%, rgba(99, 179, 237, 0.1) 0%, transparent 45%);
+      pointer-events: none;
+    }
+    .login-card {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      padding: 2.5rem;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
+    }
+    .login-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .login-logo {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .login-title {
+      margin: 0;
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #1a1d24;
+    }
+    .login-subtitle {
+      margin: 0.35rem 0 0;
+      font-size: 0.95rem;
+      color: #5f6368;
+    }
+    .login-form .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .login-form label {
+      display: block;
+      font-weight: 600;
+      color: #1a1d24;
+      margin-bottom: 0.4rem;
+      font-size: 0.9rem;
+    }
+    .login-form input[type="text"],
+    .login-form input[type="password"],
+    .login-form input[type="text"].password-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    .password-wrap {
+      position: relative;
+    }
+    .password-wrap input {
+      padding-right: 2.75rem;
+    }
+    .password-toggle {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #5f6368;
+      cursor: pointer;
+      padding: 0.25rem;
+      font-size: 1.1rem;
+    }
+    .password-toggle:hover {
+      color: #1e3a5f;
+    }
+    .login-form input:focus {
+      outline: none;
+      border-color: #1e3a5f;
+      box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.15);
+    }
+    .login-form .errorlist {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0 0;
+      font-size: 0.875rem;
+      color: #c53030;
+    }
+    .login-form .helptext { display: none; }
+    .login-btn {
+      width: 100%;
+      margin-top: 0.5rem;
+      padding: 0.875rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .login-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(30, 58, 95, 0.35);
+    }
+    .login-btn:active { transform: translateY(0); }
+    .login-footer {
+      margin-top: 1.5rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #5f6368;
+    }
+  </style>
+</head>
+<body>
+  <div class="login-bg-pattern"></div>
+  <div class="login-card">
+    <div class="login-header">
+      <div class="login-logo">🏛️</div>
+      <h1 class="login-title">PGSO</h1>
+      <p class="login-subtitle">Profiling System – Sign in to continue</p>
+    </div>
+    <form method="post" action="{% url 'login' %}" class="login-form">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      {% if form.non_field_errors %}
+        <ul class="errorlist">
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+      <div class="form-group">
+        <label for="id_username">Username</label>
+        <input type="text" name="username" id="id_username" placeholder="Enter your username" autofocus required value="{{ form.username.value|default:'' }}">
+        {% if form.username.errors %}
+          <ul class="errorlist">
+            {% for error in form.username.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+      <div class="form-group">
+        <label for="id_password">Password</label>
+        <div class="password-wrap">
+          <input type="password" name="password" id="id_password" placeholder="Enter your password" required>
+          <button type="button" class="password-toggle" id="togglePassword" title="Show password" aria-label="Show password">
+            <i class="fas fa-eye" id="togglePasswordIcon"></i>
+          </button>
+        </div>
+        {% if form.password.errors %}
+          <ul class="errorlist">
+            {% for error in form.password.errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+      <button type="submit" class="login-btn">
+        <i class="fas fa-sign-in-alt" style="margin-right: 0.5rem;"></i> Sign In
+      </button>
+    </form>
+    <p class="login-footer">Use your account credentials to access the system.</p>
+  </div>
+  <script>
+    (function() {
+      var input = document.getElementById('id_password');
+      var btn = document.getElementById('togglePassword');
+      var icon = document.getElementById('togglePasswordIcon');
+      if (!input || !btn) return;
+      btn.addEventListener('click', function() {
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.className = 'fas fa-eye-slash';
+          btn.title = 'Hide password';
+          btn.setAttribute('aria-label', 'Hide password');
+        } else {
+          input.type = 'password';
+          icon.className = 'fas fa-eye';
+          btn.title = 'Show password';
+          btn.setAttribute('aria-label', 'Show password');
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

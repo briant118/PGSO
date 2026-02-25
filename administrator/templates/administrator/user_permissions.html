@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}User Permissions – Administrator – PGSO{% endblock %}
+
+{% block content %}
+<style>
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+.page-title { margin: 0 0 0.5rem; font-size: 2rem; color: #1a1d24; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+.page-subtitle { margin: 0; color: #5f6368; font-size: 0.95rem; }
+.card-container { background: #fff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); overflow: hidden; }
+.card-header { padding: 1.5rem; border-bottom: 1px solid #e8eaed; }
+.card-header h2 { margin: 0; font-size: 1.5rem; color: #1a1d24; font-weight: 700; }
+.admin-table { width: 100%; border-collapse: collapse; }
+.admin-table thead { background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%); }
+.admin-table thead th { padding: 1rem 1.25rem; text-align: left; color: #fff; font-weight: 600; font-size: 0.95rem; }
+.admin-table tbody tr { border-bottom: 1px solid #e8eaed; }
+.admin-table tbody td { padding: 1rem 1.25rem; color: #1a1d24; }
+.badge-admin { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem; }
+.badge-staff { background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.85rem; }
+.badge-yes { color: #28a745; font-weight: 600; }
+.badge-no { color: #5f6368; }
+.btn-edit { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.4rem 0.75rem; font-size: 0.875rem; background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white; border: none; border-radius: 6px; cursor: pointer; text-decoration: none; }
+.btn-edit:hover { opacity: 0.9; }
+.empty-state { text-align: center; padding: 2rem; color: #5f6368; }
+</style>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title"><i class="fas fa-key" style="color: #4299e1;"></i> User Permissions</h1>
+    <p class="page-subtitle">Set role (Staff / Admin) and restrict or unrestrict delete in Operations and Reference.</p>
+  </div>
+  <a href="{% url 'administrator:user_accounts' %}" class="btn-edit"><i class="fas fa-user-friends"></i> User Accounts</a>
+</div>
+
+<div class="card-container">
+  <div class="card-header">
+    <h2>Roles &amp; Delete Permissions</h2>
+  </div>
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Role</th>
+        <th>Can delete in Operations</th>
+        <th>Can delete in Reference</th>
+        <th style="text-align: center;">Permissions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td><strong>{{ row.user.username }}</strong></td>
+        <td><span class="badge-{{ row.role|lower }}">{{ row.role }}</span></td>
+        <td><span class="{% if row.can_delete_in_operations %}badge-yes{% else %}badge-no{% endif %}">{% if row.can_delete_in_operations %}Yes{% else %}No{% endif %}</span></td>
+        <td><span class="{% if row.can_delete_in_reference %}badge-yes{% else %}badge-no{% endif %}">{% if row.can_delete_in_reference %}Yes{% else %}No{% endif %}</span></td>
+        <td style="text-align: center;">{% if row.is_fixed_admin %}<span style="color: #5f6368;">—</span>{% else %}<a href="{% url 'administrator:user_permissions_edit' row.user.pk %}" class="btn-edit">User Permissions</a>{% endif %}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" class="empty-state">No users found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<p style="margin-top: 1rem; color: #5f6368; font-size: 0.9rem;">
+  <strong>Admin</strong> can delete in both Operations and Reference. <strong>Staff</strong> cannot delete unless you unrestrict one or both areas on their permissions.
+</p>
+{% endblock %}

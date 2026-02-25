@@ -13,8 +13,9 @@
 </head>
 <body>
   <aside class="side-nav">
-    <div class="brand"><a href="{% url 'mainapplication:dashboard' %}">PROFILING SYSTEM</a></div>
+    <div class="brand"><a href="{% if user.is_authenticated %}{% url 'mainapplication:dashboard' %}{% else %}{% url 'login' %}{% endif %}">PROFILING SYSTEM</a></div>
     <nav>
+      {% if user.is_authenticated %}
       <div class="nav-section">
         <a href="{% url 'mainapplication:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
           <span class="nav-icon"><i class="fas fa-home"></i></span> Dashboard
@@ -89,6 +90,8 @@
           </a>
         </div>
       </div>
+      {% load admin_tags %}
+      {% if user|is_admin %}
       <div class="nav-section">
         <a href="{% url 'administrator:index' %}" class="nav-link js-nav-toggle {% if request.resolver_match.app_name == 'administrator' %}is-open{% endif %}" data-nav="administrator">
           <span class="nav-icon"><i class="fas fa-cog"></i></span>
@@ -102,10 +105,38 @@
           <a href="{% url 'administrator:user_accounts' %}" class="nav-link {% if request.resolver_match.url_name == 'user_accounts' %}active{% endif %}">
             <span class="nav-icon"><i class="fas fa-user-friends"></i></span> User Accounts
           </a>
+          <a href="{% url 'administrator:user_permissions' %}" class="nav-link {% if request.resolver_match.url_name == 'user_permissions' or request.resolver_match.url_name == 'user_permissions_edit' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-key"></i></span> User Permissions
+          </a>
           <a href="{% url 'administrator:user_activity' %}" class="nav-link {% if request.resolver_match.url_name == 'user_activity' %}active{% endif %}">
             <span class="nav-icon"><i class="fas fa-chart-line"></i></span> User Activity
           </a>
         </div>
+      </div>
+      {% endif %}
+      {% endif %}
+      <div class="nav-section nav-section-account" style="margin-top: auto; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+        {% if user.is_authenticated %}
+        <div style="padding: 0 1.5rem 0.5rem; font-size: 0.8rem; color: rgba(255,255,255,0.75); line-height: 1.3;">
+          <strong style="color: rgba(255,255,255,0.9);">Account:</strong><br>
+          {{ user.get_full_name|default:user.username }}
+          <span style="color: rgba(255,255,255,0.6);">({{ user.username }})</span>
+          <span class="status-badge status-online" style="display: inline-block; margin-top: 0.35rem; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 600; background: rgba(40, 167, 69, 0.25); color: #5dd879;">Online</span>
+        </div>
+        <form method="post" action="{% url 'logout' %}" style="margin: 0;">
+          {% csrf_token %}
+          <button type="submit" class="nav-link" style="width: 100%; text-align: left; background: none; border: none; cursor: pointer; font: inherit; color: inherit;">
+            <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span> Sign Out
+          </button>
+        </form>
+        {% else %}
+        <div style="padding: 0 1.5rem 0.5rem; font-size: 0.8rem; color: rgba(255,255,255,0.75); line-height: 1.3;">
+          <span class="status-badge status-offline" style="display: inline-block; padding: 0.2rem 0.5rem; border-radius: 6px; font-size: 0.7rem; font-weight: 600; background: rgba(108, 117, 125, 0.35); color: #b0b8c0;">Offline</span>
+        </div>
+        <a href="{% url 'login' %}" class="nav-link" style="display: block; text-decoration: none;">
+          <span class="nav-icon"><i class="fas fa-sign-in-alt"></i></span> Sign In
+        </a>
+        {% endif %}
       </div>
     </nav>
   </aside>
@@ -114,6 +145,23 @@
       {% block content %}{% endblock %}
     </main>
   </div>
+
+  <!-- Global modal for permission errors (e.g., staff delete without permission) -->
+  <div id="permissionDeniedModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:1200; align-items:center; justify-content:center; padding:1.5rem;">
+    <div style="background:#fff; border-radius:12px; max-width:420px; width:100%; box-shadow:0 10px 40px rgba(0,0,0,0.2); overflow:hidden;">
+      <div style="padding:1rem 1.25rem; background:linear-gradient(135deg,#dc3545 0%,#c82333 100%); color:#fff; display:flex; align-items:center; justify-content:space-between;">
+        <div style="font-weight:700; font-size:1.05rem;"><i class="fas fa-ban"></i> Action not allowed</div>
+        <button type="button" id="permDeniedCloseBtn" style="background:none;border:none;color:rgba(255,255,255,0.85);font-size:1.2rem;cursor:pointer;">&times;</button>
+      </div>
+      <div style="padding:1.25rem 1.5rem; font-size:0.95rem; color:#1a1d24;">
+        <p id="permissionDeniedText" style="margin:0;"></p>
+      </div>
+      <div style="padding:0.9rem 1.5rem; border-top:1px solid #e8eaed; text-align:right;">
+        <button type="button" id="permDeniedOkBtn" style="background:#6c757d;color:#fff;border:none;border-radius:8px;padding:0.45rem 1rem;font-weight:600;cursor:pointer;">OK</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     (function () {
       const toggles = Array.from(document.querySelectorAll('.js-nav-toggle'));
@@ -133,6 +181,56 @@
           toggle.classList.toggle('is-open', willOpen);
         });
       });
+    })();
+
+    // Show a modal when a delete permission error message is present
+    (function () {
+      function openPermModal(message) {
+        var modal = document.getElementById('permissionDeniedModal');
+        var text = document.getElementById('permissionDeniedText');
+        if (!modal || !text) return;
+        text.textContent = message || 'You do not have permission to perform this action.';
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+      }
+      // expose globally so pages can call it directly
+      window.showPermissionDenied = openPermModal;
+      function closePermModal() {
+        var modal = document.getElementById('permissionDeniedModal');
+        if (!modal) return;
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        var alerts = Array.prototype.slice.call(document.querySelectorAll('.alert.alert-error, .alert-error'));
+        if (!alerts.length) return;
+
+        var match = null;
+        alerts.forEach(function (a) {
+          var txt = (a.textContent || '').trim();
+          if (!txt) return;
+          if (txt.indexOf('You do not have permission to delete in Operations.') !== -1 ||
+              txt.indexOf('You do not have permission to delete in Reference.') !== -1) {
+            match = txt;
+            a.style.display = 'none';
+          }
+        });
+        if (match) {
+          openPermModal(match);
+        }
+      });
+
+      var closeBtn = document.getElementById('permDeniedCloseBtn');
+      var okBtn = document.getElementById('permDeniedOkBtn');
+      if (closeBtn) closeBtn.addEventListener('click', closePermModal);
+      if (okBtn) okBtn.addEventListener('click', closePermModal);
+      var modalElem = document.getElementById('permissionDeniedModal');
+      if (modalElem) {
+        modalElem.addEventListener('click', function (e) {
+          if (e.target === modalElem) closePermModal();
+        });
+      }
     })();
   </script>
 </body>

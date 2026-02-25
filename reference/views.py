@@ -2,6 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db import transaction
+from django.urls import reverse
+from administrator.utils import user_can_delete_in_reference
+from administrator.activity_log import log_activity, ACTION_CREATE, ACTION_UPDATE, ACTION_DELETE
 from .models import Barangay, Municipality, Position
 from operations.models import BarangayOfficial
 
@@ -76,6 +79,7 @@ def barangay_add(request):
         # Force commit to database
         transaction.on_commit(lambda: None)
         
+        log_activity(request, ACTION_CREATE, f'Added barangay "{name}" (code {next_code}).')
         messages.success(request, f'Barangay "{name}" has been added successfully with code {next_code}.')
         return redirect('reference:barangay_list')
     
@@ -114,6 +118,7 @@ def barangay_edit(request, pk):
         # Force commit to database
         transaction.on_commit(lambda: None)
         
+        log_activity(request, ACTION_UPDATE, f'Updated barangay "{name}".')
         messages.success(request, f'Barangay "{name}" has been updated successfully.')
         return redirect('reference:barangay_list')
     
@@ -123,6 +128,9 @@ def barangay_edit(request, pk):
 @transaction.atomic
 def barangay_delete(request, pk):
     """Delete a barangay and re-sequence all codes."""
+    if request.method == 'POST' and not user_can_delete_in_reference(request.user):
+        messages.error(request, 'You do not have permission to delete in Reference.')
+        return redirect(f"{reverse('reference:barangay_list')}?no_delete_perm=ref")
     barangay = get_object_or_404(Barangay, pk=pk, is_active=True)
     
     if request.method == 'POST':
@@ -148,6 +156,7 @@ def barangay_delete(request, pk):
         # Force commit to database
         transaction.on_commit(lambda: None)
         
+        log_activity(request, ACTION_DELETE, f'Deleted barangay "{barangay_name}" (code {barangay_code}).')
         messages.success(request, f'Barangay "{barangay_name}" (Code: {barangay_code}) has been deleted and codes have been re-sequenced.')
         return redirect('reference:barangay_list')
     
@@ -208,6 +217,7 @@ def position_add(request):
         # Force commit to database
         transaction.on_commit(lambda: None)
         
+        log_activity(request, ACTION_CREATE, f'Added position "{name}" (code {next_code}).')
         messages.success(request, f'Position "{name}" has been added successfully with code {next_code}.')
         next_url = request.POST.get('next', '').strip()
         if next_url:
@@ -238,6 +248,7 @@ def position_edit(request, pk):
         # Force commit to database
         transaction.on_commit(lambda: None)
         
+        log_activity(request, ACTION_UPDATE, f'Updated position "{name}".')
         messages.success(request, f'Position "{name}" has been updated successfully.')
         return redirect('reference:position_list')
     
@@ -247,6 +258,9 @@ def position_edit(request, pk):
 @transaction.atomic
 def position_delete(request, pk):
     """Delete a position and re-sequence all codes."""
+    if request.method == 'POST' and not user_can_delete_in_reference(request.user):
+        messages.error(request, 'You do not have permission to delete in Reference.')
+        return redirect(f"{reverse('reference:position_list')}?no_delete_perm=ref")
     position = get_object_or_404(Position, pk=pk, is_active=True)
     
     if request.method == 'POST':
@@ -272,6 +286,7 @@ def position_delete(request, pk):
         # Force commit to database
         transaction.on_commit(lambda: None)
         
+        log_activity(request, ACTION_DELETE, f'Deleted position "{position_name}" (code {position_code}).')
         messages.success(request, f'Position "{position_name}" (Code: {position_code}) has been deleted and codes have been re-sequenced.')
         return redirect('reference:position_list')
     

@@ -1,11 +1,16 @@
 from django.conf import settings
 from django.contrib import admin
+from django.contrib.auth import views as auth_views
 from django.urls import path, include
 from django.views.generic import RedirectView
+
+from . import views as main_views
 
 urlpatterns = [
     path('favicon.ico', RedirectView.as_view(url=settings.STATIC_URL + 'favicon.ico', permanent=True)),
     path('admin/', admin.site.urls),
+    path('sign-in/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
+    path('sign-out/', main_views.sign_out, name='logout'),
     path('', include('mainapplication.urls')),
     path('reference/', include('reference.urls')),
     path('operations/', include('operations.urls')),

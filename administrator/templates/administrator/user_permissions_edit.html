@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Permissions – {{ user.username }} – PGSO{% endblock %}
+
+{% block content %}
+<style>
+.page-header { margin-bottom: 2rem; }
+.page-title { margin: 0 0 0.5rem; font-size: 2rem; color: #1a1d24; font-weight: 700; display: flex; align-items: center; gap: 0.75rem; }
+.page-subtitle { margin: 0; color: #5f6368; font-size: 0.95rem; }
+.card-container { background: #fff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); overflow: hidden; max-width: 520px; }
+.card-header { padding: 1.5rem; border-bottom: 1px solid #e8eaed; }
+.card-header h2 { margin: 0; font-size: 1.25rem; color: #1a1d24; }
+.form-body { padding: 1.5rem; }
+.form-group { margin-bottom: 1.25rem; }
+.form-group label { display: block; font-weight: 600; color: #1a1d24; margin-bottom: 0.4rem; font-size: 0.95rem; }
+.form-group input[type="radio"] { margin-right: 0.5rem; }
+.form-group .radio-label { font-weight: normal; margin-right: 1rem; }
+.form-group .hint { font-size: 0.85rem; color: #5f6368; margin-top: 0.35rem; }
+.form-actions { padding: 1rem 1.5rem; border-top: 1px solid #e8eaed; display: flex; gap: 0.75rem; }
+.btn { padding: 0.6rem 1.25rem; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; text-decoration: none; border: none; display: inline-flex; align-items: center; gap: 0.5rem; }
+.btn-primary { background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%); color: #fff; }
+.btn-secondary { background: #e8eaed; color: #1a1d24; }
+.alert { padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; }
+.alert-info { background: #e8f4fc; color: #1a1d24; }
+</style>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title"><i class="fas fa-user-edit" style="color: #4299e1;"></i> Edit Permissions</h1>
+    <p class="page-subtitle">User: <strong>{{ user.username }}</strong></p>
+  </div>
+</div>
+
+<div class="card-container">
+  <div class="card-header"><h2>Role &amp; Delete Permissions</h2></div>
+  <form method="post" action="">
+    {% csrf_token %}
+    <div class="form-body">
+      {% if is_admin %}
+      <div class="alert alert-info">This user is an <strong>Admin</strong> and can delete in both Operations and Reference. Change role to Staff to restrict and use the options below.</div>
+      {% endif %}
+
+      <div class="form-group">
+        <label>Role</label>
+        <div>
+          <label class="radio-label"><input type="radio" name="role" value="admin" {% if is_admin %}checked{% endif %}> Admin</label>
+          <label class="radio-label"><input type="radio" name="role" value="staff" {% if not is_admin %}checked{% endif %}> Staff</label>
+        </div>
+        <div class="hint">Admin can delete everywhere. Staff cannot delete unless you unrestrict below.</div>
+      </div>
+
+      <div class="form-group">
+        <label><input type="checkbox" name="can_delete_in_operations" {% if profile.can_delete_in_operations or is_admin %}checked{% endif %}> Can delete in Operations</label>
+        <div class="hint">Allow this user to delete in Operations (Coordinator, Barangay Officials, Residents, etc.). Ignored for Admin.</div>
+      </div>
+
+      <div class="form-group">
+        <label><input type="checkbox" name="can_delete_in_reference" {% if profile.can_delete_in_reference or is_admin %}checked{% endif %}> Can delete in Reference</label>
+        <div class="hint">Allow this user to delete in Reference (Barangay, Positions, etc.). Ignored for Admin.</div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
+      <a href="{% url 'administrator:user_permissions' %}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

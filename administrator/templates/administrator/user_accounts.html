@@ -137,9 +137,86 @@
   border-bottom: none;
 }
 
+.user-row-clickable {
+  cursor: pointer;
+}
+
+.user-row-clickable:hover {
+  background: #e8f4fc !important;
+}
+
+.user-row-clickable.selected {
+  background: #e8f4fc !important;
+}
+
 .admin-table tbody td {
   padding: 1rem 1.25rem;
   color: #1a1d24;
+}
+
+/* Two-column list + detail layout (like Barangay Officials) */
+.list-detail-layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
+
+.list-detail-layout .list-column {
+  flex: 1;
+  min-width: 0;
+}
+
+.list-detail-layout .detail-column {
+  flex: 0 0 340px;
+  position: sticky;
+  top: 1rem;
+}
+
+.detail-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  padding: 1.5rem;
+}
+
+.detail-card-placeholder {
+  color: #5f6368;
+  font-size: 0.95rem;
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.detail-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e3a5f;
+  margin: 0 0 1rem;
+  line-height: 1.3;
+}
+
+.detail-card .detail-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.detail-card .detail-table .detail-row {
+  border-bottom: 1px solid #e8eaed;
+}
+
+.detail-card .detail-table .detail-label {
+  padding: 0.5rem 0.5rem 0.5rem 0;
+  font-weight: 600;
+  color: #5f6368;
+  width: 38%;
+  font-size: 0.9rem;
+}
+
+.detail-card .detail-table .detail-value {
+  padding: 0.5rem 0;
+  color: #1a1d24;
+  font-size: 0.9rem;
 }
 
 /* Badge Styles */
@@ -177,6 +254,123 @@
   padding: 3rem 2rem;
   color: #5f6368;
 }
+
+/* Modals (replace browser alert/confirm) */
+.user-accounts-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  animation: uaFadeIn 0.2s ease;
+  overflow-y: auto;
+}
+.user-accounts-modal.active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+@keyframes uaFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.user-accounts-modal .modal-content {
+  background: #fff;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 440px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: uaSlideUp 0.25s ease;
+}
+@keyframes uaSlideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.user-accounts-modal .modal-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #e8eaed;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%);
+  border-radius: 12px 12px 0 0;
+}
+.user-accounts-modal .modal-title {
+  margin: 0;
+  font-size: 1.15rem;
+  color: #fff;
+  font-weight: 700;
+}
+.user-accounts-modal .modal-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+}
+.user-accounts-modal .modal-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+.user-accounts-modal .modal-body {
+  padding: 1.25rem 1.5rem;
+  color: #1a1d24;
+  font-size: 0.95rem;
+}
+.user-accounts-modal .modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e8eaed;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+.user-accounts-modal .btn-cancel {
+  background: #6c757d;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.user-accounts-modal .btn-cancel:hover {
+  background: #5a6268;
+}
+.user-accounts-modal .btn-ok {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.user-accounts-modal .btn-ok:hover {
+  background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+}
+.user-accounts-modal .btn-confirm-delete {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.user-accounts-modal .btn-confirm-delete:hover {
+  background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+}
 </style>
 
 <!-- Page Header -->
@@ -189,71 +383,315 @@
   </div>
 </div>
 
-<!-- User List Card -->
-<div class="card-container">
-  <div class="card-header">
-    <h2>User List</h2>
-    <div class="page-header-actions">
-      <button type="button" class="btn btn-add" title="Add New User">
-        <span class="btn-add-icon-wrap">
-          <i class="fas fa-file-lines"></i>
-          <span class="btn-add-plus"><i class="fas fa-plus"></i></span>
-        </span>
-        <span class="btn-action-label">Add</span>
-      </button>
-      <button type="button" class="btn btn-edit-header" title="Edit User">
-        <i class="fas fa-pen"></i>
-        <span class="btn-action-label">Edit</span>
-      </button>
-      <button type="button" class="btn btn-delete-header" title="Delete User">
-        <i class="fas fa-trash"></i>
-        <span class="btn-action-label">Delete</span>
-      </button>
-      <button type="button" class="btn btn-print" title="Print">
-        <i class="fas fa-print"></i>
-        <span class="btn-action-label">Print</span>
-      </button>
-    </div>
-  </div>
+<!-- List + Detail layout (like Barangay Officials) -->
+<div class="list-detail-layout">
+  <div class="list-column">
+    <div class="card-container">
+      <div class="card-header">
+        <h2>User List</h2>
+        <div class="page-header-actions">
+          {% if can_manage_users %}
+          <a href="{% url 'administrator:user_add' %}" class="btn btn-add" title="Add New User" style="text-decoration: none;">
+            <span class="btn-add-icon-wrap">
+              <i class="fas fa-file-lines"></i>
+              <span class="btn-add-plus"><i class="fas fa-plus"></i></span>
+            </span>
+            <span class="btn-action-label">Add user</span>
+          </a>
+          {% endif %}
+        </div>
+      </div>
 
   <table class="admin-table">
     <thead>
       <tr>
         <th>Username</th>
         <th>Email</th>
+        <th>Full Name</th>
         <th>Role</th>
         <th>Status</th>
         <th>Last Login</th>
-        <th style="text-align: center;">Actions</th>
+        <th>Date Joined</th>
+        {# No per-row action columns; actions are in the header buttons only #}
       </tr>
     </thead>
     <tbody>
+      {% for row in users_with_roles %}
+      {% with u=row.user %}
+      <tr class="user-row-clickable"
+          data-id="{{ u.pk }}"
+          data-username="{{ u.username }}"
+          data-fullname="{% if u.get_full_name %}{{ u.get_full_name }}{% else %}—{% endif %}"
+          data-email="{{ u.email|default:'—' }}"
+          data-role="{{ row.role }}"
+          data-status="{% if u.is_active %}Active{% else %}Inactive{% endif %}"
+          data-last-login="{% if u.last_login %}{{ u.last_login|date:'M d, Y g:i A' }}{% else %}Never{% endif %}"
+          data-date-joined="{{ u.date_joined|date:'M d, Y' }}"
+          data-is-admin-role="{% if row.is_admin %}true{% else %}false{% endif %}"
+          data-is-fixed-admin="{% if u.username == fixed_admin_username %}true{% else %}false{% endif %}">
+        <td><i class="fas fa-user" style="color: #4299e1; margin-right: 0.35rem;"></i><strong>{{ u.username }}</strong></td>
+        <td>{{ u.email|default:"—" }}</td>
+        <td>{% if u.get_full_name %}{{ u.get_full_name }}{% else %}—{% endif %}</td>
+        <td>
+          {% if row.is_admin %}
+            <span class="badge badge-admin">Admin</span>
+          {% else %}
+            <span class="badge" style="background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); color: white;">Staff</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if u.is_active %}
+            <span class="badge-active">Active</span>
+          {% else %}
+            <span style="color: #dc3545; font-weight: 600;">Inactive</span>
+          {% endif %}
+        </td>
+        <td style="color: #5f6368;">
+          {% if u.last_login %}
+            {{ u.last_login|date:"M d, Y g:i A" }}
+          {% else %}
+            Never
+          {% endif %}
+        </td>
+        <td style="color: #5f6368;">{{ u.date_joined|date:"M d, Y" }}</td>
+      </tr>
+      {% endwith %}
+      {% empty %}
       <tr>
-        <td><strong>admin</strong></td>
-        <td>admin@pgso.gov.ph</td>
-        <td><span class="badge badge-admin">Administrator</span></td>
-        <td><span class="badge-active">Active</span></td>
-        <td style="color: #5f6368;">2026-02-11 10:30 AM</td>
-        <td style="text-align: center;">
-          <div class="table-actions">
-            <button type="button" class="btn btn-edit" title="Edit">
-              <i class="fas fa-edit"></i>
-              <span class="btn-action-label">Edit</span>
-            </button>
-            <button type="button" class="btn btn-delete" title="Delete">
-              <i class="fas fa-trash"></i>
-              <span class="btn-action-label">Delete</span>
-            </button>
-          </div>
+        <td colspan="7" class="empty-state">
+          No registered users yet. {% if can_manage_users %}Click <strong>Add user</strong> above to create one.{% else %}Create users via Django Admin (<a href="{% url 'admin:index' %}">Admin</a>) or <code>createsuperuser</code>.{% endif %}
         </td>
       </tr>
-      <tr>
-        <td colspan="6" class="empty-state">
-          No additional users. Click "Add New User" to create user accounts.
-        </td>
-      </tr>
+      {% endfor %}
     </tbody>
   </table>
+    </div>
+  </div>
+
+  <!-- Detail panel (right) -->
+  <div class="detail-column">
+    <div class="detail-card">
+      <div id="detailPlaceholder" class="detail-card-placeholder">
+        Select a user to view details.
+      </div>
+      <div id="detailContent" style="display: none;">
+        <h2 class="detail-card-title" id="detailCardTitle">—</h2>
+        <table class="detail-table">
+          <tr class="detail-row">
+            <td class="detail-label">Username</td>
+            <td class="detail-value" id="detailUsername">—</td>
+          </tr>
+          <tr class="detail-row">
+            <td class="detail-label">Full Name</td>
+            <td class="detail-value" id="detailFullname">—</td>
+          </tr>
+          <tr class="detail-row">
+            <td class="detail-label">Role</td>
+            <td class="detail-value" id="detailRole">—</td>
+          </tr>
+          <tr class="detail-row">
+            <td class="detail-label">Email</td>
+            <td class="detail-value" id="detailEmail">—</td>
+          </tr>
+          <tr class="detail-row">
+            <td class="detail-label">Status</td>
+            <td class="detail-value" id="detailStatus">—</td>
+          </tr>
+          <tr class="detail-row">
+            <td class="detail-label">Last Login</td>
+            <td class="detail-value" id="detailLastLogin">—</td>
+          </tr>
+          <tr class="detail-row">
+            <td class="detail-label">Date Joined</td>
+            <td class="detail-value" id="detailDateJoined">—</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
+
+<!-- Modal: Please select a user first -->
+<div id="selectUserFirstModal" class="user-accounts-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title"><i class="fas fa-info-circle"></i> Select User</h2>
+      <button type="button" class="modal-close" onclick="closeUserAccountsModal('selectUserFirstModal')" aria-label="Close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">Please select a user first.</div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-ok" onclick="closeUserAccountsModal('selectUserFirstModal')">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Fixed admin cannot be edited -->
+<div id="fixedAdminEditModal" class="user-accounts-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title"><i class="fas fa-lock"></i> Cannot Edit</h2>
+      <button type="button" class="modal-close" onclick="closeUserAccountsModal('fixedAdminEditModal')" aria-label="Close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">The fixed admin account cannot be edited.</div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-ok" onclick="closeUserAccountsModal('fixedAdminEditModal')">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Admin accounts cannot be deleted -->
+<div id="adminCannotDeleteModal" class="user-accounts-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 class="modal-title"><i class="fas fa-shield-alt"></i> Cannot Delete</h2>
+      <button type="button" class="modal-close" onclick="closeUserAccountsModal('adminCannotDeleteModal')" aria-label="Close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">Admin accounts cannot be deleted. Only Staff users can be deleted.</div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-ok" onclick="closeUserAccountsModal('adminCannotDeleteModal')">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Delete user confirmation -->
+<div id="deleteUserConfirmModal" class="user-accounts-modal">
+  <div class="modal-content">
+    <div class="modal-header" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
+      <h2 class="modal-title"><i class="fas fa-exclamation-triangle"></i> Confirm Delete</h2>
+      <button type="button" class="modal-close" onclick="closeUserAccountsModal('deleteUserConfirmModal')" aria-label="Close"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="margin: 0;">Are you sure you want to delete user <strong id="deleteConfirmUsername"></strong>?</p>
+      <p style="margin: 0.75rem 0 0; font-size: 0.9rem; color: #5f6368;"><i class="fas fa-info-circle"></i> This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-cancel" id="deleteConfirmCancelBtn">Cancel</button>
+      <button type="button" class="btn btn-confirm-delete" id="deleteConfirmSubmitBtn"><i class="fas fa-trash"></i> Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function closeUserAccountsModal(id) {
+  var el = document.getElementById(id);
+  if (el) {
+    el.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+}
+function openUserAccountsModal(id) {
+  var el = document.getElementById(id);
+  if (el) {
+    el.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+}
+document.querySelectorAll('.user-accounts-modal').forEach(function (modal) {
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) closeUserAccountsModal(modal.id);
+  });
+});
+
+(function () {
+  const rows = Array.from(document.querySelectorAll('.user-row-clickable'));
+  if (!rows.length) return;
+
+  window.userAccountsSelectedRow = null;
+  const placeholderEl = document.getElementById('detailPlaceholder');
+  const contentEl = document.getElementById('detailContent');
+
+  function selectRow(row) {
+    if (window.userAccountsSelectedRow) {
+      window.userAccountsSelectedRow.classList.remove('selected');
+    }
+    window.userAccountsSelectedRow = row;
+    row.classList.add('selected');
+
+    var title = row.dataset.fullname && row.dataset.fullname !== '—' ? row.dataset.fullname : row.dataset.username;
+    document.getElementById('detailCardTitle').textContent = title;
+    document.getElementById('detailUsername').textContent = row.dataset.username || '—';
+    document.getElementById('detailFullname').textContent = row.dataset.fullname || '—';
+    document.getElementById('detailRole').textContent = row.dataset.role || '—';
+    document.getElementById('detailEmail').textContent = row.dataset.email || '—';
+    document.getElementById('detailStatus').textContent = row.dataset.status || '—';
+    document.getElementById('detailLastLogin').textContent = row.dataset.lastLogin || '—';
+    document.getElementById('detailDateJoined').textContent = row.dataset.dateJoined || '—';
+    if (placeholderEl) placeholderEl.style.display = 'none';
+    if (contentEl) contentEl.style.display = 'block';
+  }
+
+  rows.forEach(function (row) {
+    row.addEventListener('click', function () {
+      selectRow(row);
+    });
+  });
+})();
+</script>
+{% if can_manage_users %}
+<script>
+(function () {
+  function getSelectedOrModal() {
+    var selectedRow = window.userAccountsSelectedRow;
+    if (!selectedRow) {
+      openUserAccountsModal('selectUserFirstModal');
+      return null;
+    }
+    return selectedRow;
+  }
+
+  var header = document.querySelector('.card-header .page-header-actions');
+  if (!header) return;
+
+  function createHeaderButton(text, iconClass, cssClass, onClick) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn ' + cssClass;
+    btn.style.marginLeft = '0.5rem';
+    btn.title = text;
+    btn.innerHTML = (iconClass ? '<i class="' + iconClass + '"></i> ' : '') + '<span class="btn-action-label">' + text + '</span>';
+    btn.addEventListener('click', onClick);
+    header.appendChild(btn);
+  }
+
+  createHeaderButton('Edit', 'fas fa-pen', 'btn-edit-header', function () {
+    var row = getSelectedOrModal();
+    if (!row) return;
+    if (row.dataset.isFixedAdmin === 'true') {
+      openUserAccountsModal('fixedAdminEditModal');
+      return;
+    }
+    window.location.href = "{% url 'administrator:user_edit' 0 %}".replace('/0/', '/' + row.dataset.id + '/');
+  });
+
+  createHeaderButton('Change password', 'fas fa-key', 'btn-edit-header', function () {
+    var row = getSelectedOrModal();
+    if (!row) return;
+    window.location.href = "{% url 'administrator:user_change_password' 0 %}".replace('/0/', '/' + row.dataset.id + '/');
+  });
+
+  createHeaderButton('Delete', 'fas fa-trash', 'btn-delete-header', function () {
+    var row = getSelectedOrModal();
+    if (!row) return;
+    if (row.dataset.isFixedAdmin === 'true' || row.dataset.isAdminRole === 'true') {
+      openUserAccountsModal('adminCannotDeleteModal');
+      return;
+    }
+    var username = row.dataset.username || 'this user';
+    var deleteUrl = "{% url 'administrator:user_delete' 0 %}".replace('/0/', '/' + row.dataset.id + '/');
+    document.getElementById('deleteConfirmUsername').textContent = '"' + username + '"';
+    window.userAccountsPendingDeleteUrl = deleteUrl;
+    openUserAccountsModal('deleteUserConfirmModal');
+  });
+
+  document.getElementById('deleteConfirmCancelBtn').addEventListener('click', function () {
+    closeUserAccountsModal('deleteUserConfirmModal');
+  });
+  document.getElementById('deleteConfirmSubmitBtn').addEventListener('click', function () {
+    var url = window.userAccountsPendingDeleteUrl;
+    if (url) window.location.href = url;
+  });
+})();
+</script>
+{% endif %}
 
 {% endblock %}
