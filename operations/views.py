@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.http import JsonResponse
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Count, Prefetch
 from django.urls import reverse
 from reference.models import Barangay, Municipality, Position
 from administrator.utils import user_can_delete_in_operations
@@ -167,11 +167,17 @@ def get_residents_by_barangay(request):
         residents = Resident.objects.filter(barangay=barangay, status=Resident.STATUS_ALIVE)
         
         if search:
-            residents = residents.filter(
-                Q(firstname__icontains=search) |
-                Q(lastname__icontains=search) |
-                Q(middlename__icontains=search)
-            )
+            words = [w.strip() for w in search.split() if w.strip()]
+            if words:
+                q = Q()
+                for word in words:
+                    q &= (
+                        Q(firstname__icontains=word) |
+                        Q(lastname__icontains=word) |
+                        Q(middlename__icontains=word) |
+                        Q(suffix__icontains=word)
+                    )
+                residents = residents.filter(q)
         
         residents = residents.order_by('lastname', 'firstname')[:50]  # Limit to 50 results
         
@@ -189,6 +195,7 @@ def get_residents_by_barangay(request):
             'middlename': r.middlename,
             'suffix': r.suffix,
             'is_already_official': r.id in official_resident_ids,
+            'is_voter': r.is_voter,
         } for r in residents]
         
         return JsonResponse({'residents': residents_data}, safe=False)
@@ -407,8 +414,14 @@ def resident_get(request, pk):
         'health_status': resident.health_status,
         'economic_status': resident.economic_status,
         'is_voter': resident.is_voter,
+        'precinct_number': resident.precinct_number or '',
+        'voter_legend': resident.voter_legend or '',
+        'date_verified': resident.date_verified.strftime('%Y-%m-%d') if resident.date_verified else '',
+        'verified_by': resident.verified_by or '',
         'remarks': resident.remarks,
     }
+    data['barangay_name'] = resident.barangay.name if resident.barangay else ''
+    data['full_name'] = resident.get_full_name()
     return JsonResponse(data)
 
 
@@ -444,6 +457,19 @@ def resident_edit(request, pk):
             resident.health_status = request.POST.get('health_status')
             resident.economic_status = request.POST.get('economic_status')
             resident.is_voter = request.POST.get('is_voter') == 'on'
+            resident.precinct_number = request.POST.get('precinct_number', '').strip()
+            # Legend: comma-separated e.g. A,B or A,B,C (Illiterate, PWD, Senior)
+            resident.voter_legend = request.POST.get('voter_legend', '').strip()
+            date_verified_val = request.POST.get('date_verified', '').strip()
+            resident.date_verified = None
+            if date_verified_val:
+                try:
+                    from datetime import datetime
+                    resident.date_verified = datetime.strptime(date_verified_val, '%Y-%m-%d').date()
+                except ValueError:
+                    pass
+            # Verified by: set to the logged-in user's full name (or username if no full name)
+            resident.verified_by = (request.user.get_full_name() or request.user.get_username() or '').strip()
             resident.remarks = request.POST.get('remarks', '')
             
             resident.save()
@@ -453,6 +479,8 @@ def resident_edit(request, pk):
             
             log_activity(request, ACTION_UPDATE, f'Updated resident "{resident.get_full_name()}".')
             messages.success(request, f'Resident {resident.get_full_name()} updated successfully!')
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': True, 'message': 'Voter updated successfully.'})
             return redirect('operations:residents_record')
         except Exception as e:
             logger.error(f'Error updating resident in Supabase: {str(e)}')
@@ -491,7 +519,78 @@ def resident_delete(request, pk):
 
 
 def voters_registration(request):
-    return render(request, "operations/voters_registration.html")
+    """Voters registration: show municipalities, then barangays; clicking a barangay shows its voters."""
+    barangays_with_voter_count = Barangay.objects.filter(
+        is_active=True
+    ).annotate(
+        voter_count=Count(
+            'residents',
+            filter=Q(residents__is_voter=True, residents__status=Resident.STATUS_ALIVE),
+            distinct=True,
+        ),
+    ).order_by('name')
+    municipalities = Municipality.objects.filter(
+        is_active=True
+    ).prefetch_related(
+        Prefetch('barangays', queryset=barangays_with_voter_count)
+    ).order_by('name')
+    context = {'municipalities': municipalities}
+    return render(request, "operations/voters_registration.html", context)
+
+
+def voters_registration_barangay(request, pk):
+    """Voters registration detail page for a single barangay (full-width voters list)."""
+    barangays_with_voter_count = Barangay.objects.filter(
+        is_active=True
+    ).annotate(
+        voter_count=Count(
+            'residents',
+            filter=Q(residents__is_voter=True, residents__status=Resident.STATUS_ALIVE),
+            distinct=True,
+        ),
+    ).order_by('name')
+    municipalities = Municipality.objects.filter(
+        is_active=True
+    ).prefetch_related(
+        Prefetch('barangays', queryset=barangays_with_voter_count)
+    ).order_by('name')
+    initial_barangay = get_object_or_404(Barangay, pk=pk, is_active=True)
+    context = {
+        'municipalities': municipalities,
+        'initial_barangay': initial_barangay,
+        'single_barangay_view': True,
+    }
+    return render(request, "operations/voters_registration.html", context)
+
+
+def get_voters_by_barangay(request, pk):
+    """API: return list of voters (residents with is_voter=True, alive) for a barangay."""
+    barangay = get_object_or_404(Barangay, pk=pk)
+    voters = Resident.objects.filter(
+        barangay=barangay,
+        is_voter=True,
+        status=Resident.STATUS_ALIVE,
+    ).order_by('lastname', 'firstname')
+    barangay_name = barangay.name
+    data = [
+        {
+            'id': r.id,
+            'resident_id': r.resident_id or '',
+            'full_name': r.get_full_name(),
+            'gender': r.get_gender_display() if hasattr(r, 'get_gender_display') else r.gender,
+            'date_of_birth': r.date_of_birth.strftime('%Y-%m-%d'),
+            'address': r.address or '',
+            'purok': r.purok or '',
+            'precinct_number': r.precinct_number or '—',
+            'barangay_name': barangay_name,
+            'legend': r.get_voter_legend_display(),
+            'status': r.get_status_display() if hasattr(r, 'get_status_display') else r.status,
+            'date_verified': r.date_verified.strftime('%Y-%m-%d') if r.date_verified else '',
+            'verified_by': r.verified_by or '',
+        }
+        for r in voters
+    ]
+    return JsonResponse({'voters': data, 'barangay_name': barangay_name}, safe=False)
 
 
 @transaction.atomic

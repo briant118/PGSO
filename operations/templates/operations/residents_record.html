@@ -800,7 +800,13 @@
 <div id="addModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2 class="modal-title"><i class="fas fa-user-plus"></i> Add New Resident</h2>
+      <h2 class="modal-title">
+        {% if request.GET.voter == '1' %}
+        <i class="fas fa-vote-yea"></i> Voter's Registration
+        {% else %}
+        <i class="fas fa-user-plus"></i> Add New Resident
+        {% endif %}
+      </h2>
       <button class="modal-close" onclick="closeAddModal()">&times;</button>
     </div>
     <form method="post" action="{% url 'operations:resident_add' %}">
@@ -998,19 +1004,6 @@
         <!-- Other Information -->
         <div class="form-section">
           <h3 class="form-section-title"><i class="fas fa-clipboard"></i> Other Information</h3>
-          
-          <div class="form-row cols-2">
-            <div class="form-group">
-              <label for="add_is_voter">Voter?</label>
-              <div class="toggle-container">
-                <label class="toggle-switch">
-                  <input type="checkbox" id="add_is_voter" name="is_voter">
-                  <span class="toggle-slider"></span>
-                </label>
-                <span style="font-size: 0.95rem; color: #5f6368;">Registered voter</span>
-              </div>
-            </div>
-          </div>
           
           <div class="form-group">
             <label for="add_remarks">Remarks</label>
@@ -1702,10 +1695,24 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
   (function () {
     var params = new URLSearchParams(window.location.search);
-    var flag = params.get('no_delete_perm');
-    if (!flag) return;
-    if (window.showPermissionDenied) {
-      window.showPermissionDenied('You do not have permission to delete in Operations.');
+    var noDeletePerm = params.get('no_delete_perm');
+    if (noDeletePerm) {
+      if (window.showPermissionDenied) {
+        window.showPermissionDenied('You do not have permission to delete in Operations.');
+      }
+      return;
+    }
+    var addFlag = params.get('add');
+    var editId = params.get('edit');
+    var viewId = params.get('view');
+    if (addFlag === '1') {
+      if (typeof openAddModal === 'function') openAddModal();
+    }
+    if (editId && typeof openEditModal === 'function') {
+      openEditModal(editId);
+    }
+    if (viewId && typeof openViewModal === 'function') {
+      openViewModal(viewId);
     }
   })();
 </script>

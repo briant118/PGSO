@@ -4,7 +4,17 @@
 <style>
 /* Page Header */
 .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 1rem;
   margin-bottom: 2rem;
+}
+
+.page-header-text {
+  flex: 1;
+  min-width: 0;
 }
 
 .page-title {
@@ -23,47 +33,1637 @@
   font-size: 0.95rem;
 }
 
-/* Coming Soon Card */
-.coming-soon-card {
+.page-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+/* Card-style buttons: white, rounded, icon on top + label below (match reference) */
+.voters-header-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  background: #fff;
+  color: #4a4a4a;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.voters-header-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+}
+
+.voters-header-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.voters-header-btn .btn-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+}
+
+.voters-header-btn .btn-icon-wrap i {
+  font-size: 1.5rem;
+}
+
+/* Add: document icon with green plus in corner */
+.voters-header-btn.btn-add-voter .btn-icon-wrap {
+  color: #5f6368;
+}
+.voters-header-btn.btn-add-voter .btn-icon-wrap .fa-file-lines {
+  font-size: 1.4rem;
+}
+.voters-header-btn.btn-add-voter .btn-icon-wrap .add-plus-circle {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 1.1rem;
+  height: 1.1rem;
+  border-radius: 50%;
+  background: #28a745;
+  color: #fff;
+  font-size: 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* View: teal eye */
+.voters-header-btn.btn-view-voter .btn-icon-wrap i {
+  color: #17a2b8;
+  font-size: 1.5rem;
+}
+
+/* Edit: blue pencil */
+.voters-header-btn.btn-edit-voter .btn-icon-wrap i {
+  color: #007bff;
+  font-size: 1.5rem;
+}
+
+/* Delete: red trash */
+.voters-header-btn.btn-delete-voter .btn-icon-wrap i {
+  color: #dc3545;
+  font-size: 1.5rem;
+}
+
+/* Layout: municipalities + barangays on left, voters panel on right */
+.voters-layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: stretch;
+  width: 100%;
+}
+
+/* Left column: municipalities — fixed 30% */
+.voters-layout-col.municipalities-col {
+  width: 30%;
+  flex-shrink: 0;
+  min-width: 0;
+  border-right: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+/* Right column: voters — fills remaining width (max width) */
+.voters-layout-col.voters-col {
+  flex: 1;
+  min-width: 0;
+}
+
+.voters-layout.single-barangay-layout .municipalities-col {
+  display: none;
+}
+
+.voters-layout.single-barangay-layout .voters-col {
+  flex: 1;
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .voters-layout {
+    flex-direction: column;
+  }
+  .voters-layout-col.municipalities-col {
+    width: 100%;
+  }
+}
+
+/* Municipalities list: fills first grid column (50%) */
+.municipalities-section {
+  min-width: 0;
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  padding: 4rem 2rem;
-  text-align: center;
+  overflow: hidden;
 }
 
-.coming-soon-icon {
-  font-size: 4rem;
-  margin-bottom: 1.5rem;
-  opacity: 0.3;
-}
-
-.coming-soon-card h2 {
-  margin: 0 0 0.75rem;
-  color: #1a1d24;
-  font-size: 1.75rem;
-  font-weight: 700;
-}
-
-.coming-soon-card p {
+.municipalities-section h2 {
   margin: 0;
+  padding: 1rem 1.25rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1a1d24;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e8eaed;
+}
+.municipality-search-row {
+  padding: 0.5rem 1.25rem 0.75rem;
+  border-bottom: 1px solid #f1f3f4;
+}
+
+.search-input-wrap {
+  position: relative;
+  display: block;
+}
+.search-input-wrap .search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
   color: #5f6368;
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+.search-input-wrap input {
+  width: 100%;
+  padding: 0.45rem 0.75rem 0.45rem 2.25rem;
+  border-radius: 8px;
+  border: 1px solid #dadce0;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+.search-input-wrap input:focus {
+  outline: none;
+  border-color: #1e3a5f;
+  box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.1);
+}
+
+.municipality-block {
+  border-bottom: 1px solid #e8eaed;
+}
+
+.municipality-block:last-child {
+  border-bottom: none;
+}
+
+.municipality-name {
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  color: #1e3a5f;
+  font-size: 1rem;
+  background: #f0f4f8;
+}
+
+.barangays-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.barangay-folder {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1.25rem 0.65rem 2rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: 0.95rem;
+  color: #1a1d24;
+  background: transparent;
+}
+
+.barangay-folder:hover {
+  background: #e8f0fe;
+}
+
+.barangay-folder.selected {
+  background: #d2e3fc;
+  color: #1e3a5f;
+  font-weight: 600;
+}
+
+.barangay-folder .folder-icon {
+  color: #5f6368;
+  font-size: 1.1rem;
+}
+
+.barangay-folder.selected .folder-icon {
+  color: #1e3a5f;
+}
+
+.barangay-folder .folder-name {
+  flex: 1;
+}
+
+.barangay-folder .voter-badge {
+  font-size: 0.8rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: #e8eaed;
+  color: #5f6368;
+  font-weight: 500;
+}
+
+.barangay-folder.selected .voter-badge {
+  background: #1e3a5f;
+  color: #fff;
+}
+
+/* Voters panel */
+.voters-panel {
+  min-width: 0;
+  width: 100%;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.voters-panel-placeholder {
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #5f6368;
+  font-size: 0.95rem;
+}
+
+.voters-panel-placeholder i {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  opacity: 0.4;
+  display: block;
+}
+.voters-search-row {
+  padding: 0.75rem 1.25rem 0.5rem;
+  border-bottom: 1px solid #e8eaed;
+}
+.voters-search-row .search-input-wrap input {
+  width: 100%;
+}
+
+.voters-panel-header {
+  padding: 1rem 1.25rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%);
   font-size: 1rem;
 }
+
+.voters-panel-loading {
+  padding: 2rem;
+  text-align: center;
+  color: #5f6368;
+}
+
+.voters-table-wrap {
+  overflow: auto;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.voters-table {
+  width: 100%;
+  min-width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.voters-table thead th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #5f6368;
+  font-weight: 600;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e8eaed;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.voters-table tbody tr {
+  border-bottom: 1px solid #e8eaed;
+}
+
+.voters-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.voters-table tbody td {
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+  color: #1a1d24;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+/* Column widths so table fills space and text wraps */
+.voters-table th:nth-child(1),
+.voters-table td:nth-child(1) { width: 18%; }
+.voters-table th:nth-child(2),
+.voters-table td:nth-child(2) { width: 10%; }
+.voters-table th:nth-child(3),
+.voters-table td:nth-child(3) { width: 22%; }
+.voters-table th:nth-child(4),
+.voters-table td:nth-child(4) { width: 12%; }
+.voters-table th:nth-child(5),
+.voters-table td:nth-child(5) { width: 8%; }
+.voters-table th:nth-child(6),
+.voters-table td:nth-child(6) { width: 8%; }
+.voters-table th:nth-child(7),
+.voters-table td:nth-child(7) { width: 12%; }
+.voters-table th:nth-child(8),
+.voters-table td:nth-child(8) { width: 10%; }
+
+.voters-table tbody td a {
+  color: #1e3a5f;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.voters-table tbody td a:hover {
+  text-decoration: underline;
+}
+
+.voters-table tbody tr.voter-row-clickable {
+  cursor: pointer;
+}
+
+.voters-table tbody tr.voter-row-clickable:hover {
+  background: #e8f4fc;
+}
+
+.voters-table tbody tr.voter-row-clickable.selected {
+  background: #bbdefb;
+}
+
+/* Voter's Registration (Modify record) modal - match reference image */
+.voter-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1rem;
+  overflow-y: auto;
+}
+.voter-modal-overlay.active {
+  display: flex;
+}
+.voter-modal-card {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 520px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  margin: auto;
+}
+.voter-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e8eaed;
+}
+.voter-modal-header-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #1e3a5f;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+.voter-modal-header-text { flex: 1; }
+.voter-modal-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1e3a5f;
+}
+.voter-modal-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #5f6368;
+}
+.voter-modal-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #1a1d24;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+.voter-modal-close:hover { color: #000; }
+.voter-modal-body {
+  padding: 1.25rem 1.5rem;
+}
+.voter-form-row {
+  margin-bottom: 1rem;
+}
+.voter-form-row.flex-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+.voter-form-row.flex-row .voter-form-group { flex: 1; }
+.voter-form-row.flex-row .voter-form-group input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: #fff;
+}
+.voter-form-row.flex-row .voter-form-group input:focus {
+  outline: none;
+  border-color: #1e3a5f;
+  box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.15);
+}
+.voter-form-row > input.voter-form-input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: #fff;
+}
+.voter-form-row > input.voter-form-input:focus {
+  outline: none;
+  border-color: #1e3a5f;
+  box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.15);
+}
+.voter-form-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #5f6368;
+}
+.voter-form-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.voter-form-input-wrap input[type="text"],
+.voter-form-input-wrap .voter-form-input {
+  flex: 1;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: #fff;
+}
+.voter-form-input-wrap input:focus {
+  outline: none;
+  border-color: #1e3a5f;
+  box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.15);
+}
+.voter-form-input-wrap input.voter-form-input-focus,
+.voter-modal-name-input:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.25);
+}
+.voter-form-input-wrap .btn-icon-sm {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  background: #fff;
+  color: #5f6368;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.voter-form-input-wrap .btn-icon-sm.search { color: #007bff; }
+.voter-form-row.barangay-row { position: relative; }
+.barangay-picker-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 4px;
+  background: #fff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+}
+.barangay-picker-item {
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #1a1d24;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.barangay-picker-item:hover { background: #e8f0fe; }
+
+/* Voter's Name: single input, no icon; green border when focused */
+.voter-form-row.voter-name-row { position: relative; }
+.voter-modal-name-input {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: #fff;
+}
+.voter-modal-name-input:focus {
+  outline: none;
+}
+
+/* Legend dropdown with checkboxes */
+.voter-legend-dropdown-wrap {
+  position: relative;
+  width: 100%;
+}
+.voter-legend-trigger {
+  width: 100%;
+  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: #fff;
+  color: #1a1d24;
+  text-align: left;
+  cursor: pointer;
+  appearance: none;
+  display: flex;
+  align-items: center;
+  min-height: 38px;
+}
+.voter-legend-trigger:focus {
+  outline: none;
+  border-color: #1e3a5f;
+  box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.15);
+}
+.voter-legend-trigger::after {
+  content: '';
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-top-color: #5f6368;
+  margin-top: 2px;
+}
+.voter-legend-dropdown-wrap.open .voter-legend-trigger::after {
+  border-top-color: transparent;
+  border-bottom-color: #5f6368;
+  margin-top: -7px;
+}
+.voter-legend-panel {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 4px;
+  background: #fff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  z-index: 20;
+  padding: 0.5rem 0;
+}
+.voter-legend-dropdown-wrap.open .voter-legend-panel {
+  display: block;
+}
+.voter-legend-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #1a1d24;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.voter-legend-option:hover {
+  background: #f0f4f8;
+}
+.voter-legend-option input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  margin: 0;
+}
+.voter-legend-option label {
+  cursor: pointer;
+  margin: 0;
+  flex: 1;
+}
+
+.voter-modal-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e8eaed;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+.voter-modal-footer .footer-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+.voter-modal-footer .btn-save {
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  background: #4a5568;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.voter-modal-footer .btn-save:hover { background: #2d3748; }
+.voter-modal-footer .btn-cancel {
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  border: 1px solid #cbd5e0;
+  background: #e2e8f0;
+  color: #1a1d24;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.voter-modal-footer .btn-cancel:hover { background: #cbd5e0; }
+
+/* View mode: read-only styling */
+.voter-modal-view-mode .voter-form-input,
+.voter-modal-view-mode .voter-modal-name-input,
+.voter-modal-view-mode .voter-form-input-wrap input,
+.voter-modal-view-mode input[type="text"] {
+  background: #f5f5f5;
+  cursor: default;
+  color: #1a1d24;
+}
+
+/* Resident picker for Register voter */
+.voter-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.voter-name-wrap input.voter-form-input { flex: 1; }
+.resident-picker-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 4px;
+  background: #fff;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  max-height: 220px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+.resident-picker-search {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e8eaed;
+}
+.resident-picker-search input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #dadce0;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.resident-picker-list {
+  overflow-y: auto;
+  padding: 0.25rem 0;
+}
+.resident-picker-loading {
+  padding: 1rem;
+  color: #5f6368;
+  font-size: 0.9rem;
+  text-align: center;
+}
+.resident-picker-item {
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #1a1d24;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.resident-picker-item:hover {
+  background: #e8f0fe;
+}
+.resident-picker-item.already-voter {
+  color: #5f6368;
+}
+.resident-picker-item .badge-voter {
+  font-size: 0.7rem;
+  margin-left: 0.5rem;
+  color: #28a745;
+}
+.voter-form-row.voter-name-row { position: relative; }
 </style>
 
 <!-- Page Header -->
 <div class="page-header">
-  <h1 class="page-title">
-    <i class="fas fa-vote-yea" style="color: #4299e1;"></i> Voter's Registration
-  </h1>
+  <div class="page-header-text">
+    <h1 class="page-title">
+      <i class="fas fa-vote-yea" style="color: #4299e1;"></i> Voter's Registration
+    </h1>
+    <p class="page-subtitle">Browse by municipality and barangay to view registered voters.</p>
+  </div>
+  <div class="page-header-actions">
+    <button type="button" class="voters-header-btn btn-add-voter" id="votersAddBtn" title="Register a resident as voter">
+      <span class="btn-icon-wrap">
+        <i class="fas fa-file-lines"></i>
+        <span class="add-plus-circle"><i class="fas fa-plus"></i></span>
+      </span>
+      <span class="btn-label">Add</span>
+    </button>
+    <button type="button" class="voters-header-btn btn-view-voter" id="votersViewBtn" disabled title="View selected voter">
+      <span class="btn-icon-wrap">
+        <i class="fas fa-eye"></i>
+      </span>
+      <span class="btn-label">View</span>
+    </button>
+    <button type="button" class="voters-header-btn btn-edit-voter" id="votersEditBtn" disabled title="Edit selected voter">
+      <span class="btn-icon-wrap">
+        <i class="fas fa-pen"></i>
+      </span>
+      <span class="btn-label">Edit</span>
+    </button>
+    <button type="button" class="voters-header-btn btn-delete-voter" id="votersDeleteBtn" disabled title="Delete selected voter">
+      <span class="btn-icon-wrap">
+        <i class="fas fa-trash"></i>
+      </span>
+      <span class="btn-label">Delete</span>
+    </button>
+  </div>
 </div>
 
-<!-- Coming Soon Content -->
-<div class="coming-soon-card">
-  <div class="coming-soon-icon">🚧</div>
-  <h2>Coming Soon</h2>
-  <p>This feature is currently under development and will be available soon.</p>
+<!-- Hidden form for delete (CSRF and action set in JS) -->
+<form method="post" id="voterDeleteForm" action="" style="display: none;">
+  {% csrf_token %}
+</form>
+
+<!-- Voter's Registration – Modify record modal -->
+<div id="voterModifyModal" class="voter-modal-overlay">
+  <div class="voter-modal-card">
+    <div class="voter-modal-header">
+      <div class="voter-modal-header-icon">
+        <i class="fas fa-file-pen"></i>
+      </div>
+      <div class="voter-modal-header-text">
+        <h2 class="voter-modal-title">Voter's Registration</h2>
+        <p class="voter-modal-subtitle" id="voterModalSubtitle">{/Modify record/}</p>
+      </div>
+      <button type="button" class="voter-modal-close" id="voterModalClose" aria-label="Close">&times;</button>
+    </div>
+    <form id="voterModifyForm">
+      {% csrf_token %}
+      <div class="voter-modal-body">
+        <div class="voter-form-row barangay-row">
+          <label class="voter-form-label">Barangay</label>
+          <div class="voter-form-input-wrap">
+            <input type="text" id="voterModalBarangayDisplay" class="voter-form-input" placeholder="Type to search barangay" autocomplete="off">
+            <input type="hidden" id="voterModalBarangay" name="barangay" value="">
+            <button type="button" class="btn-icon-sm search" title="Search"><i class="fas fa-search"></i></button>
+          </div>
+          <div id="barangayPickerDropdown" class="barangay-picker-dropdown" style="display: none;"></div>
+        </div>
+        <select id="barangaysData" style="display: none;">
+          <option value="">Select Barangay</option>
+          {% for municipality in municipalities %}
+            {% for barangay in municipality.barangays.all %}
+          <option value="{{ barangay.id }}">{{ barangay.name }}</option>
+            {% endfor %}
+          {% endfor %}
+        </select>
+        <div class="voter-form-row voter-name-row">
+          <label class="voter-form-label">Voter's Name</label>
+          <input
+            type="text"
+            id="voterModalName"
+            class="voter-form-input voter-form-input-focus voter-modal-name-input"
+            placeholder="Select barangay, then type to search resident"
+            autocomplete="off"
+          >
+          <div id="residentPickerDropdown" class="resident-picker-dropdown" style="display: none;">
+            <div id="residentPickerList" class="resident-picker-list"></div>
+          </div>
+        </div>
+        <div class="voter-form-row flex-row">
+          <div class="voter-form-group">
+            <label class="voter-form-label">Precinct No.</label>
+            <input type="text" id="voterModalPrecinct" name="precinct_number" maxlength="20" placeholder="e.g. 0021A">
+          </div>
+          <div class="voter-form-group">
+            <label class="voter-form-label">Legend</label>
+            <div class="voter-legend-dropdown-wrap" id="voterLegendDropdownWrap">
+              <button type="button" class="voter-legend-trigger" id="voterLegendTrigger" aria-haspopup="true" aria-expanded="false">Select legend…</button>
+              <div class="voter-legend-panel" id="voterLegendPanel" role="listbox">
+                <label class="voter-legend-option">
+                  <input type="checkbox" id="voterLegendA" value="A">
+                  <span>Illiterate</span>
+                </label>
+                <label class="voter-legend-option">
+                  <input type="checkbox" id="voterLegendB" value="B">
+                  <span>PWD</span>
+                </label>
+                <label class="voter-legend-option">
+                  <input type="checkbox" id="voterLegendC" value="C">
+                  <span>Senior</span>
+                </label>
+              </div>
+            </div>
+            <input type="hidden" id="voterModalVoterLegend" name="voter_legend" value="">
+          </div>
+        </div>
+        <div class="voter-form-row">
+          <label class="voter-form-label">Address</label>
+          <input type="text" id="voterModalAddress" name="address" class="voter-form-input" placeholder="Address">
+        </div>
+        <div class="voter-form-row flex-row">
+          <div class="voter-form-group">
+            <label class="voter-form-label">Date Verified</label>
+            <input type="date" id="voterModalDateVerified" name="date_verified" class="voter-form-input">
+          </div>
+          <div class="voter-form-group">
+            <label class="voter-form-label">Verified By</label>
+            <input type="text" id="voterModalVerifiedBy" class="voter-form-input" readonly placeholder="Set when you save (your account name)" tabindex="-1">
+          </div>
+        </div>
+        <!-- Hidden fields for resident_edit (required) -->
+        <input type="hidden" name="status" id="voterModalStatus" value="ALIVE">
+        <input type="hidden" name="lastname" id="voterModalLastname" value="">
+        <input type="hidden" name="firstname" id="voterModalFirstname" value="">
+        <input type="hidden" name="middlename" id="voterModalMiddlename" value="">
+        <input type="hidden" name="suffix" id="voterModalSuffix" value="">
+        <input type="hidden" name="gender" id="voterModalGender" value="">
+        <input type="hidden" name="date_of_birth" id="voterModalDob" value="">
+        <input type="hidden" name="place_of_birth" id="voterModalPob" value="">
+        <input type="hidden" name="purok" id="voterModalPurok" value="">
+        <input type="hidden" name="contact_no" id="voterModalContact" value="">
+        <input type="hidden" name="civil_status" id="voterModalCivil" value="">
+        <input type="hidden" name="educational_attainment" id="voterModalEdu" value="">
+        <input type="hidden" name="citizenship" id="voterModalCitizenship" value="">
+        <input type="hidden" name="dialect_ethnic" id="voterModalDialect" value="">
+        <input type="hidden" name="occupation" id="voterModalOccupation" value="">
+        <input type="hidden" name="health_status" id="voterModalHealth" value="">
+        <input type="hidden" name="economic_status" id="voterModalEconomic" value="">
+        <input type="hidden" name="is_voter" id="voterModalIsVoter" value="on">
+        <input type="hidden" name="remarks" id="voterModalRemarks" value="">
+      </div>
+      <div class="voter-modal-footer">
+        <div class="footer-actions">
+          <button type="button" class="btn-cancel" id="voterModalCancel"><i class="fas fa-arrow-left"></i> CANCEL</button>
+          <button type="submit" class="btn-save" id="voterModalUpdateBtn"><i class="fas fa-save"></i> UPDATE</button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
+
+<div class="voters-layout{% if single_barangay_view %} single-barangay-layout{% endif %}">
+  <!-- Left: Municipalities → Barangays (50%) -->
+  <div class="voters-layout-col municipalities-col">
+  <div class="municipalities-section">
+    <h2><i class="fas fa-map-marker-alt"></i> Municipalities &amp; Barangays</h2>
+    <div class="municipality-search-row">
+      <div class="search-input-wrap">
+        <i class="fas fa-search search-icon" aria-hidden="true"></i>
+        <input type="text" id="municipalitySearch" placeholder="Search municipality or barangay">
+      </div>
+    </div>
+    {% for municipality in municipalities %}
+    <div class="municipality-block">
+      <div class="municipality-name">{{ municipality.name }}</div>
+      <div class="barangays-list">
+        {% for barangay in municipality.barangays.all %}
+        <button type="button" class="barangay-folder" data-barangay-id="{{ barangay.id }}" data-barangay-name="{{ barangay.name|escapejs }}" aria-label="Show voters in {{ barangay.name }}">
+          <span class="folder-icon"><i class="fas fa-folder"></i></span>
+          <span class="folder-name">{{ barangay.name }}</span>
+          <span class="voter-badge">{{ barangay.voter_count|default:0 }} voter{{ barangay.voter_count|default:0|pluralize }}</span>
+        </button>
+        {% empty %}
+        <div style="padding: 0.5rem 1.25rem 0.5rem 2rem; font-size: 0.9rem; color: #5f6368;">No barangays</div>
+        {% endfor %}
+      </div>
+    </div>
+    {% empty %}
+    <div style="padding: 2rem; text-align: center; color: #5f6368;">No municipalities in the system.</div>
+    {% endfor %}
+  </div>
+  </div>
+
+  <!-- Right: Voters list — fills remaining width -->
+  <div class="voters-layout-col voters-col">
+  <div class="voters-panel">
+    <div id="votersHeader" class="voters-panel-header" style="display: none;"></div>
+    <div class="voters-search-row" style="display: none;" id="votersSearchRow">
+      <div class="search-input-wrap">
+        <i class="fas fa-search search-icon" aria-hidden="true"></i>
+        <input type="text" id="votersSearch" placeholder="Search voters in this barangay" disabled>
+      </div>
+    </div>
+    <div id="votersLoading" class="voters-panel-loading" style="display: none;">
+      <i class="fas fa-spinner fa-spin"></i> Loading voters…
+    </div>
+    <div id="votersTableWrap" class="voters-table-wrap" style="display: none;">
+      <table class="voters-table">
+        <thead>
+          <tr>
+            <th>Voter's Name</th>
+            <th>Precinct No</th>
+            <th>Address</th>
+            <th>Barangay</th>
+            <th>Legend</th>
+            <th>Status</th>
+            <th>Date Verified</th>
+            <th>Verified By</th>
+          </tr>
+        </thead>
+        <tbody id="votersTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var placeholder = null;
+  var header = document.getElementById('votersHeader');
+  var loading = document.getElementById('votersLoading');
+  var tableWrap = document.getElementById('votersTableWrap');
+  var tableBody = document.getElementById('votersTableBody');
+  var folderBtns = document.querySelectorAll('.barangay-folder');
+  var residentsRecordUrl = '{% url "operations:residents_record" %}';
+  var currentBarangayId = null;
+  var municipalitySearch = document.getElementById('municipalitySearch');
+  var municipalityBlocks = document.querySelectorAll('.municipality-block');
+  var votersSearchRow = document.getElementById('votersSearchRow');
+  var votersSearch = document.getElementById('votersSearch');
+  var viewBtn = document.getElementById('votersViewBtn');
+  var editBtn = document.getElementById('votersEditBtn');
+  var deleteBtn = document.getElementById('votersDeleteBtn');
+  var deleteForm = document.getElementById('voterDeleteForm');
+  var initialBarangayId = {% if initial_barangay %}{{ initial_barangay.id }}{% else %}null{% endif %};
+  var initialBarangayName = {% if initial_barangay %}'{{ initial_barangay.name|escapejs }}'{% else %}null{% endif %};
+
+  function setPanelLoading(show) {
+    if (placeholder) placeholder.style.display = show ? 'none' : (tableWrap && header && tableWrap.style.display === 'none' && header.style.display === 'none' ? 'block' : 'none');
+    if (header) header.style.display = show ? 'none' : (tableBody && tableBody.innerHTML ? 'block' : 'none');
+    if (loading) loading.style.display = show ? 'block' : 'none';
+    if (tableWrap) tableWrap.style.display = show ? 'none' : (tableBody && tableBody.innerHTML ? 'block' : 'none');
+  }
+
+  function updateEditDeleteState() {
+    var selected = tableBody ? tableBody.querySelector('tr.voter-row-clickable.selected') : null;
+    var disabled = !selected;
+    if (viewBtn) viewBtn.disabled = disabled;
+    if (editBtn) editBtn.disabled = disabled;
+    if (deleteBtn) deleteBtn.disabled = disabled;
+  }
+
+  function refreshCurrentVoters() {
+    if (!currentBarangayId) return;
+    var btn = document.querySelector('.barangay-folder[data-barangay-id="' + currentBarangayId + '"]');
+    if (btn) btn.click();
+  }
+
+  function filterVotersTable() {
+    if (!votersSearch || !tableBody) return;
+    var term = votersSearch.value.trim().toLowerCase();
+    var rows = tableBody.querySelectorAll('tr.voter-row-clickable');
+    rows.forEach(function (tr) {
+      if (!term) {
+        tr.style.display = '';
+        return;
+      }
+      var text = tr.textContent.toLowerCase();
+      tr.style.display = text.indexOf(term) !== -1 ? '' : 'none';
+    });
+  }
+
+  function showVoters(barangayId, barangayName, voters) {
+    currentBarangayId = barangayId;
+    if (placeholder) placeholder.style.display = 'none';
+    if (loading) loading.style.display = 'none';
+    if (header) { header.style.display = 'block'; header.textContent = 'Voters in ' + barangayName; }
+    if (tableWrap) tableWrap.style.display = 'block';
+    if (!tableBody) return;
+    tableBody.innerHTML = '';
+    voters.forEach(function(v) {
+      var tr = document.createElement('tr');
+      tr.className = 'voter-row-clickable';
+      tr.setAttribute('data-id', v.id);
+      tr.setAttribute('data-name', v.full_name || '');
+      tr.innerHTML =
+        '<td><a href="' + residentsRecordUrl + '?highlight=' + v.id + '">' + escapeHtml(v.full_name || '') + '</a></td>' +
+        '<td>' + escapeHtml(v.precinct_number || '—') + '</td>' +
+        '<td>' + escapeHtml(v.address || '') + (v.purok ? ' / ' + escapeHtml(v.purok) : '') + '</td>' +
+        '<td>' + escapeHtml(v.barangay_name || barangayName || '') + '</td>' +
+        '<td>' + escapeHtml(v.legend || '—') + '</td>' +
+        '<td>' + escapeHtml(v.status || '') + '</td>' +
+        '<td>' + escapeHtml(v.date_verified || '—') + '</td>' +
+        '<td>' + escapeHtml(v.verified_by || '—') + '</td>';
+      tr.addEventListener('click', function(e) {
+        if (e.target.tagName === 'A') return;
+        tableBody.querySelectorAll('tr.voter-row-clickable').forEach(function(r) { r.classList.remove('selected'); });
+        tr.classList.add('selected');
+        updateEditDeleteState();
+      });
+      tableBody.appendChild(tr);
+    });
+    if (votersSearchRow && votersSearch) {
+      votersSearchRow.style.display = 'block';
+      votersSearch.disabled = voters.length === 0;
+      votersSearch.value = '';
+    }
+    updateEditDeleteState();
+    filterVotersTable();
+  }
+
+  function escapeHtml(text) {
+    if (text == null) return '';
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  folderBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var id = this.getAttribute('data-barangay-id');
+      var name = this.getAttribute('data-barangay-name');
+      folderBtns.forEach(function(b) { b.classList.remove('selected'); });
+      this.classList.add('selected');
+      setPanelLoading(true);
+      fetch('/operations/api/voters-by-barangay/' + id + '/')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          setPanelLoading(false);
+          showVoters(id, data.barangay_name || name || '', data.voters || []);
+        })
+        .catch(function() {
+          setPanelLoading(false);
+          if (placeholder) placeholder.style.display = 'block';
+          if (header) header.style.display = 'none';
+          if (tableWrap) tableWrap.style.display = 'none';
+          alert('Failed to load voters.');
+        });
+    });
+  });
+
+  if (initialBarangayId) {
+    setPanelLoading(true);
+    fetch('/operations/api/voters-by-barangay/' + initialBarangayId + '/')
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        setPanelLoading(false);
+        showVoters(initialBarangayId, (data.barangay_name || initialBarangayName || ''), data.voters || []);
+      })
+      .catch(function() {
+        setPanelLoading(false);
+        if (placeholder) placeholder.style.display = 'block';
+        if (header) header.style.display = 'none';
+        if (tableWrap) tableWrap.style.display = 'none';
+        alert('Failed to load voters.');
+      });
+  }
+
+  if (municipalitySearch) {
+    municipalitySearch.addEventListener('input', function () {
+      var term = this.value.trim().toLowerCase();
+      municipalityBlocks.forEach(function (block) {
+        if (!term) {
+          block.style.display = '';
+          return;
+        }
+        var mNameEl = block.querySelector('.municipality-name');
+        var bNames = block.querySelectorAll('.barangays-list .folder-name');
+        var matched = false;
+        if (mNameEl && mNameEl.textContent.toLowerCase().indexOf(term) !== -1) {
+          matched = true;
+        } else {
+          bNames.forEach(function (el) {
+            if (el.textContent.toLowerCase().indexOf(term) !== -1) matched = true;
+          });
+        }
+        block.style.display = matched ? '' : 'none';
+      });
+    });
+  }
+
+  if (votersSearch) {
+    votersSearch.addEventListener('input', filterVotersTable);
+  }
+
+  if (viewBtn) {
+    viewBtn.addEventListener('click', function() {
+      if (viewBtn.disabled) return;
+      var selected = document.querySelector('#votersTableBody tr.voter-row-clickable.selected');
+      if (!selected) { alert('Please select a voter first.'); return; }
+      openVoterViewModal(selected.getAttribute('data-id'));
+    });
+  }
+
+  var addBtn = document.getElementById('votersAddBtn');
+  if (addBtn) {
+    addBtn.addEventListener('click', function() {
+      openVoterRegisterModal();
+    });
+  }
+
+  if (editBtn) {
+    editBtn.addEventListener('click', function() {
+      if (editBtn.disabled) return;
+      var selected = document.querySelector('#votersTableBody tr.voter-row-clickable.selected');
+      if (!selected) { alert('Please select a voter first.'); return; }
+      openVoterModifyModal(selected.getAttribute('data-id'));
+    });
+  }
+
+  function setVoterModalMode(mode) {
+    var sub = document.getElementById('voterModalSubtitle');
+    if (!sub) return;
+    if (mode === 'view') sub.textContent = 'View record';
+    else if (mode === true) sub.textContent = 'Register voter';
+    else sub.textContent = 'Modify record';
+  }
+
+  function setModalViewMode(isView) {
+    var modal = document.getElementById('voterModifyModal');
+    var form = document.getElementById('voterModifyForm');
+    var updateBtn = document.getElementById('voterModalUpdateBtn');
+    var cancelBtn = document.getElementById('voterModalCancel');
+    var inputs = form.querySelectorAll('input:not([type="hidden"]), select');
+    var legendWrap = form.querySelector('#voterLegendDropdownWrap');
+    var legendTrigger = form.querySelector('#voterLegendTrigger');
+    if (isView) {
+      modal.classList.add('voter-modal-view-mode');
+      form.setAttribute('data-view-only', 'true');
+      if (updateBtn) updateBtn.style.display = 'none';
+      if (cancelBtn) { cancelBtn.innerHTML = '<i class="fas fa-times"></i> CLOSE'; cancelBtn.classList.add('btn-close'); }
+      inputs.forEach(function(inp) { inp.readOnly = true; inp.disabled = false; });
+      if (legendTrigger) legendTrigger.disabled = true;
+      if (legendWrap) legendWrap.classList.remove('open');
+      var searchBtn = form.querySelector('.barangay-row .btn-icon-sm.search');
+      if (searchBtn) searchBtn.style.display = 'none';
+    } else {
+      modal.classList.remove('voter-modal-view-mode');
+      form.removeAttribute('data-view-only');
+      if (updateBtn) updateBtn.style.display = '';
+      if (cancelBtn) { cancelBtn.innerHTML = '<i class="fas fa-arrow-left"></i> CANCEL'; cancelBtn.classList.remove('btn-close'); }
+      inputs.forEach(function(inp) { inp.readOnly = false; });
+      if (legendTrigger) legendTrigger.disabled = false;
+      var searchBtn = form.querySelector('.barangay-row .btn-icon-sm.search');
+      if (searchBtn) searchBtn.style.display = '';
+    }
+  }
+
+  function openVoterRegisterModal() {
+    setVoterModalMode(true);
+    setModalViewMode(false);
+    var modal = document.getElementById('voterModifyModal');
+    var form = document.getElementById('voterModifyForm');
+    form.removeAttribute('data-resident-id');
+    document.getElementById('voterModalBarangay').value = '';
+    document.getElementById('voterModalBarangayDisplay').value = '';
+    document.getElementById('voterModalName').value = '';
+    document.getElementById('voterModalPrecinct').value = '';
+    document.getElementById('voterModalAddress').value = '';
+    document.getElementById('voterModalVoterLegend').value = '';
+    setLegendSelectFromValue('');
+    var dateVerifiedEl = document.getElementById('voterModalDateVerified');
+    var verifiedByEl = document.getElementById('voterModalVerifiedBy');
+    if (dateVerifiedEl) dateVerifiedEl.value = '';
+    if (verifiedByEl) verifiedByEl.value = '';
+    document.getElementById('residentPickerDropdown').style.display = 'none';
+    document.getElementById('residentPickerList').innerHTML = '';
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function openVoterViewModal(residentId) {
+    setVoterModalMode('view');
+    setModalViewMode(true);
+    var modal = document.getElementById('voterModifyModal');
+    var form = document.getElementById('voterModifyForm');
+    form.setAttribute('data-resident-id', residentId);
+    document.getElementById('residentPickerDropdown').style.display = 'none';
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    fetch('/operations/resident/get/' + residentId + '/')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        setBarangayDisplay(data.barangay || '', data.barangay_name || '');
+        var nameStr = (data.lastname || '') + ', ' + [data.firstname, data.middlename].filter(Boolean).join(' ');
+        if (data.suffix) nameStr += ' ' + data.suffix;
+        document.getElementById('voterModalName').value = nameStr;
+        document.getElementById('voterModalPrecinct').value = data.precinct_number || '';
+        document.getElementById('voterModalAddress').value = data.address || '';
+        setLegendSelectFromValue(data.voter_legend || '');
+        document.getElementById('voterModalStatus').value = data.status || 'ALIVE';
+        document.getElementById('voterModalLastname').value = data.lastname || '';
+        document.getElementById('voterModalFirstname').value = data.firstname || '';
+        document.getElementById('voterModalMiddlename').value = data.middlename || '';
+        document.getElementById('voterModalSuffix').value = data.suffix || '';
+        document.getElementById('voterModalGender').value = data.gender || '';
+        document.getElementById('voterModalDob').value = data.date_of_birth || '';
+        document.getElementById('voterModalPob').value = data.place_of_birth || '';
+        document.getElementById('voterModalPurok').value = data.purok || '';
+        document.getElementById('voterModalContact').value = data.contact_no || '';
+        document.getElementById('voterModalCivil').value = data.civil_status || '';
+        document.getElementById('voterModalEdu').value = data.educational_attainment || '';
+        document.getElementById('voterModalCitizenship').value = data.citizenship || '';
+        document.getElementById('voterModalDialect').value = data.dialect_ethnic || '';
+        document.getElementById('voterModalOccupation').value = data.occupation || '';
+        document.getElementById('voterModalHealth').value = data.health_status || '';
+        document.getElementById('voterModalEconomic').value = data.economic_status || '';
+        document.getElementById('voterModalRemarks').value = data.remarks || '';
+        document.getElementById('voterModalIsVoter').value = data.is_voter ? 'on' : '';
+        document.getElementById('voterModalDateVerified').value = data.date_verified || '';
+        document.getElementById('voterModalVerifiedBy').value = data.verified_by || '';
+      })
+      .catch(function() { alert('Failed to load voter data.'); });
+  }
+
+  function openVoterModifyModal(residentId) {
+    setVoterModalMode(false);
+    setModalViewMode(false);
+    var modal = document.getElementById('voterModifyModal');
+    var form = document.getElementById('voterModifyForm');
+    form.setAttribute('data-resident-id', residentId);
+    document.getElementById('residentPickerDropdown').style.display = 'none';
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    fetch('/operations/resident/get/' + residentId + '/')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        setBarangayDisplay(data.barangay || '', data.barangay_name || '');
+        var nameStr = (data.lastname || '') + ', ' + [data.firstname, data.middlename].filter(Boolean).join(' ');
+        if (data.suffix) nameStr += ' ' + data.suffix;
+        document.getElementById('voterModalName').value = nameStr;
+        document.getElementById('voterModalPrecinct').value = data.precinct_number || '';
+        document.getElementById('voterModalAddress').value = data.address || '';
+        setLegendSelectFromValue(data.voter_legend || '');
+        document.getElementById('voterModalStatus').value = data.status || 'ALIVE';
+        document.getElementById('voterModalLastname').value = data.lastname || '';
+        document.getElementById('voterModalFirstname').value = data.firstname || '';
+        document.getElementById('voterModalMiddlename').value = data.middlename || '';
+        document.getElementById('voterModalSuffix').value = data.suffix || '';
+        document.getElementById('voterModalGender').value = data.gender || '';
+        document.getElementById('voterModalDob').value = data.date_of_birth || '';
+        document.getElementById('voterModalPob').value = data.place_of_birth || '';
+        document.getElementById('voterModalPurok').value = data.purok || '';
+        document.getElementById('voterModalContact').value = data.contact_no || '';
+        document.getElementById('voterModalCivil').value = data.civil_status || '';
+        document.getElementById('voterModalEdu').value = data.educational_attainment || '';
+        document.getElementById('voterModalCitizenship').value = data.citizenship || '';
+        document.getElementById('voterModalDialect').value = data.dialect_ethnic || '';
+        document.getElementById('voterModalOccupation').value = data.occupation || '';
+        document.getElementById('voterModalHealth').value = data.health_status || '';
+        document.getElementById('voterModalEconomic').value = data.economic_status || '';
+        document.getElementById('voterModalRemarks').value = data.remarks || '';
+        document.getElementById('voterModalIsVoter').value = data.is_voter ? 'on' : '';
+        document.getElementById('voterModalDateVerified').value = data.date_verified || '';
+        document.getElementById('voterModalVerifiedBy').value = data.verified_by || '';
+      })
+      .catch(function() { alert('Failed to load voter data.'); });
+  }
+
+  function closeVoterModifyModal() {
+    setModalViewMode(false);
+    document.getElementById('voterModifyModal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('voterModalClose').addEventListener('click', closeVoterModifyModal);
+  document.getElementById('voterModalCancel').addEventListener('click', closeVoterModifyModal);
+  document.getElementById('voterModifyModal').addEventListener('click', function(e) {
+    if (e.target === this) closeVoterModifyModal();
+  });
+
+  var residentPickerDropdown = document.getElementById('residentPickerDropdown');
+  var residentPickerList = document.getElementById('residentPickerList');
+  var residentNameInput = document.getElementById('voterModalName');
+
+  var residentSearchDebounce;
+  function triggerResidentSearch() {
+    var barangayId = document.getElementById('voterModalBarangay').value;
+    if (!barangayId) return;
+    clearTimeout(residentSearchDebounce);
+    var term = residentNameInput.value.trim();
+    residentSearchDebounce = setTimeout(function() {
+      residentPickerDropdown.style.display = 'flex';
+      residentPickerList.innerHTML = term ? '<div class="resident-picker-loading">Searching...</div>' : '<div class="resident-picker-loading">Loading residents...</div>';
+      loadResidentPicker(barangayId, term);
+    }, 250);
+  }
+
+  residentNameInput.addEventListener('input', triggerResidentSearch);
+  residentNameInput.addEventListener('focus', function() {
+    var barangayId = document.getElementById('voterModalBarangay').value;
+    if (!barangayId) return;
+    triggerResidentSearch();
+  });
+  residentNameInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') residentPickerDropdown.style.display = 'none';
+  });
+  function setBarangayDisplay(barangayId, barangayName) {
+    document.getElementById('voterModalBarangay').value = barangayId;
+    document.getElementById('voterModalBarangayDisplay').value = barangayName;
+  }
+  function getBarangayNameById(id) {
+    var sel = document.getElementById('barangaysData');
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === String(id)) return sel.options[i].text;
+    }
+    return '';
+  }
+  document.addEventListener('click', function(e) {
+    var barRow = document.querySelector('.barangay-row');
+    if (barRow && !barRow.contains(e.target)) document.getElementById('barangayPickerDropdown').style.display = 'none';
+  });
+
+  document.getElementById('voterModalBarangayDisplay').addEventListener('blur', function() {
+    var id = document.getElementById('voterModalBarangay').value;
+    if (id && !this.value) this.value = getBarangayNameById(id);
+  });
+
+  document.querySelector('.barangay-row .btn-icon-sm.search').addEventListener('click', function() {
+    document.getElementById('voterModalBarangayDisplay').focus();
+  });
+
+  function updateBarangayPicker() {
+    var q = document.getElementById('voterModalBarangayDisplay').value.trim().toLowerCase();
+    var list = document.getElementById('barangaysData').options;
+    var container = document.getElementById('barangayPickerDropdown');
+    container.innerHTML = '';
+    for (var i = 1; i < list.length; i++) {
+      var opt = list[i];
+      if (q && opt.text.toLowerCase().indexOf(q) < 0) continue;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'barangay-picker-item';
+      btn.textContent = opt.text;
+      btn.dataset.id = opt.value;
+      btn.dataset.name = opt.text;
+      btn.addEventListener('click', function() {
+        setBarangayDisplay(this.dataset.id, this.dataset.name);
+        document.getElementById('barangayPickerDropdown').style.display = 'none';
+        document.getElementById('voterModalName').value = '';
+        document.getElementById('voterModifyForm').removeAttribute('data-resident-id');
+      });
+      container.appendChild(btn);
+    }
+    container.style.display = container.children.length ? 'block' : 'none';
+    if (!q) document.getElementById('voterModalBarangay').value = '';
+  }
+  document.getElementById('voterModalBarangayDisplay').addEventListener('focus', updateBarangayPicker);
+  document.getElementById('voterModalBarangayDisplay').addEventListener('input', updateBarangayPicker);
+
+  function loadResidentPicker(barangayId, searchTerm) {
+    var url = '/operations/api/residents-by-barangay/?barangay_id=' + encodeURIComponent(barangayId);
+    if (searchTerm) url += '&search=' + encodeURIComponent(searchTerm);
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var list = document.getElementById('residentPickerList');
+        list.innerHTML = '';
+        (data.residents || []).forEach(function(r) {
+          var btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'resident-picker-item' + (r.is_voter ? ' already-voter' : '');
+          btn.textContent = r.fullname || (r.lastname + ', ' + r.firstname);
+          if (r.is_voter) {
+            var span = document.createElement('span');
+            span.className = 'badge-voter';
+            span.textContent = '(voter)';
+            btn.appendChild(span);
+          }
+          btn.addEventListener('click', function() {
+            residentPickerDropdown.style.display = 'none';
+            document.getElementById('voterModifyForm').setAttribute('data-resident-id', r.id);
+            document.getElementById('voterModalName').value = r.fullname || (r.lastname + ', ' + r.firstname);
+            fetch('/operations/resident/get/' + r.id + '/')
+              .then(function(res) { return res.json(); })
+              .then(function(d) {
+                setBarangayDisplay(d.barangay || '', d.barangay_name || '');
+                document.getElementById('voterModalPrecinct').value = d.precinct_number || '';
+                document.getElementById('voterModalAddress').value = d.address || '';
+                setLegendSelectFromValue(d.voter_legend || '');
+                document.getElementById('voterModalStatus').value = d.status || 'ALIVE';
+                document.getElementById('voterModalLastname').value = d.lastname || '';
+                document.getElementById('voterModalFirstname').value = d.firstname || '';
+                document.getElementById('voterModalMiddlename').value = d.middlename || '';
+                document.getElementById('voterModalSuffix').value = d.suffix || '';
+                document.getElementById('voterModalGender').value = d.gender || '';
+                document.getElementById('voterModalDob').value = d.date_of_birth || '';
+                document.getElementById('voterModalPob').value = d.place_of_birth || '';
+                document.getElementById('voterModalPurok').value = d.purok || '';
+                document.getElementById('voterModalContact').value = d.contact_no || '';
+                document.getElementById('voterModalCivil').value = d.civil_status || '';
+                document.getElementById('voterModalEdu').value = d.educational_attainment || '';
+                document.getElementById('voterModalCitizenship').value = d.citizenship || '';
+                document.getElementById('voterModalDialect').value = d.dialect_ethnic || '';
+                document.getElementById('voterModalOccupation').value = d.occupation || '';
+                document.getElementById('voterModalHealth').value = d.health_status || '';
+                document.getElementById('voterModalEconomic').value = d.economic_status || '';
+                document.getElementById('voterModalRemarks').value = d.remarks || '';
+                document.getElementById('voterModalIsVoter').value = 'on';
+                document.getElementById('voterModalDateVerified').value = d.date_verified || '';
+                document.getElementById('voterModalVerifiedBy').value = d.verified_by || '';
+              })
+              .catch(function() { alert('Failed to load resident.'); });
+          });
+          list.appendChild(btn);
+        });
+        if (list.children.length === 0) {
+          list.innerHTML = '<div style="padding:1rem;color:#5f6368;font-size:0.9rem;">No residents found. Select another barangay or search.</div>';
+        }
+      })
+      .catch(function() {
+        residentPickerList.innerHTML = '<div style="padding:1rem;color:#dc3545;">Failed to load list.</div>';
+      });
+  }
+
+  document.addEventListener('click', function(e) {
+    if (residentPickerDropdown && residentPickerDropdown.style.display === 'flex') {
+      var nameRow = document.querySelector('.voter-name-row');
+      if (nameRow && !nameRow.contains(e.target)) residentPickerDropdown.style.display = 'none';
+    }
+  });
+
+  var legendLabels = { 'A': 'Illiterate', 'B': 'PWD', 'C': 'Senior' };
+
+  function getLegendTriggerText() {
+    var values = [];
+    ['A', 'B', 'C'].forEach(function(code) {
+      var cb = document.getElementById('voterLegend' + code);
+      if (cb && cb.checked) values.push(legendLabels[code]);
+    });
+    return values.length ? values.join(', ') : 'Select legend…';
+  }
+
+  function syncLegendFromCheckboxes() {
+    var hidden = document.getElementById('voterModalVoterLegend');
+    var trigger = document.getElementById('voterLegendTrigger');
+    if (!hidden || !trigger) return;
+    var values = [];
+    ['A', 'B', 'C'].forEach(function(code) {
+      var cb = document.getElementById('voterLegend' + code);
+      if (cb && cb.checked) values.push(code);
+    });
+    hidden.value = values.join(',');
+    trigger.textContent = getLegendTriggerText();
+  }
+
+  function setLegendSelectFromValue(str) {
+    var hidden = document.getElementById('voterModalVoterLegend');
+    var trigger = document.getElementById('voterLegendTrigger');
+    if (!hidden || !trigger) return;
+    var codes = (str || '').split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+    ['A', 'B', 'C'].forEach(function(code) {
+      var cb = document.getElementById('voterLegend' + code);
+      if (cb) cb.checked = codes.indexOf(code) !== -1;
+    });
+    hidden.value = (str || '').trim();
+    trigger.textContent = getLegendTriggerText();
+  }
+
+  var legendWrap = document.getElementById('voterLegendDropdownWrap');
+  var legendTrigger = document.getElementById('voterLegendTrigger');
+  var legendPanel = document.getElementById('voterLegendPanel');
+  if (legendTrigger && legendPanel) {
+    legendTrigger.addEventListener('click', function(e) {
+      e.preventDefault();
+      if (this.disabled) return;
+      legendWrap.classList.toggle('open');
+    });
+    legendPanel.querySelectorAll('input[type="checkbox"]').forEach(function(cb) {
+      cb.addEventListener('change', syncLegendFromCheckboxes);
+    });
+  }
+  document.addEventListener('click', function(e) {
+    if (legendWrap && !legendWrap.contains(e.target)) legendWrap.classList.remove('open');
+  });
+
+  document.getElementById('voterModifyForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (this.getAttribute('data-view-only')) return;
+    var barangayId = document.getElementById('voterModalBarangay').value;
+    if (!barangayId) {
+      alert('Please select a barangay (type and choose from the list).');
+      return;
+    }
+    var id = this.getAttribute('data-resident-id');
+    if (!id) {
+      alert('Please select a resident (use the search icon next to Voter\'s Name).');
+      return;
+    }
+    var formData = new FormData(this);
+    var body = new URLSearchParams(formData).toString();
+    var csrf = formData.get('csrfmiddlewaretoken');
+    fetch('/operations/resident/edit/' + id + '/', {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': csrf,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: body
+    }).then(function(r) {
+      if (r.ok) return r.json();
+      throw new Error('Save failed');
+    }).then(function() {
+      closeVoterModifyModal();
+      refreshCurrentVoters();
+    }).catch(function() {
+      alert('Failed to save.');
+    });
+  });
+
+  if (deleteBtn && deleteForm) {
+    deleteBtn.addEventListener('click', function() {
+      if (deleteBtn.disabled) return;
+      var selected = document.querySelector('#votersTableBody tr.voter-row-clickable.selected');
+      if (!selected) { alert('Please select a voter first.'); return; }
+      var id = selected.getAttribute('data-id');
+      var name = selected.getAttribute('data-name') || 'this voter';
+      if (!confirm('Are you sure you want to delete resident "' + name + '"?')) return;
+      var formAction = '/operations/resident/delete/' + id + '/';
+      var csrfInput = deleteForm.querySelector('input[name=csrfmiddlewaretoken]');
+      var csrfToken = csrfInput ? csrfInput.value : '';
+      fetch(formAction, {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: 'csrfmiddlewaretoken=' + encodeURIComponent(csrfToken)
+      }).then(function(res) {
+        if (res.ok || res.redirected) refreshCurrentVoters();
+        else alert('Failed to delete.');
+      }).catch(function() {
+        alert('Failed to delete.');
+      });
+    });
+  }
+})();
+</script>
 {% endblock %}
-

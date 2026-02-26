@@ -97,6 +97,14 @@ class Resident(models.Model):
     
     # Other fields
     is_voter = models.BooleanField(default=False)
+    precinct_number = models.CharField(max_length=20, blank=True, help_text='Precinct number for voter registration')
+    voter_legend = models.CharField(
+        max_length=20,
+        blank=True,
+        help_text='Voter legend: comma-separated A=Illiterate, B=PWD, C=Senior (e.g. A,B or A,B,C)',
+    )
+    date_verified = models.DateField(null=True, blank=True, help_text='Date the voter record was verified')
+    verified_by = models.CharField(max_length=150, blank=True, help_text='Name or username of person who verified')
     remarks = models.TextField(blank=True)
     
     # Metadata
@@ -111,6 +119,15 @@ class Resident(models.Model):
     def __str__(self):
         return f"{self.firstname} {self.lastname}"
     
+    LEGEND_LABELS = {'A': 'Illiterate', 'B': 'PWD', 'C': 'Senior'}
+
+    def get_voter_legend_display(self):
+        """Return display string for voter_legend (supports multiple: A,B,C -> 'Illiterate, PWD, Senior')."""
+        if not self.voter_legend or not self.voter_legend.strip():
+            return '—'
+        codes = [c.strip() for c in self.voter_legend.split(',') if c.strip()]
+        return ', '.join(self.LEGEND_LABELS.get(c, c) for c in codes) or '—'
+
     def get_full_name(self):
         """Returns the full name with suffix if available."""
         parts = [self.firstname, self.middlename, self.lastname]
