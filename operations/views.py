@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.db import transaction
 from django.db.models import Q, Count, Prefetch
 from django.urls import reverse
@@ -8,10 +8,42 @@ from reference.models import Barangay, Municipality, Position
 from administrator.utils import user_can_delete_in_operations
 from administrator.activity_log import log_activity, ACTION_CREATE, ACTION_UPDATE, ACTION_DELETE
 from .models import Resident, BarangayOfficial, CoordinatorPosition, Coordinator
+from django.conf import settings
 import logging
+import socket
 
 # Set up logging
 logger = logging.getLogger(__name__)
+
+
+def _get_base_url_for_devices(request):
+    """Return base URL reachable from other devices. Always includes http:// and :8000 for dev server."""
+    site_url = getattr(settings, 'SITE_URL', '') or ''
+    if site_url:
+        base = site_url.strip().rstrip('/')
+        if not base.startswith(('http://', 'https://')):
+            base = 'http://' + base
+        host_part = base.split('//')[-1].split('/')[0] if '//' in base else ''
+        if host_part and ':' not in host_part:
+            base = base.replace(host_part, host_part + ':8000', 1)
+        return base
+    host = request.get_host().split(':')[0]
+    port = request.get_port() or '8000'
+    if host in ('localhost', '127.0.0.1', ''):
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.settimeout(0.5)
+            s.connect(('8.8.8.8', 80))
+            ip = s.getsockname()[0]
+            s.close()
+            return f'http://{ip}:{port}'
+        except Exception:
+            pass
+    base = request.build_absolute_uri('/').rstrip('/')
+    host_part = base.split('//')[-1].split('/')[0] if '//' in base else ''
+    if host_part and ':' not in host_part:
+        base = base.replace(host_part, host_part + ':8000', 1)
+    return base
 
 
 def operations_index(request):
@@ -331,10 +363,11 @@ def residents_record(request):
     """Display list of residents."""
     residents = Resident.objects.select_related('barangay').all()
     barangays = Barangay.objects.filter(is_active=True)
-    
+    base_url = _get_base_url_for_devices(request)
     context = {
         'residents': residents,
         'barangays': barangays,
+        'network_url': base_url,
     }
     return render(request, "operations/residents_record.html", context)
 
@@ -352,6 +385,7 @@ def resident_add(request):
             resident = Resident(
                 barangay=barangay,
                 status=request.POST.get('status', 'ALIVE'),
+                profile_picture=request.FILES.get('profile_picture'),
                 lastname=request.POST.get('lastname'),
                 firstname=request.POST.get('firstname'),
                 middlename=request.POST.get('middlename', ''),
@@ -388,40 +422,118 @@ def resident_add(request):
     return redirect('operations:residents_record')
 
 
+def resident_qr(request, pk):
+    """Generate QR code image for resident profile (scannable URL to app)."""
+    import qrcode
+    import io
+    resident = get_object_or_404(Resident, pk=pk)
+    base = _get_base_url_for_devices(request)
+    profile_url = f"{base}/app/resident/{pk}/"
+    qr = qrcode.QRCode(version=1, box_size=8, border=2)
+    qr.add_data(profile_url)
+    qr.make(fit=True)
+    img = qr.make_image(fill_color='#1a1d24', back_color='white')
+    buffer = io.BytesIO()
+    img.save(buffer, format='PNG')
+    buffer.seek(0)
+    return HttpResponse(buffer.getvalue(), content_type='image/png')
+
+
+def resident_print(request, pk):
+    """Render print template for resident (record layout: name, details, address, QR, profile)."""
+    resident = get_object_or_404(Resident, pk=pk)
+    profile_picture_url = ''
+    if resident.profile_picture:
+        try:
+            profile_picture_url = request.build_absolute_uri(resident.profile_picture.url)
+        except Exception:
+            profile_picture_url = ''
+    # Format: LASTNAME, FIRSTNAME SUFFIX MIDDLENAME
+    parts = [resident.lastname or '']
+    name_parts = [resident.firstname or '', resident.suffix or '', resident.middlename or '']
+    parts.append(' '.join(p for p in name_parts if p).strip())
+    full_name = ', '.join(p for p in parts if p).upper() or '-'
+    birthdate = resident.date_of_birth.strftime('%b-%d-%Y') if resident.date_of_birth else '-'
+    age = str(resident.get_age()) if resident.date_of_birth else '-'
+    address_line = f"{resident.address or ''}{', ' + resident.purok if resident.purok else ''}".strip() or '-'
+    qr_code_url = request.build_absolute_uri(reverse('operations:resident_qr', args=[pk]))
+    # Badges per Profiling-template.docx: PWD, SENIOR (VOTERS shown under QR)
+    badges = []
+    if resident.health_status == 'PWD':
+        badges.append('PWD')
+    if resident.economic_status == 'SENIOR CITIZEN':
+        badges.append('SENIOR')
+    barangay_name = resident.barangay.name if resident.barangay else ''
+    resident_id_val = resident.resident_id or str(resident.id)
+    id_barangay = f"{resident_id_val}. {barangay_name}" if barangay_name else resident_id_val
+    return render(request, 'operations/resident_print.html', {
+        'resident': resident,
+        'profile_picture_url': profile_picture_url,
+        'full_name': full_name,
+        'birthdate': birthdate,
+        'age': age,
+        'address_line': address_line,
+        'qr_code_url': qr_code_url,
+        'badges': badges,
+        'barangay_name': barangay_name,
+        'id_barangay': id_barangay,
+    })
+
+
 def resident_get(request, pk):
     """Get resident data as JSON."""
     resident = get_object_or_404(Resident, pk=pk)
+    profile_url = ''
+    if resident.profile_picture:
+        try:
+            profile_url = request.build_absolute_uri(resident.profile_picture.url)
+        except Exception:
+            profile_url = ''
+    barangay_id = resident.barangay.id if resident.barangay else None
+    barangay_name = resident.barangay.name if resident.barangay else ''
+    date_of_birth_str = ''
+    if resident.date_of_birth:
+        date_of_birth_str = resident.date_of_birth.strftime('%Y-%m-%d')
+    date_verified_str = ''
+    if resident.date_verified:
+        try:
+            date_verified_str = resident.date_verified.strftime('%Y-%m-%d')
+        except Exception:
+            date_verified_str = ''
     data = {
         'id': resident.id,
-        'resident_id': resident.resident_id,
-        'barangay': resident.barangay.id,
-        'status': resident.status,
-        'lastname': resident.lastname,
-        'firstname': resident.firstname,
-        'middlename': resident.middlename,
-        'suffix': resident.suffix,
-        'gender': resident.gender,
-        'date_of_birth': resident.date_of_birth.strftime('%Y-%m-%d'),
-        'place_of_birth': resident.place_of_birth,
-        'address': resident.address,
-        'purok': resident.purok,
-        'contact_no': resident.contact_no,
-        'civil_status': resident.civil_status,
-        'educational_attainment': resident.educational_attainment,
-        'citizenship': resident.citizenship,
-        'dialect_ethnic': resident.dialect_ethnic,
-        'occupation': resident.occupation,
-        'health_status': resident.health_status,
-        'economic_status': resident.economic_status,
+        'resident_id': resident.resident_id or '',
+        'profile_picture': profile_url,
+        'barangay': barangay_id,
+        'barangay_name': barangay_name,
+        'status': resident.status or 'ALIVE',
+        'lastname': resident.lastname or '',
+        'firstname': resident.firstname or '',
+        'middlename': resident.middlename or '',
+        'suffix': resident.suffix or '',
+        'gender': resident.gender or '',
+        'date_of_birth': date_of_birth_str,
+        'place_of_birth': resident.place_of_birth or '',
+        'address': resident.address or '',
+        'purok': resident.purok or '',
+        'contact_no': resident.contact_no or '',
+        'civil_status': resident.civil_status or '',
+        'educational_attainment': resident.educational_attainment or '',
+        'citizenship': resident.citizenship or '',
+        'dialect_ethnic': resident.dialect_ethnic or '',
+        'occupation': resident.occupation or '',
+        'health_status': resident.health_status or '',
+        'economic_status': resident.economic_status or '',
         'is_voter': resident.is_voter,
         'precinct_number': resident.precinct_number or '',
         'voter_legend': resident.voter_legend or '',
-        'date_verified': resident.date_verified.strftime('%Y-%m-%d') if resident.date_verified else '',
+        'date_verified': date_verified_str,
         'verified_by': resident.verified_by or '',
-        'remarks': resident.remarks,
+        'remarks': resident.remarks or '',
     }
-    data['barangay_name'] = resident.barangay.name if resident.barangay else ''
     data['full_name'] = resident.get_full_name()
+    base = _get_base_url_for_devices(request)
+    data['profile_url'] = f"{base}/app/resident/{resident.pk}/"
     return JsonResponse(data)
 
 
@@ -439,6 +551,8 @@ def resident_edit(request, pk):
             barangay_id = request.POST.get('barangay')
             resident.barangay = get_object_or_404(Barangay, id=barangay_id)
             resident.status = request.POST.get('status', 'ALIVE')
+            if 'profile_picture' in request.FILES:
+                resident.profile_picture = request.FILES['profile_picture']
             resident.lastname = request.POST.get('lastname')
             resident.firstname = request.POST.get('firstname')
             resident.middlename = request.POST.get('middlename', '')

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PPS Resident Record - {{ resident.get_full_name }}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f5f5f5;
+      min-height: 100vh;
+      padding: 1.5rem;
+      color: #1a1d24;
+    }
+    .record-card {
+      max-width: 700px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .record-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1.5rem;
+    }
+    .record-left {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+    .record-profile {
+      flex-shrink: 0;
+      width: 90px;
+      height: 90px;
+      overflow: hidden;
+      background: #e8eaed;
+      border: 2px solid #e0e0e0;
+    }
+    .record-profile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .record-profile .placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9e9e9e;
+      font-size: 1.5rem;
+    }
+    .record-info { flex: 1; min-width: 0; }
+    .record-right {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .record-name {
+      font-size: 1.35rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 0.5rem;
+      border: 1px solid transparent;
+      padding: 0.15rem 0;
+      outline: none;
+    }
+    .record-name:focus {
+      border-color: #4299e1;
+      background: #f8fcff;
+    }
+    .record-details {
+      font-size: 0.95rem;
+      color: #333;
+      margin-bottom: 0.35rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .record-details span { white-space: nowrap; }
+    .record-details .label { font-weight: 500; color: #666; }
+    .record-details input {
+      font: inherit;
+      border: none;
+      background: transparent;
+      padding: 0;
+      min-width: 80px;
+      border-bottom: 1px dashed transparent;
+    }
+    .record-details input:focus {
+      outline: none;
+      border-bottom-color: #4299e1;
+    }
+    .record-address {
+      font-size: 0.95rem;
+      color: #333;
+      border: 1px solid transparent;
+      padding: 0.15rem 0;
+      outline: none;
+    }
+    .record-address:focus {
+      border-color: #4299e1;
+      background: #f8fcff;
+    }
+    .record-address .label { font-weight: 500; color: #666; }
+    .record-badges {
+      font-size: 0.9rem;
+      color: #333;
+      margin-top: 0.35rem;
+      font-weight: 500;
+    }
+    .record-qr {
+      width: 80px;
+      height: 80px;
+      padding: 4px;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+    }
+    .record-qr img { width: 100%; height: 100%; display: block; }
+    .record-voters {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 0.25rem;
+      text-transform: uppercase;
+    }
+    .record-id {
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-align: center;
+    }
+    .record-id input {
+      font: inherit;
+      font-weight: 600;
+      text-align: center;
+      border: none;
+      background: transparent;
+      width: 4em;
+      padding: 0.15rem;
+      border-bottom: 1px dashed transparent;
+    }
+    .record-id input:focus {
+      outline: none;
+      border-bottom-color: #4299e1;
+    }
+    .record-id-barangay {
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 0.35rem;
+      color: #1a1d24;
+      min-height: 1.2em;
+      border: 1px solid transparent;
+      padding: 0.1rem 0.25rem;
+    }
+    .record-id-barangay:focus {
+      outline: none;
+      border-color: #4299e1;
+      background: #f8fcff;
+    }
+    .no-print { display: block; }
+    .action-bar {
+      text-align: center;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e8eaed;
+    }
+    .action-bar button {
+      padding: 0.5rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+    .btn-print { background: #1e3a5f; color: #fff; }
+    .btn-print:hover { background: #152a45; }
+    .btn-close { background: #6c757d; color: #fff; margin-left: 0.5rem; }
+    .btn-close:hover { background: #5a6268; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .record-card { border-bottom: 1px solid #e0e0e0; box-shadow: none; }
+      .no-print { display: none !important; }
+      .record-name:focus, .record-details input:focus, .record-address:focus, .record-id-barangay:focus {
+        border-color: transparent !important;
+        background: transparent !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="record-card">
+    <div class="record-row">
+      <div class="record-left">
+        <div class="record-profile">
+          {% if profile_picture_url %}
+          <img src="{{ profile_picture_url }}" alt="Profile">
+          {% else %}
+          <div class="placeholder">&#128100;</div>
+          {% endif %}
+        </div>
+        <div class="record-info">
+        <div class="record-name" contenteditable="true" id="printName">{{ full_name }}</div>
+        <div class="record-details">
+          <span><span class="label">Birthdate:</span> <input type="text" id="printBirthdate" value="{{ birthdate }}" size="12"></span>
+          <span><span class="label">Age:</span> <input type="text" id="printAge" value="{{ age }}" size="4"></span>
+          <span><span class="label">Gender:</span> <input type="text" id="printGender" value="{{ resident.get_gender_display }}" size="8"></span>
+          <span><span class="label">Contact No:</span> <input type="text" id="printContact" value="{{ resident.contact_no|default:'' }}" size="14"></span>
+        </div>
+        <div class="record-address" contenteditable="true" id="printAddress"><span class="label">Address:</span> {{ address_line }}</div>
+        {% if badges %}
+        <div class="record-badges">{% for b in badges %}{{ b }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>
+        {% endif %}
+        </div>
+      </div>
+      <div class="record-right">
+        <div class="record-id-barangay" contenteditable="true" id="printIdBarangay">{{ id_barangay }}</div>
+        <div class="record-qr">
+          <img src="{{ qr_code_url }}" alt="QR Code">
+        </div>
+        {% if resident.is_voter %}
+        <div class="record-voters">VOTERS</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="action-bar no-print">
+    <button class="btn-print" onclick="window.print()">Print</button>
+    <button class="btn-close" onclick="window.close()">Close</button>
+  </div>
+</body>
+</html>

@@ -1,13 +1,74 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Residents Record – Operations – PGSO{% endblock %}
 {% block content %}
 <style>
+/* Sticky header: page header + search stay at top when scrolling */
+.residents-sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+  padding-bottom: 1rem;
+  margin-bottom: 1rem;
+  margin-left: -2.5rem;
+  margin-right: -2.5rem;
+  padding-left: 2.5rem;
+  padding-right: 2.5rem;
+  padding-top: 0.25rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
 /* Page Header */
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Header right: buttons + search stacked */
+.page-header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+/* Search Input - under the buttons */
+.residents-sticky-header .search-input-wrap {
+  margin-bottom: 0;
+}
+.search-input-wrap {
+  position: relative;
+  display: block;
+  min-width: 200px;
+  max-width: 400px;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+.search-input-wrap .search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #5f6368;
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+.search-input-wrap input {
+  width: 100%;
+  padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+  border-radius: 8px;
+  border: 1px solid #dadce0;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+.search-input-wrap input:focus {
+  outline: none;
+  border-color: #1e3a5f;
+  box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.1);
 }
 
 .page-title {
@@ -85,12 +146,73 @@
   background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
 }
 
+/* Header action buttons – same style as Voters Registration (transparent, no border, icon + label) */
+.residents-header-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  padding: 0.4rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #8a8a8a;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  background: transparent;
+  box-shadow: none;
+  width: 2.90rem;
+  height: 3.80rem;
+}
+.residents-header-btn:hover:not(:disabled) {
+  background: transparent;
+  box-shadow: none;
+}
+.residents-header-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.residents-header-btn .btn-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+}
+.residents-header-btn .btn-label {
+  color: #8a8a8a;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.residents-header-btn.btn-add-resident .btn-icon-wrap .btn-add-user-img,
+.residents-header-btn.btn-view-resident .btn-icon-wrap .btn-view-list-img,
+.residents-header-btn.btn-edit-resident .btn-icon-wrap .btn-edit-img,
+.residents-header-btn.btn-delete-resident .btn-icon-wrap .btn-delete-user-img {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  display: block;
+}
+.residents-header-btn .btn-icon-wrap [class$="-fallback"] {
+  width: 2rem !important;
+  height: 2rem !important;
+  font-size: 1.1rem !important;
+}
+.residents-header-btn.btn-edit-resident .btn-icon-wrap i { color: #007bff; font-size: 1.1rem; }
+.residents-header-btn.btn-delete-resident .btn-icon-wrap i { color: #dc3545; font-size: 1.1rem; }
+.residents-header-btn.btn-print-resident .btn-icon-wrap i { color: #5f6368; font-size: 1.1rem; }
+
 /* Table Styles */
 .residents-table-container {
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
+  overflow: auto;
+  max-height: calc(100vh - 220px);
 }
 
 .residents-table {
@@ -140,6 +262,26 @@
 .residents-table tbody td {
   padding: 1rem 1.25rem;
   color: #1a1d24;
+}
+
+.residents-table tbody td:nth-child(2) {
+  vertical-align: middle;
+}
+.resident-table-avatar,
+.resident-table-avatar-placeholder {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+.resident-table-avatar-placeholder {
+  background: #e8eaed;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9e9e9e;
+  font-size: 0.9rem;
 }
 
 .table-actions {
@@ -358,6 +500,11 @@
 }
 
 .form-group input[type="date"] {
+  cursor: pointer;
+}
+
+.form-group input[type="file"] {
+  padding: 0.5rem 0;
   cursor: pointer;
 }
 
@@ -622,12 +769,12 @@
 }
 
 .view-resident-name {
-  font-size: 1.2rem;
-  color: #5e35b1;
+  font-size: 1.15rem;
+  color: #1a1d24;
   font-weight: 700;
-  text-align: center;
-  margin-bottom: 1.5rem;
   text-transform: uppercase;
+  line-height: 1.3;
+  word-break: break-word;
 }
 
 .detail-table {
@@ -701,6 +848,178 @@
   color: #2196F3;
   text-transform: none;
 }
+
+/* View Modal: Profile Picture - 2-column layout: photo in col1, info+QR in col2 */
+.view-profile-wrap {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.5rem;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e8eaed;
+}
+.view-profile-col1 {
+  grid-column: 1;
+}
+.view-profile-col2 {
+  grid-column: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+.view-profile-row {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-wrap: nowrap;
+}
+.view-profile-picture {
+  width: 100px;
+  height: 100px;
+  min-width: 100px;
+  min-height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #e8eaed;
+  flex-shrink: 0;
+}
+.view-profile-picture img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.view-profile-info {
+  flex: 1;
+  min-width: 0;
+}
+.view-resident-name {
+  margin-bottom: 0.25rem !important;
+}
+.view-qr-wrap {
+  text-align: center;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e8eaed;
+}
+.view-qr-img {
+  width: 140px;
+  height: 140px;
+  padding: 8px;
+  background: #fff;
+  border-radius: 8px;
+  border: 1px solid #e8eaed;
+}
+.view-qr-hint {
+  font-size: 0.8rem;
+  color: #5f6368;
+  margin-top: 0.5rem;
+}
+@media (max-width: 480px) {
+  .view-profile-wrap {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+  .view-profile-col2 {
+    justify-content: center;
+  }
+}
+
+/* Edit Modal: Profile Picture - 2 cols: upload in col1, preview in col2 */
+.edit-profile-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100px;
+  padding: 0.75rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 2px dashed #e8eaed;
+}
+.edit-profile-preview img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e8eaed;
+  display: block;
+  flex-shrink: 0;
+}
+.edit-profile-preview span {
+  color: #9e9e9e;
+  font-size: 0.85rem;
+}
+
+.btn-icon-wrap img {
+  width: 18px;
+  height: 20px;
+}
+
+/* Add Resident: Barangay search input */
+.add-barangay-wrap {
+  position: relative;
+}
+.add-barangay-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.add-barangay-input-wrap input[type="text"] {
+  flex: 1;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border: 2px solid #e8eaed;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+.add-barangay-input-wrap input[type="text"]:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+.add-barangay-input-wrap .add-barangay-search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #5f6368;
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+.add-barangay-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  margin-top: 4px;
+  background: #fff;
+  border: 2px solid #e8eaed;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 100;
+}
+.add-barangay-item {
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #1a1d24;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.add-barangay-item:hover {
+  background: #e8f4fc;
+}
 </style>
 
 <!-- Messages -->
@@ -715,47 +1034,70 @@
 </div>
 {% endif %}
 
+
+<!-- Sticky Header: Page Header + Search (stays at top when scrolling) -->
+<div class="residents-sticky-header">
 <!-- Page Header -->
 <div class="page-header">
   <h1 class="page-title">
     <i class="fas fa-address-book" style="color: #4299e1;"></i> Residents Record
   </h1>
-  <div class="page-header-actions">
-    <button type="button" class="btn btn-add" onclick="openAddModal()" title="Register Resident">
-      <span class="btn-add-icon-wrap">
-        <i class="fas fa-file-lines"></i>
-        <span class="btn-add-plus"><i class="fas fa-plus"></i></span>
+  <div class="page-header-right">
+    <div class="page-header-actions">
+    <button type="button" class="residents-header-btn btn-add-resident" onclick="openAddModal()" title="Register Resident">
+      <span class="btn-icon-wrap">
+        <img src="{% static 'images/add-user.png' %}" alt="Add" class="btn-add-user-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+        <span class="btn-add-user-fallback" style="display:none; width:2rem; height:2rem; align-items:center; justify-content:center; color:#5f6368; font-size:1.1rem;"><i class="fas fa-user-plus"></i></span>
       </span>
-      <span class="btn-action-label">Add</span>
+      <span class="btn-label">Add</span>
     </button>
-    <button type="button" class="btn btn-view-header" id="residentsHeaderViewBtn" title="View Resident">
-      <i class="fas fa-eye"></i>
-      <span class="btn-action-label">View</span>
+    <button type="button" class="residents-header-btn btn-view-resident" id="residentsHeaderViewBtn" title="View Resident">
+      <span class="btn-icon-wrap">
+        <img src="{% static 'images/view-list.png' %}" alt="View" class="btn-view-list-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+        <span class="btn-view-list-fallback" style="display:none; width:2rem; height:2rem; align-items:center; justify-content:center; color:#17a2b8; font-size:1.1rem;"><i class="fas fa-eye"></i></span>
+      </span>
+      <span class="btn-label">View</span>
     </button>
-    <button type="button" class="btn btn-edit-header" id="residentsHeaderEditBtn" title="Edit Resident">
-      <i class="fas fa-pen"></i>
-      <span class="btn-action-label">Edit</span>
+    <button type="button" class="residents-header-btn btn-edit-resident" id="residentsHeaderEditBtn" title="Edit Resident">
+      <span class="btn-icon-wrap">
+        <img src="{% static 'images/edit.png' %}" alt="Edit" class="btn-edit-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+        <span class="btn-edit-fallback" style="display:none; width:2rem; height:2rem; align-items:center; justify-content:center; color:#007bff; font-size:1.1rem;"><i class="fas fa-pen"></i></span>
+      </span>
+      <span class="btn-label">Edit</span>
     </button>
-    <button type="button" class="btn btn-delete-header" id="residentsHeaderDeleteBtn" title="Delete Resident">
-      <i class="fas fa-trash"></i>
-      <span class="btn-action-label">Delete</span>
+    <button type="button" class="residents-header-btn btn-delete-resident" id="residentsHeaderDeleteBtn" title="Delete Resident">
+      <span class="btn-icon-wrap">
+        <img src="{% static 'images/delete-user.png' %}" alt="Delete" class="btn-delete-user-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+        <span class="btn-delete-user-fallback" style="display:none; width:2rem; height:2rem; align-items:center; justify-content:center; color:#dc3545; font-size:1.1rem;"><i class="fas fa-trash"></i></span>
+      </span>
+      <span class="btn-label">Delete</span>
     </button>
-    <button type="button" class="btn btn-print" title="Print">
-      <i class="fas fa-print"></i>
-      <span class="btn-action-label">Print</span>
+    <button type="button" class="residents-header-btn btn-print-resident" title="Print">
+      <span class="btn-icon-wrap">
+        <img src="{% static 'images/printer.png' %}" alt="Print" width="20" height="30" object-fit: contain;>
+    </span>
+      <span class="btn-label">Print</span>
     </button>
+    </div>
+    
   </div>
 </div>
 
+<div class="search-input-wrap">
+  <i class="fas fa-search search-icon" aria-hidden="true"></i>
+  <input type="text" id="residentsSearch" placeholder="Search residents by name, ID, barangay, contact..." oninput="filterResidentsTable()">
+</div>
+</div>
 <!-- Residents Table -->
 {% if residents %}
 <div class="residents-table-container">
   <table class="residents-table">
     <thead>
       <tr>
-        <th style="width: 10%;">ID</th>
+        <th style="width: 8%;">ID</th>
+        <th style="width: 6%;">Photo</th>
         <th style="width: 14%;">Barangay</th>
-        <th style="width: 24%;">Resident</th>
+        <th style="width: 22%;">Resident</th>
         <th style="width: 12%;">Gender</th>
         <th style="width: 14%;">Contact</th>
         <th style="width: 14%;">Status</th>
@@ -766,6 +1108,13 @@
       <tr class="resident-row-clickable" data-id="{{ resident.id }}" data-name="{{ resident.get_full_name|escapejs }}">
         <td>
           <span class="badge badge-id">{{ resident.resident_id }}</span>
+        </td>
+        <td>
+          {% if resident.profile_picture %}
+          <img src="{{ resident.profile_picture.url }}" alt="" class="resident-table-avatar">
+          {% else %}
+          <div class="resident-table-avatar-placeholder"><i class="fas fa-user"></i></div>
+          {% endif %}
         </td>
         <td>{{ resident.barangay.name }}</td>
         <td><strong>{{ resident.get_full_name }}</strong></td>
@@ -786,12 +1135,12 @@
   <div class="empty-icon">👥</div>
   <h3>No Residents Yet</h3>
   <p>Start by adding your first resident to the system.</p>
-  <button type="button" class="btn btn-add" onclick="openAddModal()" title="Add Your First Resident">
-    <span class="btn-add-icon-wrap">
-      <i class="fas fa-file-lines"></i>
-      <span class="btn-add-plus"><i class="fas fa-plus"></i></span>
+  <button type="button" class="residents-header-btn btn-add-resident" onclick="openAddModal()" title="Add Your First Resident">
+    <span class="btn-icon-wrap">
+      <img src="{% static 'images/add-user.png' %}" alt="Add" class="btn-add-user-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+      <span class="btn-add-user-fallback" style="display:none; width:2rem; height:2rem; align-items:center; justify-content:center; color:#5f6368; font-size:1.1rem;"><i class="fas fa-user-plus"></i></span>
     </span>
-    <span class="btn-action-label">Add</span>
+    <span class="btn-label">Add</span>
   </button>
 </div>
 {% endif %}
@@ -809,7 +1158,7 @@
       </h2>
       <button class="modal-close" onclick="closeAddModal()">&times;</button>
     </div>
-    <form method="post" action="{% url 'operations:resident_add' %}">
+    <form method="post" action="{% url 'operations:resident_add' %}" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="modal-body">
         <!-- Basic Information -->
@@ -817,9 +1166,15 @@
           <h3 class="form-section-title"><i class="fas fa-id-card"></i> Basic Information</h3>
           
           <div class="form-row cols-2">
-            <div class="form-group">
-              <label for="add_barangay">Barangay <span class="required">*</span></label>
-              <select id="add_barangay" name="barangay" required>
+            <div class="form-group add-barangay-wrap">
+              <label for="add_barangay_display">Barangay <span class="required">*</span></label>
+              <div class="add-barangay-input-wrap" style="position: relative;">
+                <i class="fas fa-search add-barangay-search-icon" aria-hidden="true"></i>
+                <input type="text" id="add_barangay_display" placeholder="Type to search barangay" autocomplete="off">
+                <input type="hidden" id="add_barangay" name="barangay" value="" required>
+              </div>
+              <div id="add_barangay_dropdown" class="add-barangay-dropdown" style="display: none;"></div>
+              <select id="add_barangays_data" style="display: none;">
                 <option value="">Select Barangay</option>
                 {% for barangay in barangays %}
                 <option value="{{ barangay.id }}">{{ barangay.name }}</option>
@@ -839,6 +1194,22 @@
                   DECEASED
                 </label>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Picture -->
+        <div class="form-section">
+          <h3 class="form-section-title"><i class="fas fa-camera"></i> Profile Picture</h3>
+          <div class="form-row cols-2">
+            <div class="form-group">
+              <label for="add_profile_picture">Photo</label>
+              <input type="file" id="add_profile_picture" name="profile_picture" accept="image/*">
+              <small style="color: #5f6368; font-size: 0.85rem;">JPG, PNG or GIF. Optional.</small>
+            </div>
+            <div class="form-group">
+              <label>Preview</label>
+              <div id="add_profile_preview" class="edit-profile-preview"><span>No photo</span></div>
             </div>
           </div>
         </div>
@@ -1031,7 +1402,7 @@
     <div class="modal-header">
       <h2 class="modal-title"><i class="fas fa-edit"></i> Edit Resident</h2>
     </div>
-    <form method="post" id="editForm">
+    <form method="post" id="editForm" enctype="multipart/form-data">
       {% csrf_token %}
       <div class="modal-body">
         <!-- Basic Information -->
@@ -1066,6 +1437,22 @@
                   DECEASED
                 </label>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Picture -->
+        <div class="form-section">
+          <h3 class="form-section-title"><i class="fas fa-camera"></i> Profile Picture</h3>
+          <div class="form-row cols-2">
+            <div class="form-group">
+              <label for="edit_profile_picture">Photo</label>
+              <input type="file" id="edit_profile_picture" name="profile_picture" accept="image/*">
+              <small style="color: #5f6368; font-size: 0.85rem;">JPG, PNG or GIF. Leave empty to keep current.</small>
+            </div>
+            <div class="form-group">
+              <label>Preview</label>
+              <div id="edit_profile_preview" class="edit-profile-preview"><span>No photo</span></div>
             </div>
           </div>
         </div>
@@ -1302,7 +1689,23 @@
     </div>
     <div class="modal-body">
       <div class="view-header-title">Residents Record Information</div>
-      <div class="view-resident-name" id="view_full_name">-</div>
+      <div class="view-profile-wrap">
+        <div class="view-profile-col1">
+          <div class="view-profile-picture" id="view_profile_picture">
+            <i class="fas fa-user fa-3x" style="color: #9e9e9e;"></i>
+          </div>
+        </div>
+        <div class="view-profile-col2">
+          <div class="view-profile-info">
+            <div class="view-resident-name" id="view_full_name">-</div>
+            <p class="view-id-text" id="view_id_display" style="font-size: 0.9rem; color: #5f6368; margin: 0.25rem 0 0 0;">ID: -</p>
+          </div>
+          <div class="view-qr-wrap">
+            <img id="view_qr_code" src="" alt="QR Code" class="view-qr-img" style="display: none;">
+            <p class="view-qr-hint">Scan to view on phone</p>
+          </div>
+        </div>
+      </div>
       
       <table class="detail-table">
         <tr class="detail-row">
@@ -1387,6 +1790,25 @@
 </div>
 
 <script>
+// Search / Filter Residents Table
+function filterResidentsTable() {
+  var searchInput = document.getElementById('residentsSearch');
+  var tableBody = document.querySelector('.residents-table tbody');
+  if (!searchInput || !tableBody) return;
+
+  var term = searchInput.value.trim().toLowerCase();
+  var rows = tableBody.querySelectorAll('tr.resident-row-clickable');
+
+  rows.forEach(function (tr) {
+    if (!term) {
+      tr.style.display = '';
+      return;
+    }
+    var text = tr.textContent.toLowerCase();
+    tr.style.display = text.indexOf(term) !== -1 ? '' : 'none';
+  });
+}
+
 // Status Toggle Function
 function setStatus(element, status) {
   const container = element.closest('.status-toggle-container');
@@ -1411,12 +1833,87 @@ function closeAddModal() {
   // Reset status toggle
   document.querySelector('#addModal .status-option.alive').classList.add('active');
   document.querySelector('#addModal .status-option.deceased').classList.remove('active');
+  // Reset barangay search
+  var display = document.getElementById('add_barangay_display');
+  var hidden = document.getElementById('add_barangay');
+  if (display) display.value = '';
+  if (hidden) hidden.value = '';
+  var dropdown = document.getElementById('add_barangay_dropdown');
+  if (dropdown) dropdown.style.display = 'none';
+  // Reset profile picture
+  var addProfileInput = document.getElementById('add_profile_picture');
+  if (addProfileInput) addProfileInput.value = '';
+  var addPreview = document.getElementById('add_profile_preview');
+  if (addPreview) addPreview.innerHTML = '<span>No photo</span>';
 }
+
+// Add Resident: Barangay search picker
+(function() {
+  var displayInput = document.getElementById('add_barangay_display');
+  var hiddenInput = document.getElementById('add_barangay');
+  var dropdown = document.getElementById('add_barangay_dropdown');
+  var dataSelect = document.getElementById('add_barangays_data');
+  var barangayWrap = document.querySelector('.add-barangay-wrap');
+
+  function updateAddBarangayPicker() {
+    if (!displayInput || !dropdown || !dataSelect) return;
+    var q = (displayInput.value || '').trim().toLowerCase();
+    var list = dataSelect.options;
+    dropdown.innerHTML = '';
+    for (var i = 1; i < list.length; i++) {
+      var opt = list[i];
+      if (q && opt.text.toLowerCase().indexOf(q) < 0) continue;
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'add-barangay-item';
+      btn.textContent = opt.text;
+      btn.dataset.id = opt.value;
+      btn.dataset.name = opt.text;
+      btn.addEventListener('click', function() {
+        hiddenInput.value = this.dataset.id;
+        displayInput.value = this.dataset.name;
+        dropdown.style.display = 'none';
+      });
+      dropdown.appendChild(btn);
+    }
+    dropdown.style.display = dropdown.children.length ? 'block' : 'none';
+    if (!q) hiddenInput.value = '';
+  }
+
+  if (displayInput) {
+    displayInput.addEventListener('focus', updateAddBarangayPicker);
+    displayInput.addEventListener('input', updateAddBarangayPicker);
+    displayInput.addEventListener('blur', function() {
+      setTimeout(function() {
+        var id = hiddenInput.value;
+        if (id && !displayInput.value && dataSelect) {
+          for (var i = 0; i < dataSelect.options.length; i++) {
+            if (dataSelect.options[i].value === id) {
+              displayInput.value = dataSelect.options[i].text;
+              break;
+            }
+          }
+        }
+      }, 150);
+    });
+  }
+
+  document.addEventListener('click', function(e) {
+    if (barangayWrap && !barangayWrap.contains(e.target)) {
+      if (dropdown) dropdown.style.display = 'none';
+    }
+  });
+})();
 
 // Edit Modal Functions
 function openEditModal(id) {
-  fetch(`/operations/resident/get/${id}/`)
-    .then(response => response.json())
+  fetch(`/operations/resident/get/${id}/`, { credentials: 'same-origin' })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Server returned ' + response.status + '. Session may have expired—try refreshing the page.');
+      }
+      return response.json();
+    })
     .then(data => {
       document.getElementById('edit_resident_id').value = data.resident_id;
       document.getElementById('edit_barangay').value = data.barangay;
@@ -1452,13 +1949,25 @@ function openEditModal(id) {
       document.getElementById('edit_is_voter').checked = data.is_voter;
       document.getElementById('edit_remarks').value = data.remarks;
       
+      // Profile picture preview
+      var previewEl = document.getElementById('edit_profile_preview');
+      var profileInput = document.getElementById('edit_profile_picture');
+      if (profileInput) profileInput.value = '';
+      if (previewEl) {
+        if (data.profile_picture) {
+          previewEl.innerHTML = '<img src="' + data.profile_picture + '" alt="Current">';
+        } else {
+          previewEl.innerHTML = '<span>No photo</span>';
+        }
+      }
+      
       document.getElementById('editForm').action = `/operations/resident/edit/${id}/`;
       document.getElementById('editModal').classList.add('active');
       document.body.style.overflow = 'hidden';
     })
     .catch(error => {
       console.error('Error:', error);
-      alert('Failed to load resident data.');
+      alert(error.message || 'Failed to load resident data.');
     });
 }
 
@@ -1485,8 +1994,13 @@ let currentViewResidentId = null;
 
 function openViewModal(id) {
   currentViewResidentId = id;
-  fetch(`/operations/resident/get/${id}/`)
-    .then(response => response.json())
+  fetch(`/operations/resident/get/${id}/`, { credentials: 'same-origin' })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Server returned ' + response.status + '. Session may have expired—try refreshing the page.');
+      }
+      return response.json();
+    })
     .then(data => {
       // Full Name with comma after lastname
       let fullName = data.lastname || '';
@@ -1496,8 +2010,26 @@ function openViewModal(id) {
       }
       document.getElementById('view_full_name').textContent = fullName.toUpperCase();
       
+      // Profile Picture
+      const profileEl = document.getElementById('view_profile_picture');
+      if (data.profile_picture) {
+        profileEl.innerHTML = '<img src="' + data.profile_picture + '" alt="Profile">';
+      } else {
+        profileEl.innerHTML = '<i class="fas fa-user fa-3x" style="color: #9e9e9e;"></i>';
+      }
+      
+      // QR Code (links to app profile page)
+      const qrEl = document.getElementById('view_qr_code');
+      if (qrEl) {
+        qrEl.src = '/operations/resident/qr/' + id + '/';
+        qrEl.style.display = 'block';
+      }
+      
       // Basic Information
-      document.getElementById('view_resident_id').textContent = data.resident_id || '-';
+      var residentIdVal = data.resident_id || data.id || '-';
+      document.getElementById('view_resident_id').textContent = residentIdVal;
+      var idDisplay = document.getElementById('view_id_display');
+      if (idDisplay) idDisplay.textContent = 'ID: ' + residentIdVal;
       document.getElementById('view_contact_no').textContent = data.contact_no || '-';
       document.getElementById('view_gender').textContent = data.gender || '-';
       document.getElementById('view_civil_status').textContent = data.civil_status || '-';
@@ -1523,7 +2055,7 @@ function openViewModal(id) {
       // Location
       document.getElementById('view_purok').textContent = data.purok || '-';
       document.getElementById('view_address').textContent = data.address || '-';
-      document.getElementById('view_barangay').textContent = getBarangayName(data.barangay);
+      document.getElementById('view_barangay').textContent = data.barangay_name || getBarangayName(data.barangay) || '-';
       
       // Additional Information
       document.getElementById('view_educational_attainment').textContent = data.educational_attainment || '-';
@@ -1547,7 +2079,7 @@ function openViewModal(id) {
     })
     .catch(error => {
       console.error('Error:', error);
-      alert('Failed to load resident data.');
+      alert(error.message || 'Failed to load resident data.');
     });
 }
 
@@ -1555,6 +2087,10 @@ function closeViewModal() {
   document.getElementById('viewModal').classList.remove('active');
   document.body.style.overflow = '';
   currentViewResidentId = null;
+  var qrEl = document.getElementById('view_qr_code');
+  if (qrEl) { qrEl.src = ''; qrEl.style.display = 'none'; }
+  var idDisplay = document.getElementById('view_id_display');
+  if (idDisplay) idDisplay.textContent = 'ID: -';
 }
 
 function openEditFromView() {
@@ -1603,8 +2139,9 @@ function formatChoice(value) {
 }
 
 function getBarangayName(barangayId) {
-  const select = document.getElementById('add_barangay');
-  const option = select.querySelector(`option[value="${barangayId}"]`);
+  const select = document.getElementById('add_barangays_data');
+  if (!select) return '-';
+  const option = select.querySelector('option[value="' + barangayId + '"]');
   return option ? option.textContent.toUpperCase() : '-';
 }
 
@@ -1664,6 +2201,18 @@ document.querySelectorAll('.modal').forEach(modal => {
       );
     });
   }
+  var headerPrint = document.querySelector('.btn-print-resident');
+  if (headerPrint) {
+    headerPrint.addEventListener('click', function() {
+      var selected = document.querySelector('.resident-row-clickable.selected');
+      if (!selected) {
+        alert('Please select a resident first.');
+        return;
+      }
+      var id = selected.getAttribute('data-id');
+      window.open("{% url 'operations:resident_print' 0 %}".replace('0', id), 'print', 'width=750,height=550');
+    });
+  }
 })();
 
 // Close modals with Escape key
@@ -1674,6 +2223,29 @@ document.addEventListener('keydown', function(e) {
     });
     document.body.style.overflow = '';
   }
+});
+
+// Live preview when user selects profile picture (Add and Edit forms)
+document.addEventListener('DOMContentLoaded', function() {
+  function setupPreview(inputId, previewId) {
+    var input = document.getElementById(inputId);
+    var preview = document.getElementById(previewId);
+    if (!input || !preview) return;
+    input.addEventListener('change', function() {
+      var file = this.files[0];
+      if (file && file.type.startsWith('image/')) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          preview.innerHTML = '<img src="' + e.target.result + '" alt="Preview">';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.innerHTML = '<span>No photo</span>';
+      }
+    });
+  }
+  setupPreview('edit_profile_picture', 'edit_profile_preview');
+  setupPreview('add_profile_picture', 'add_profile_preview');
 });
 
 // Auto-hide messages after 5 seconds

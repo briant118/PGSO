@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "PPS Palawan Profiling System",
+    "slug": "pgso-app",
+    "version": "1.0.0",
+    "runtimeVersion": "1.0.0",
+    "orientation": "portrait",
+    "updates": {
+      "url": "https://u.expo.dev/155bb949-12d1-45d8-89a9-3ae2e543e466"
+    },
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1e3a5f"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Scan resident QR codes"
+      }
+    },
+    "android": {
+      "package": "com.pps.palawanprofiling",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
+      ],
+      "adaptiveIcon": {
+        "backgroundColor": "#1e3a5f",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Scan resident QR codes"
+        }
+      ],
+      ["expo-build-properties",{"android":{"usesCleartextTraffic":true}}]
+    ],
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "155bb949-12d1-45d8-89a9-3ae2e543e466"
+      }
+    }
+  }
+}

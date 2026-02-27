@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Voter's Registration – Operations – PGSO{% endblock %}
 {% block content %}
 <style>
@@ -6,7 +7,7 @@
 .page-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: flex-end;
   flex-wrap: wrap;
   gap: 1rem;
   margin-bottom: 2rem;
@@ -85,44 +86,104 @@
   font-size: 1.5rem;
 }
 
-/* Add: document icon with green plus in corner */
+/* Add: custom add-user.png icon, transparent background, light text, no border */
+.voters-header-btn.btn-add-voter {
+  background: transparent;
+  box-shadow: none;
+  padding: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #8a8a8a;
+  border: none;
+  width: 2.90rem;
+  height: 3.80rem;
+  border-radius: 6px;
+}
+.voters-header-btn.btn-add-voter:hover:not(:disabled) {
+  background: transparent;
+  box-shadow: none;
+}
 .voters-header-btn.btn-add-voter .btn-icon-wrap {
   color: #5f6368;
+  width: 2rem;
+  height: 2rem;
 }
-.voters-header-btn.btn-add-voter .btn-icon-wrap .fa-file-lines {
-  font-size: 1.4rem;
+.voters-header-btn.btn-add-voter .btn-label {
+  color: #8a8a8a;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
-.voters-header-btn.btn-add-voter .btn-icon-wrap .add-plus-circle {
-  position: absolute;
-  right: -4px;
-  bottom: -4px;
-  width: 1.1rem;
-  height: 1.1rem;
-  border-radius: 50%;
-  background: #28a745;
-  color: #fff;
-  font-size: 0.6rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.voters-header-btn.btn-add-voter .btn-icon-wrap .btn-add-user-img {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  display: block;
 }
-
-/* View: teal eye */
-.voters-header-btn.btn-view-voter .btn-icon-wrap i {
-  color: #17a2b8;
-  font-size: 1.5rem;
+.voters-header-btn.btn-add-voter .btn-add-user-fallback {
+  width: 2rem !important;
+  height: 2rem !important;
+  font-size: 1.1rem !important;
 }
 
-/* Edit: blue pencil */
+/* View, Edit, Delete: same size and style as Add (transparent, no border, light text) */
+.voters-header-btn.btn-view-voter,
+.voters-header-btn.btn-edit-voter,
+.voters-header-btn.btn-delete-voter {
+  background: transparent;
+  box-shadow: none;
+  padding: 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #8a8a8a;
+  border: none;
+  width: 2.90rem;
+  height: 3.80rem;
+  border-radius: 6px;
+}
+.voters-header-btn.btn-view-voter:hover:not(:disabled),
+.voters-header-btn.btn-edit-voter:hover:not(:disabled),
+.voters-header-btn.btn-delete-voter:hover:not(:disabled) {
+  background: transparent;
+  box-shadow: none;
+}
+.voters-header-btn.btn-view-voter .btn-icon-wrap,
+.voters-header-btn.btn-edit-voter .btn-icon-wrap,
+.voters-header-btn.btn-delete-voter .btn-icon-wrap {
+  width: 2rem;
+  height: 2rem;
+}
+.voters-header-btn.btn-view-voter .btn-label,
+.voters-header-btn.btn-edit-voter .btn-label,
+.voters-header-btn.btn-delete-voter .btn-label {
+  color: #8a8a8a;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-top: 0.35rem;
+}
+
+/* View: view-list.png */
+.voters-header-btn.btn-view-voter .btn-icon-wrap .btn-view-list-img {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+  display: block;
+}
+.voters-header-btn.btn-view-voter .btn-icon-wrap .btn-view-list-fallback {
+  width: 2rem !important;
+  height: 2rem !important;
+  font-size: 1.1rem !important;
+}
+
+/* Edit: blue pencil (smaller icon) */
 .voters-header-btn.btn-edit-voter .btn-icon-wrap i {
   color: #007bff;
-  font-size: 1.5rem;
+  font-size: 1.1rem;
 }
 
-/* Delete: red trash */
+/* Delete: red trash (smaller icon) */
 .voters-header-btn.btn-delete-voter .btn-icon-wrap i {
   color: #dc3545;
-  font-size: 1.5rem;
+  font-size: 1.1rem;
 }
 
 /* Layout: municipalities + barangays on left, voters panel on right */
@@ -500,9 +561,19 @@
   gap: 1rem;
   align-items: flex-start;
 }
-.voter-form-row.flex-row .voter-form-group { flex: 1; }
+.voter-form-row.flex-row .voter-form-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.voter-form-row.flex-row .voter-form-group .voter-form-label {
+  margin-bottom: 0.35rem;
+}
 .voter-form-row.flex-row .voter-form-group input {
   width: 100%;
+  height: 2.5rem;
+  box-sizing: border-box;
   padding: 0.6rem 0.75rem;
   border: 1px solid #dadce0;
   border-radius: 8px;
@@ -513,6 +584,12 @@
   outline: none;
   border-color: #1e3a5f;
   box-shadow: 0 0 0 2px rgba(30, 58, 95, 0.15);
+}
+.voter-form-row.flex-row .voter-form-group .voter-legend-trigger {
+  height: 2.5rem;
+  min-height: 2.5rem;
+  box-sizing: border-box;
+  padding: 0.6rem 2rem 0.6rem 0.75rem;
 }
 .voter-form-row > input.voter-form-input {
   width: 100%;
@@ -620,7 +697,7 @@
 }
 .voter-legend-trigger {
   width: 100%;
-  padding: 0.5rem 2rem 0.5rem 0.75rem;
+  padding: 0.6rem 2rem 0.6rem 0.75rem;
   border: 1px solid #dadce0;
   border-radius: 8px;
   font-size: 0.9rem;
@@ -631,7 +708,8 @@
   appearance: none;
   display: flex;
   align-items: center;
-  min-height: 38px;
+  min-height: 2.5rem;
+  box-sizing: border-box;
 }
 .voter-legend-trigger:focus {
   outline: none;
@@ -673,6 +751,7 @@
 .voter-legend-option {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
   cursor: pointer;
@@ -686,16 +765,15 @@
 .voter-legend-option:hover {
   background: #f0f4f8;
 }
+.voter-legend-option span {
+  flex: 1;
+}
 .voter-legend-option input[type="checkbox"] {
   width: 1rem;
   height: 1rem;
   cursor: pointer;
   margin: 0;
-}
-.voter-legend-option label {
-  cursor: pointer;
-  margin: 0;
-  flex: 1;
+  flex-shrink: 0;
 }
 
 .voter-modal-footer {
@@ -819,22 +897,23 @@
 <!-- Page Header -->
 <div class="page-header">
   <div class="page-header-text">
-    <h1 class="page-title">
-      <i class="fas fa-vote-yea" style="color: #4299e1;"></i> Voter's Registration
-    </h1>
+  <h1 class="page-title">
+    <i class="fas fa-vote-yea" style="color: #4299e1;"></i> Voter's Registration
+  </h1>
     <p class="page-subtitle">Browse by municipality and barangay to view registered voters.</p>
   </div>
   <div class="page-header-actions">
     <button type="button" class="voters-header-btn btn-add-voter" id="votersAddBtn" title="Register a resident as voter">
       <span class="btn-icon-wrap">
-        <i class="fas fa-file-lines"></i>
-        <span class="add-plus-circle"><i class="fas fa-plus"></i></span>
+        <img src="{% static 'images/add-user.png' %}" alt="Add" class="btn-add-user-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+        <span class="btn-add-user-fallback" style="display:none; width:2.5rem; height:2.5rem; align-items:center; justify-content:center; color:#5f6368; font-size:1.4rem;"><i class="fas fa-user-plus"></i></span>
       </span>
       <span class="btn-label">Add</span>
     </button>
     <button type="button" class="voters-header-btn btn-view-voter" id="votersViewBtn" disabled title="View selected voter">
       <span class="btn-icon-wrap">
-        <i class="fas fa-eye"></i>
+        <img src="{% static 'images/view-list.png' %}" alt="View" class="btn-view-list-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+        <span class="btn-view-list-fallback" style="display:none; width:2rem; height:2rem; align-items:center; justify-content:center; color:#17a2b8; font-size:1.1rem;"><i class="fas fa-eye"></i></span>
       </span>
       <span class="btn-label">View</span>
     </button>
@@ -864,7 +943,7 @@
     <div class="voter-modal-header">
       <div class="voter-modal-header-icon">
         <i class="fas fa-file-pen"></i>
-      </div>
+</div>
       <div class="voter-modal-header-text">
         <h2 class="voter-modal-title">Voter's Registration</h2>
         <p class="voter-modal-subtitle" id="voterModalSubtitle">{/Modify record/}</p>
@@ -915,16 +994,16 @@
               <button type="button" class="voter-legend-trigger" id="voterLegendTrigger" aria-haspopup="true" aria-expanded="false">Select legend…</button>
               <div class="voter-legend-panel" id="voterLegendPanel" role="listbox">
                 <label class="voter-legend-option">
-                  <input type="checkbox" id="voterLegendA" value="A">
                   <span>Illiterate</span>
+                  <input type="checkbox" id="voterLegendA" value="A">
                 </label>
                 <label class="voter-legend-option">
-                  <input type="checkbox" id="voterLegendB" value="B">
                   <span>PWD</span>
+                  <input type="checkbox" id="voterLegendB" value="B">
                 </label>
                 <label class="voter-legend-option">
-                  <input type="checkbox" id="voterLegendC" value="C">
                   <span>Senior</span>
+                  <input type="checkbox" id="voterLegendC" value="C">
                 </label>
               </div>
             </div>
@@ -1035,8 +1114,10 @@
             <th>Verified By</th>
           </tr>
         </thead>
+      
         <tbody id="votersTableBody"></tbody>
       </table>
+      
     </div>
   </div>
   </div>

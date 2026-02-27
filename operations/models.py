@@ -67,6 +67,7 @@ class Resident(models.Model):
     
     # Basic Information
     resident_id = models.CharField(max_length=20, unique=True, blank=True)
+    profile_picture = models.ImageField(upload_to='residents/', blank=True, null=True)
     barangay = models.ForeignKey(Barangay, on_delete=models.PROTECT, related_name='residents')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_ALIVE)
     

@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'operations',
     'reports',
     'administrator',
-    
+    'app',
 ]
 
 MIDDLEWARE = [
@@ -67,6 +67,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.media',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -134,8 +135,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+
+# Media files (user uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # Authentication
 LOGIN_URL = '/sign-in/'
@@ -144,3 +149,7 @@ LOGOUT_REDIRECT_URL = '/sign-in/'
 
 # Fixed admin account: this username cannot be modified (no password change or permissions edit from app)
 FIXED_ADMIN_USERNAME = 'admin'
+
+# Network access for QR codes and mobile devices. Set to your network IP (e.g. http://192.168.1.32:8000)
+# when accessing from other devices. If not set, we try to detect from request.
+SITE_URL = config('SITE_URL', default='')
