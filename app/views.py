@@ -6,7 +6,7 @@ from operations.models import Resident
 
 
 def resident_profile_pdf(request, pk):
-    """Generate and return resident profile as downloadable PDF."""
+    """Generate and return resident profile PDF matching Profiling-template layout fields."""
     from reportlab.lib.pagesizes import letter
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib.units import inch
@@ -15,42 +15,70 @@ def resident_profile_pdf(request, pk):
     resident = get_object_or_404(Resident, pk=pk)
     response = HttpResponse(content_type='application/pdf')
     filename = f"resident_profile_{resident.resident_id or resident.id}.pdf"
-    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    response['Content-Disposition'] = f'attachment; filename=\"{filename}\"'
 
     buffer = response
-    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=0.75*inch, leftMargin=0.75*inch,
-                            topMargin=0.75*inch, bottomMargin=0.75*inch)
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=letter,
+        rightMargin=0.75 * inch,
+        leftMargin=0.75 * inch,
+        topMargin=0.75 * inch,
+        bottomMargin=0.75 * inch,
+    )
     styles = getSampleStyleSheet()
     title_style = ParagraphStyle(
-        'CustomTitle', parent=styles['Heading1'], fontSize=18, spaceAfter=12,
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=16,
+        spaceAfter=10,
     )
     body_style = ParagraphStyle(
-        'CustomBody', parent=styles['Normal'], fontSize=10, spaceAfter=6,
+        'CustomBody',
+        parent=styles['Normal'],
+        fontSize=11,
+        spaceAfter=6,
     )
 
     elements = []
-    elements.append(Paragraph("PGSO Resident Profile", title_style))
-    elements.append(Spacer(1, 0.2*inch))
+    elements.append(Paragraph("PPS Palawan Profiling System", title_style))
+    elements.append(Spacer(1, 0.15 * inch))
 
+    # Name line (similar to LASTNAME, FIRSTNAME in template)
     full_name = resident.get_full_name()
-    elements.append(Paragraph(f"<b>Name:</b> {full_name}", body_style))
-    elements.append(Paragraph(f"<b>Resident ID:</b> {resident.resident_id or '-'}", body_style))
-    elements.append(Paragraph(f"<b>Contact:</b> {resident.contact_no or '—'}", body_style))
-    elements.append(Paragraph(f"<b>Gender:</b> {resident.get_gender_display()}", body_style))
-    elements.append(Paragraph(f"<b>Status:</b> {resident.get_status_display()}", body_style))
-    elements.append(Paragraph(f"<b>Date of Birth:</b> {resident.date_of_birth.strftime('%B %d, %Y')}", body_style))
-    elements.append(Paragraph(f"<b>Age:</b> {resident.get_age()} years old", body_style))
-    elements.append(Paragraph(f"<b>Place of Birth:</b> {resident.place_of_birth or '—'}", body_style))
-    elements.append(Paragraph(f"<b>Address:</b> {resident.address or '—'}{' / ' + resident.purok if resident.purok else ''}", body_style))
-    elements.append(Paragraph(f"<b>Barangay:</b> {resident.barangay.name if resident.barangay else '—'}", body_style))
-    elements.append(Paragraph(f"<b>Civil Status:</b> {resident.get_civil_status_display()}", body_style))
-    elements.append(Paragraph(f"<b>Occupation:</b> {resident.occupation or '—'}", body_style))
-    elements.append(Paragraph(f"<b>Citizenship:</b> {resident.citizenship or '—'}", body_style))
-    elements.append(Paragraph(f"<b>Educational Attainment:</b> {resident.get_educational_attainment_display()}", body_style))
-    elements.append(Paragraph(f"<b>Health Status:</b> {resident.get_health_status_display()}", body_style))
-    elements.append(Paragraph(f"<b>Economic Status:</b> {resident.get_economic_status_display()}", body_style))
-    if resident.remarks:
-        elements.append(Paragraph(f"<b>Remarks:</b> {resident.remarks}", body_style))
+    elements.append(Paragraph(f"<b>{full_name}</b>", body_style))
+    elements.append(Spacer(1, 0.1 * inch))
+
+    # Birthdate, Age, Gender, Contact No (single line, as in docx template)
+    birthdate_str = resident.date_of_birth.strftime('%b-%d-%Y') if resident.date_of_birth else '—'
+    age_val = resident.get_age() if resident.date_of_birth else ''
+    age_str = f"{age_val}" if age_val else '—'
+    gender_str = resident.get_gender_display()
+    contact_str = resident.contact_no or '—'
+    line1 = (
+        f"<b>Birthdate:</b> {birthdate_str}&nbsp;&nbsp;  "
+        f"<b>Age:</b> {age_str}&nbsp;&nbsp;  "
+        f"<b>Gender:</b> {gender_str}&nbsp;&nbsp;  "
+        f"<b>Contact No:</b> {contact_str}"
+    )
+    elements.append(Paragraph(line1, body_style))
+
+    # Address line
+    addr = resident.address or '—'
+    if resident.purok:
+        addr = f"{addr}, {resident.purok}"
+    elements.append(Paragraph(f"<b>Address:</b> {addr}", body_style))
+
+    # PWD / SENIOR / VOTERS badges (from template wording)
+    badges = []
+    if resident.health_status == 'PWD':
+        badges.append('PWD')
+    if resident.economic_status == 'SENIOR CITIZEN':
+        badges.append('SENIOR')
+    if getattr(resident, 'is_voter', False):
+        badges.append('VOTERS')
+    badges_str = ', '.join(badges) if badges else '—'
+    elements.append(Paragraph(f"<b>Remarks:</b> {badges_str}", body_style))
 
     doc.build(elements)
     return response

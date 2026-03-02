@@ -21,91 +21,13 @@ function extractResidentId(url) {
   return match ? match[1] : null;
 }
 
-function HomeScreen({ onSearch, onScan }) {
-  const [query, setQuery] = useState('');
-  const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [debounceTimer, setDebounceTimer] = useState(null);
-
-  const doSearch = useCallback((q) => {
-    const trimmed = (q || '').trim();
-    if (trimmed.length < 2) {
-      setResults([]);
-      return;
-    }
-    setLoading(true);
-    fetch(`${API_BASE_URL}/app/api/residents/search/?q=${encodeURIComponent(trimmed)}`)
-      .then((res) => res.json())
-      .then((data) => setResults(data.results || []))
-      .catch(() => setResults([]))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    if (debounceTimer) clearTimeout(debounceTimer);
-    if (!query.trim()) {
-      setResults([]);
-      return;
-    }
-    const t = setTimeout(() => doSearch(query), 400);
-    setDebounceTimer(t);
-    return () => clearTimeout(t);
-  }, [query, doSearch]);
-
-  const handleSelect = (id) => {
-    Keyboard.dismiss();
-    onSearch(String(id));
-  };
-
+function HomeScreen({ onScan }) {
+  // Simplified home: centered Scan button only
   return (
-    <View style={styles.homeContainer}>
-      <View style={styles.searchSection}>
-        <TextInput
-          style={styles.searchInput}
-          placeholder="Search by name or ID..."
-          placeholderTextColor="#8b949e"
-          value={query}
-          onChangeText={setQuery}
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        {loading && (
-          <ActivityIndicator size="small" color="#17a2b8" style={styles.searchSpinner} />
-        )}
-      </View>
-      {results.length > 0 ? (
-        <FlatList
-          data={results}
-          keyExtractor={(r) => String(r.id)}
-          style={styles.searchList}
-          keyboardShouldPersistTaps="handled"
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.searchItem}
-              onPress={() => handleSelect(item.id)}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.searchItemName}>{item.full_name}</Text>
-              <Text style={styles.searchItemMeta}>
-                ID: {item.resident_id || item.id} | {item.barangay}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
-      ) : query.trim().length >= 2 && !loading ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>No residents found</Text>
-        </View>
-      ) : (
-        <View style={styles.emptyState}>
-          <Text style={styles.hintText}>Type name or ID to search</Text>
-        </View>
-      )}
-      <View style={styles.homeActions}>
-        <TouchableOpacity style={styles.btnScan} onPress={onScan}>
-          <Text style={styles.btnScanText}>📷 Scan QR Code</Text>
-        </TouchableOpacity>
-      </View>
+    <View style={styles.centerContainer}>
+      <TouchableOpacity style={styles.btnScan} onPress={onScan}>
+        <Text style={styles.btnScanText}>📷 Scan QR Code</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -302,7 +224,7 @@ export default function App() {
   };
 
   const getSubtitle = () => {
-    if (screen === 'home') return 'Search or scan resident';
+    if (screen === 'home') return 'Scan a resident QR code';
     if (screen === 'scanner') return 'Scan a resident QR code';
     return 'Resident Profile';
   };
@@ -316,7 +238,6 @@ export default function App() {
       </View>
       {screen === 'home' && (
         <HomeScreen
-          onSearch={handleSearchSelect}
           onScan={handleGoToScan}
         />
       )}

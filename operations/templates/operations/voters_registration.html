@@ -161,6 +161,11 @@
   margin-top: 0.35rem;
 }
 
+.voters-header-btn.btn-print-voter .btn-icon-wrap i {
+  color: #5f6368;
+  font-size: 1.1rem;
+}
+
 /* View: view-list.png */
 .voters-header-btn.btn-view-voter .btn-icon-wrap .btn-view-list-img {
   width: 2rem;
@@ -929,6 +934,12 @@
       </span>
       <span class="btn-label">Delete</span>
     </button>
+    <button type="button" class="voters-header-btn btn-print-voter" id="votersPrintBtn" title="Print voter or list">
+      <span class="btn-icon-wrap">
+        <i class="fas fa-print"></i>
+      </span>
+      <span class="btn-label">Print</span>
+    </button>
   </div>
 </div>
 
@@ -1140,6 +1151,7 @@
   var viewBtn = document.getElementById('votersViewBtn');
   var editBtn = document.getElementById('votersEditBtn');
   var deleteBtn = document.getElementById('votersDeleteBtn');
+  var printBtn = document.getElementById('votersPrintBtn');
   var deleteForm = document.getElementById('voterDeleteForm');
   var initialBarangayId = {% if initial_barangay %}{{ initial_barangay.id }}{% else %}null{% endif %};
   var initialBarangayName = {% if initial_barangay %}'{{ initial_barangay.name|escapejs }}'{% else %}null{% endif %};
@@ -1314,6 +1326,26 @@
       var selected = document.querySelector('#votersTableBody tr.voter-row-clickable.selected');
       if (!selected) { alert('Please select a voter first.'); return; }
       openVoterModifyModal(selected.getAttribute('data-id'));
+    });
+  }
+
+  if (printBtn) {
+    printBtn.addEventListener('click', function () {
+      var selected = document.querySelector('#votersTableBody tr.voter-row-clickable.selected');
+      if (selected) {
+        var id = selected.getAttribute('data-id');
+        if (id) {
+          window.open("{% url 'operations:resident_print' 0 %}".replace('0', id), 'print_resident', 'width=750,height=550');
+          return;
+        }
+      }
+
+      if (currentBarangayId) {
+        var listUrl = "{% url 'reports:list_voters' %}" + "?barangay=" + encodeURIComponent(currentBarangayId);
+        window.open(listUrl, 'print_voters', 'width=900,height=650');
+      } else {
+        window.open("{% url 'reports:list_voters' %}", 'print_voters', 'width=900,height=650');
+      }
     });
   }
 

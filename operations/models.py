@@ -147,18 +147,30 @@ class Resident(models.Model):
         return age
     
     def save(self, *args, **kwargs):
-        """Override save to auto-generate resident ID."""
+        """Override save to auto-generate resident ID.
+
+        Format rules:
+        - 1 to 99,999  -> zero-padded 5 digits, e.g. 00001, 00002, ..., 99999
+        - 100,000+     -> letter prefix for each 100k block, then 4 digits:
+          100,000..199,999 -> A0001, A0002, ...
+          200,000..299,999 -> B0001, B0002, ...
+        """
         if not self.resident_id:
-            # Get the last resident ID and increment
+            # Use last primary key as sequence source
             last_resident = Resident.objects.order_by('-id').first()
-            if last_resident and last_resident.resident_id:
-                try:
-                    last_id = int(last_resident.resident_id)
-                    self.resident_id = str(last_id + 1)
-                except ValueError:
-                    self.resident_id = '1'
+            next_seq = (last_resident.id if last_resident else 0) + 1
+
+            if next_seq <= 99999:
+                # Simple zero-padded numeric ID up to 99,999
+                self.resident_id = f"{next_seq:05d}"
             else:
-                self.resident_id = '1'
+                # Use letter prefix per 100k block, then 4-digit sequence inside the block
+                # 100,000..199,999 -> 'A', 200,000..299,999 -> 'B', etc.
+                block_index = (next_seq - 100000) // 100000  # 0-based
+                letter = chr(ord('A') + block_index)
+                within_block = (next_seq - 100000) % 100000 + 1  # 1..100000
+                within_block = min(within_block, 9999)  # keep 4 digits max
+                self.resident_id = f"{letter}{within_block:04d}"
         super().save(*args, **kwargs)
 
 

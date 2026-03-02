@@ -464,8 +464,14 @@ def resident_print(request, pk):
     if resident.economic_status == 'SENIOR CITIZEN':
         badges.append('SENIOR')
     barangay_name = resident.barangay.name if resident.barangay else ''
-    resident_id_val = resident.resident_id or str(resident.id)
-    id_barangay = f"{resident_id_val}. {barangay_name}" if barangay_name else resident_id_val
+    barangay_number = ''
+    if resident.barangay:
+        # Prefer barangay.code if set, otherwise use its primary key
+        barangay_number = resident.barangay.code or str(resident.barangay.id)
+    if barangay_name:
+        id_barangay = f"{barangay_number}. {barangay_name}" if barangay_number else barangay_name
+    else:
+        id_barangay = ''
     return render(request, 'operations/resident_print.html', {
         'resident': resident,
         'profile_picture_url': profile_picture_url,

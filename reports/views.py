@@ -1,6 +1,8 @@
 from django.shortcuts import render
-from operations.models import Resident
 from datetime import date
+
+from operations.models import Resident
+from reference.models import Barangay
 
 
 def reports_index(request):
@@ -93,27 +95,59 @@ def list_4ps_member(request):
 
 
 def list_voters(request):
-    """List of voters"""
-    residents = Resident.objects.filter(
+    """List of voters, optionally filtered by barangay."""
+    barangay_id = request.GET.get('barangay')
+    barangay = None
+
+    residents_qs = Resident.objects.filter(
         status=Resident.STATUS_ALIVE,
-        is_voter=True
-    ).select_related('barangay').order_by('lastname', 'firstname')
-    
+        is_voter=True,
+    )
+
+    if barangay_id:
+        try:
+            barangay = Barangay.objects.get(pk=barangay_id)
+            residents_qs = residents_qs.filter(barangay=barangay)
+        except Barangay.DoesNotExist:
+            barangay = None
+
+    residents = (
+        residents_qs.select_related('barangay')
+        .order_by('lastname', 'firstname')
+    )
+
     context = {
         'residents': residents,
-        'count': residents.count()
+        'count': residents.count(),
+        'barangay': barangay,
     }
     return render(request, 'reports/list_voters.html', context)
 
 
 def list_residents_record(request):
-    """List of all resident's records"""
-    residents = Resident.objects.filter(
-        status=Resident.STATUS_ALIVE
-    ).select_related('barangay').order_by('lastname', 'firstname')
-    
+    """List of all resident's records, optionally filtered by barangay."""
+    barangay_id = request.GET.get('barangay')
+    barangay = None
+
+    residents_qs = Resident.objects.filter(
+        status=Resident.STATUS_ALIVE,
+    )
+
+    if barangay_id:
+        try:
+            barangay = Barangay.objects.get(pk=barangay_id)
+            residents_qs = residents_qs.filter(barangay=barangay)
+        except Barangay.DoesNotExist:
+            barangay = None
+
+    residents = (
+        residents_qs.select_related('barangay')
+        .order_by('lastname', 'firstname')
+    )
+
     context = {
         'residents': residents,
-        'count': residents.count()
+        'count': residents.count(),
+        'barangay': barangay,
     }
     return render(request, 'reports/list_residents_record.html', context)

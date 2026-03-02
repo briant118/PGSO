@@ -121,7 +121,13 @@
   <h1 class="page-title">
     <i class="fas fa-file-alt" style="color: #4299e1;"></i> List of Resident's Record
   </h1>
-  <p class="page-subtitle">This report displays all resident records in the system. Total: <strong>{{ count }}</strong></p>
+  <p class="page-subtitle">
+    {% if barangay %}
+      Resident records in <strong>{{ barangay.name }}</strong>. Total: <strong>{{ count }}</strong>
+    {% else %}
+      This report displays all resident records in the system. Total: <strong>{{ count }}</strong>
+    {% endif %}
+  </p>
 </div>
 
 <!-- Report Table -->

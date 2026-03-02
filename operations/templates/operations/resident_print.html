@@ -39,7 +39,7 @@
       height: 90px;
       overflow: hidden;
       background: #e8eaed;
-      border: 2px solid #e0e0e0;
+      border: 2px solid #2196F3;
     }
     .record-profile img {
       width: 100%;
@@ -125,11 +125,25 @@
       border: 1px solid #e0e0e0;
     }
     .record-qr img { width: 100%; height: 100%; display: block; }
-    .record-voters {
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-top: 0.25rem;
-      text-transform: uppercase;
+    /* Right side: precinct + economic status/legend/voters — bold text, no box */
+    .record-right-box {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      width: 100%;
+      max-width: 140px;
+    }
+    .record-right-box .line {
+      border: 1px solid transparent;
+      padding: 0 0.15rem;
+      outline: none;
+      min-height: 1.2em;
+      font-weight: 700;
+    }
+    .record-right-box .line + .line { margin-top: 0.25rem; }
+    .record-right-box .line:focus {
+      border-color: #4299e1;
+      background: #fff;
     }
     .record-id {
       font-size: 0.95rem;
@@ -188,7 +202,8 @@
       body { background: #fff; padding: 0; }
       .record-card { border-bottom: 1px solid #e0e0e0; box-shadow: none; }
       .no-print { display: none !important; }
-      .record-name:focus, .record-details input:focus, .record-address:focus, .record-id-barangay:focus {
+      .record-name:focus, .record-details input:focus, .record-address:focus, .record-id-barangay:focus,
+      .record-right-box .line:focus {
         border-color: transparent !important;
         background: transparent !important;
       }
@@ -225,9 +240,10 @@
         <div class="record-qr">
           <img src="{{ qr_code_url }}" alt="QR Code">
         </div>
-        {% if resident.is_voter %}
-        <div class="record-voters">VOTERS</div>
-        {% endif %}
+        <div class="record-right-box">
+          <div class="line" contenteditable="true" id="printPrecinct">{% if resident.precinct_number %}{{ resident.precinct_number }}{% else %}&nbsp;{% endif %}</div>
+          <div class="line">{% if resident.get_economic_status_display %}{{ resident.get_economic_status_display|cut:" Member" }}{% endif %}{% if resident.get_economic_status_display and resident.get_voter_legend_display %}, {% endif %}{% if resident.get_voter_legend_display %}{{ resident.get_voter_legend_display }}{% endif %}{% if resident.is_voter %}{% if resident.get_economic_status_display or resident.get_voter_legend_display %}, {% endif %}Voters{% endif %}</div>
+        </div>
       </div>
     </div>
   </div>
