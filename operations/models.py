@@ -68,6 +68,8 @@ class Resident(models.Model):
     # Basic Information
     resident_id = models.CharField(max_length=20, unique=True, blank=True)
     profile_picture = models.ImageField(upload_to='residents/', blank=True, null=True)
+    profile_picture_url = models.URLField(max_length=500, blank=True, help_text='Profile image URL in Supabase Storage')
+    qr_code_url = models.URLField(max_length=500, blank=True, help_text='QR code image URL in Supabase Storage')
     barangay = models.ForeignKey(Barangay, on_delete=models.PROTECT, related_name='residents')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_ALIVE)
     

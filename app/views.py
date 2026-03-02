@@ -113,15 +113,22 @@ def residents_search_api(request):
     return JsonResponse({'results': results})
 
 
+def _resident_profile_url(resident, request):
+    """Profile image URL: Supabase Storage or Django media."""
+    if resident.profile_picture_url:
+        return resident.profile_picture_url
+    if resident.profile_picture:
+        try:
+            return request.build_absolute_uri(resident.profile_picture.url)
+        except Exception:
+            pass
+    return ''
+
+
 def resident_api(request, pk):
     """Public API: resident data as JSON (for scanner app)."""
     resident = get_object_or_404(Resident, pk=pk)
-    profile_url = ''
-    if resident.profile_picture:
-        try:
-            profile_url = request.build_absolute_uri(resident.profile_picture.url)
-        except Exception:
-            profile_url = ''
+    profile_url = _resident_profile_url(resident, request)
     pdf_url = request.build_absolute_uri(f'/app/resident/{pk}/pdf/')
     date_of_birth_str = resident.date_of_birth.strftime('%Y-%m-%d') if resident.date_of_birth else ''
     data = {
@@ -153,12 +160,7 @@ def resident_api(request, pk):
 def resident_profile(request, pk):
     """Show profiling template when QR is scanned (profile picture, barangay, QR, economic status)."""
     resident = get_object_or_404(Resident, pk=pk)
-    profile_picture_url = ''
-    if resident.profile_picture:
-        try:
-            profile_picture_url = request.build_absolute_uri(resident.profile_picture.url)
-        except Exception:
-            profile_picture_url = ''
+    profile_picture_url = _resident_profile_url(resident, request)
     return render(request, 'app/profiling.html', {
         'resident': resident,
         'profile_picture_url': profile_picture_url,

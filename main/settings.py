@@ -153,3 +153,9 @@ FIXED_ADMIN_USERNAME = 'admin'
 # Network access for QR codes and mobile devices. Set to your network IP (e.g. http://192.168.1.32:8000)
 # when accessing from other devices. If not set, we try to detect from request.
 SITE_URL = config('SITE_URL', default='')
+
+# Supabase Storage (profile pictures and QR codes). Use service role key for server uploads.
+SUPABASE_URL = config('SUPABASE_URL', default='')
+SUPABASE_SERVICE_ROLE_KEY = config('SUPABASE_SERVICE_ROLE_KEY', default='')
+SUPABASE_STORAGE_BUCKET_PROFILES = config('SUPABASE_STORAGE_BUCKET_PROFILES', default='profiles')
+SUPABASE_STORAGE_BUCKET_QR = config('SUPABASE_STORAGE_BUCKET_QR', default='qr')

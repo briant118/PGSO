@@ -8,6 +8,7 @@ from reference.models import Barangay, Municipality, Position
 from administrator.utils import user_can_delete_in_operations
 from administrator.activity_log import log_activity, ACTION_CREATE, ACTION_UPDATE, ACTION_DELETE
 from .models import Resident, BarangayOfficial, CoordinatorPosition, Coordinator
+from .supabase_storage import upload_profile_picture, upload_qr_image
 from django.conf import settings
 import logging
 import socket
@@ -44,6 +45,18 @@ def _get_base_url_for_devices(request):
     if host_part and ':' not in host_part:
         base = base.replace(host_part, host_part + ':8000', 1)
     return base
+
+
+def _resident_profile_picture_url(resident, request):
+    """Return profile image URL: Supabase Storage URL or Django media URL."""
+    if resident.profile_picture_url:
+        return resident.profile_picture_url
+    if resident.profile_picture:
+        try:
+            return request.build_absolute_uri(resident.profile_picture.url)
+        except Exception:
+            pass
+    return ''
 
 
 def operations_index(request):
@@ -381,11 +394,10 @@ def resident_add(request):
             barangay_id = request.POST.get('barangay')
             barangay = get_object_or_404(Barangay, id=barangay_id)
             
-            # Create resident (automatically saved to Supabase)
+            # Create resident (profile uploaded to Supabase Storage after save to get pk)
             resident = Resident(
                 barangay=barangay,
                 status=request.POST.get('status', 'ALIVE'),
-                profile_picture=request.FILES.get('profile_picture'),
                 lastname=request.POST.get('lastname'),
                 firstname=request.POST.get('firstname'),
                 middlename=request.POST.get('middlename', ''),
@@ -407,6 +419,17 @@ def resident_add(request):
                 remarks=request.POST.get('remarks', ''),
             )
             resident.save()
+            # Upload profile picture to Supabase Storage if provided
+            profile_file = request.FILES.get('profile_picture')
+            if profile_file:
+                url = upload_profile_picture(profile_file, resident.id)
+                if url:
+                    resident.profile_picture_url = url
+                    resident.save(update_fields=['profile_picture_url'])
+                else:
+                    profile_file.seek(0)
+                    resident.profile_picture = profile_file
+                    resident.save(update_fields=['profile_picture'])
             
             # Log successful save to Supabase
             logger.info(f'Resident {resident.get_full_name()} (ID: {resident.resident_id}) added to Supabase database successfully')
@@ -423,10 +446,12 @@ def resident_add(request):
 
 
 def resident_qr(request, pk):
-    """Generate QR code image for resident profile (scannable URL to app)."""
+    """Serve or generate QR code image; store in Supabase when possible."""
     import qrcode
     import io
     resident = get_object_or_404(Resident, pk=pk)
+    if resident.qr_code_url:
+        return redirect(resident.qr_code_url)
     base = _get_base_url_for_devices(request)
     profile_url = f"{base}/app/resident/{pk}/"
     qr = qrcode.QRCode(version=1, box_size=8, border=2)
@@ -435,19 +460,19 @@ def resident_qr(request, pk):
     img = qr.make_image(fill_color='#1a1d24', back_color='white')
     buffer = io.BytesIO()
     img.save(buffer, format='PNG')
-    buffer.seek(0)
-    return HttpResponse(buffer.getvalue(), content_type='image/png')
+    png_bytes = buffer.getvalue()
+    url = upload_qr_image(png_bytes, resident.id)
+    if url:
+        resident.qr_code_url = url
+        resident.save(update_fields=['qr_code_url'])
+        return redirect(url)
+    return HttpResponse(png_bytes, content_type='image/png')
 
 
 def resident_print(request, pk):
     """Render print template for resident (record layout: name, details, address, QR, profile)."""
     resident = get_object_or_404(Resident, pk=pk)
-    profile_picture_url = ''
-    if resident.profile_picture:
-        try:
-            profile_picture_url = request.build_absolute_uri(resident.profile_picture.url)
-        except Exception:
-            profile_picture_url = ''
+    profile_picture_url = _resident_profile_picture_url(resident, request)
     # Format: LASTNAME, FIRSTNAME SUFFIX MIDDLENAME
     parts = [resident.lastname or '']
     name_parts = [resident.firstname or '', resident.suffix or '', resident.middlename or '']
@@ -456,7 +481,8 @@ def resident_print(request, pk):
     birthdate = resident.date_of_birth.strftime('%b-%d-%Y') if resident.date_of_birth else '-'
     age = str(resident.get_age()) if resident.date_of_birth else '-'
     address_line = f"{resident.address or ''}{', ' + resident.purok if resident.purok else ''}".strip() or '-'
-    qr_code_url = request.build_absolute_uri(reverse('operations:resident_qr', args=[pk]))
+    # Prefer stored QR URL in Supabase; fallback to on-the-fly QR view
+    qr_code_url = resident.qr_code_url or request.build_absolute_uri(reverse('operations:resident_qr', args=[pk]))
     # Badges per Profiling-template.docx: PWD, SENIOR (VOTERS shown under QR)
     badges = []
     if resident.health_status == 'PWD':
@@ -489,12 +515,7 @@ def resident_print(request, pk):
 def resident_get(request, pk):
     """Get resident data as JSON."""
     resident = get_object_or_404(Resident, pk=pk)
-    profile_url = ''
-    if resident.profile_picture:
-        try:
-            profile_url = request.build_absolute_uri(resident.profile_picture.url)
-        except Exception:
-            profile_url = ''
+    profile_url = _resident_profile_picture_url(resident, request)
     barangay_id = resident.barangay.id if resident.barangay else None
     barangay_name = resident.barangay.name if resident.barangay else ''
     date_of_birth_str = ''
@@ -558,7 +579,13 @@ def resident_edit(request, pk):
             resident.barangay = get_object_or_404(Barangay, id=barangay_id)
             resident.status = request.POST.get('status', 'ALIVE')
             if 'profile_picture' in request.FILES:
-                resident.profile_picture = request.FILES['profile_picture']
+                profile_file = request.FILES['profile_picture']
+                url = upload_profile_picture(profile_file, resident.id)
+                if url:
+                    resident.profile_picture_url = url
+                    resident.profile_picture = None  # prefer Supabase URL
+                else:
+                    resident.profile_picture = profile_file
             resident.lastname = request.POST.get('lastname')
             resident.firstname = request.POST.get('firstname')
             resident.middlename = request.POST.get('middlename', '')

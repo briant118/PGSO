@@ -1110,7 +1110,9 @@
           <span class="badge badge-id">{{ resident.resident_id }}</span>
         </td>
         <td>
-          {% if resident.profile_picture %}
+          {% if resident.profile_picture_url %}
+          <img src="{{ resident.profile_picture_url }}" alt="" class="resident-table-avatar">
+          {% elif resident.profile_picture %}
           <img src="{{ resident.profile_picture.url }}" alt="" class="resident-table-avatar">
           {% else %}
           <div class="resident-table-avatar-placeholder"><i class="fas fa-user"></i></div>
