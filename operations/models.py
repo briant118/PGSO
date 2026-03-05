@@ -179,7 +179,7 @@ class Resident(models.Model):
 class BarangayOfficial(models.Model):
     """Model for barangay officials."""
     
-    resident = models.ForeignKey(Resident, on_delete=models.PROTECT, related_name='official_positions')
+    resident = models.ForeignKey(Resident, on_delete=models.CASCADE, related_name='official_positions')
     barangay = models.ForeignKey(Barangay, on_delete=models.PROTECT, related_name='officials')
     position = models.ForeignKey(Position, on_delete=models.PROTECT, related_name='officials')
     start_date = models.DateField()
