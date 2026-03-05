@@ -32,7 +32,7 @@
 </div>
 
 <div class="card-container">
-  <div class="card-header"><h2>Role &amp; Delete Permissions</h2></div>
+  <div class="card-header"><h2>Role, Delete &amp; Section Permissions</h2></div>
   <form method="post" action="">
     {% csrf_token %}
     <div class="form-body">
@@ -49,14 +49,181 @@
         <div class="hint">Admin can delete everywhere. Staff cannot delete unless you unrestrict below.</div>
       </div>
 
+      <hr>
+
       <div class="form-group">
-        <label><input type="checkbox" name="can_delete_in_operations" {% if profile.can_delete_in_operations or is_admin %}checked{% endif %}> Can delete in Operations</label>
-        <div class="hint">Allow this user to delete in Operations (Coordinator, Barangay Officials, Residents, etc.). Ignored for Admin.</div>
+        <label>Reference Permissions</label>
+        <div style="margin-left: 1.25rem;">
+          <label style="display:block; margin-bottom:0.35rem;">
+            <input type="checkbox" name="can_manage_reference"
+                   {% if profile.can_manage_reference or is_admin %}checked{% endif %}>
+            Reference (all)
+          </label>
+          <div style="margin-left:1.5rem; margin-top:0.35rem;">
+            <div style="font-weight:600; margin-bottom:0.25rem;">Barangay</div>
+            <div style="margin-left:1.25rem; font-size:0.9rem; margin-bottom:0.4rem;">
+              <label style="margin-right:0.75rem;">
+                <input type="checkbox" name="can_manage_reference_barangay"
+                       {% if profile.can_manage_reference_barangay or profile.can_manage_reference or is_admin %}checked{% endif %}>
+                Enable
+              </label>
+              <label style="margin-right:0.5rem;">
+                <input type="checkbox" name="can_add_reference_barangay"
+                       {% if profile.can_add_reference_barangay %}checked{% endif %}>
+                Add
+              </label>
+              <label style="margin-right:0.5rem;">
+                <input type="checkbox" name="can_edit_reference_barangay"
+                       {% if profile.can_edit_reference_barangay %}checked{% endif %}>
+                Edit
+              </label>
+              <label>
+                <input type="checkbox" name="can_delete_reference_barangay"
+                       {% if profile.can_delete_reference_barangay %}checked{% endif %}>
+                Delete
+              </label>
+            </div>
+
+            <div style="font-weight:600; margin-bottom:0.25rem;">Position</div>
+            <div style="margin-left:1.25rem; font-size:0.9rem;">
+              <label style="margin-right:0.75rem;">
+                <input type="checkbox" name="can_manage_reference_position"
+                       {% if profile.can_manage_reference_position or profile.can_manage_reference or is_admin %}checked{% endif %}>
+                Enable
+              </label>
+              <label style="margin-right:0.5rem;">
+                <input type="checkbox" name="can_add_reference_position"
+                       {% if profile.can_add_reference_position %}checked{% endif %}>
+                Add
+              </label>
+              <label style="margin-right:0.5rem;">
+                <input type="checkbox" name="can_edit_reference_position"
+                       {% if profile.can_edit_reference_position %}checked{% endif %}>
+                Edit
+              </label>
+              <label>
+                <input type="checkbox" name="can_delete_reference_position"
+                       {% if profile.can_delete_reference_position %}checked{% endif %}>
+                Delete
+              </label>
+            </div>
+          </div>
+          <div class="hint">
+            Checking <strong>Reference (all)</strong> allows this user to add, edit, and delete in all Reference subsections.
+            Otherwise, only the checked subsections are manageable.
+          </div>
+        </div>
       </div>
 
       <div class="form-group">
-        <label><input type="checkbox" name="can_delete_in_reference" {% if profile.can_delete_in_reference or is_admin %}checked{% endif %}> Can delete in Reference</label>
-        <div class="hint">Allow this user to delete in Reference (Barangay, Positions, etc.). Ignored for Admin.</div>
+        <label>Operations Permissions</label>
+        <div style="margin-left: 1.25rem;">
+          <label style="display:block; margin-bottom:0.35rem;">
+            <input type="checkbox" name="can_manage_operations"
+                   {% if profile.can_manage_operations or is_admin %}checked{% endif %}>
+            Operations (all)
+          </label>
+          <div style="margin-left:1.5rem; margin-top:0.35rem;">
+            <div style="font-weight:600; margin-bottom:0.25rem;">Coordinator</div>
+            <div style="margin-left:1.25rem; font-size:0.9rem; margin-bottom:0.4rem;">
+              <label style="margin-right:0.75rem;">
+                <input type="checkbox" name="can_manage_operations_coordinator"
+                       {% if profile.can_manage_operations_coordinator or profile.can_manage_operations or is_admin %}checked{% endif %}>
+                Enable
+              </label>
+              <label style="margin-right:0.5rem;">
+                <input type="checkbox" name="can_add_operations_coordinator"
+                       {% if profile.can_add_operations_coordinator %}checked{% endif %}>
+                Add
+              </label>
+              <label style="margin-right:0.5rem;">
+                <input type="checkbox" name="can_edit_operations_coordinator"
+                       {% if profile.can_edit_operations_coordinator %}checked{% endif %}>
+                Edit
+              </label>
+              <label>
+                <input type="checkbox" name="can_delete_operations_coordinator"
+                       {% if profile.can_delete_operations_coordinator %}checked{% endif %}>
+                Delete
+              </label>
+            </div>
+
+            <div style="font-weight:600; margin-bottom:0.25rem;">Barangay Official</div>
+            <div style="margin-left:1.25rem; font-size:0.9rem; margin-bottom:0.4rem;">
+              <label style="margin-right:0.75rem;">
+                <input type="checkbox" name="can_manage_operations_barangay_official"
+                       {% if profile.can_manage_operations_barangay_official or profile.can_manage_operations or is_admin %}checked{% endif %}>
+                Enable
+              </label>
+              <label style="margin-right:0.5rem;">
+                <input type="checkbox" name="can_add_operations_barangay_official"
+                       {% if profile.can_add_operations_barangay_official %}checked{% endif %}>
+                Add
+              </label>
+              <label style="margin-right:0.5rem;">
+                <input type="checkbox" name="can_edit_operations_barangay_official"
+                       {% if profile.can_edit_operations_barangay_official %}checked{% endif %}>
+                Edit
+              </label>
+              <label>
+                <input type="checkbox" name="can_delete_operations_barangay_official"
+                       {% if profile.can_delete_operations_barangay_official %}checked{% endif %}>
+                Delete
+              </label>
+            </div>
+
+            <div style="font-weight:600; margin-bottom:0.25rem;">Residents Record</div>
+            <div style="margin-left:1.25rem; font-size:0.9rem; margin-bottom:0.4rem;">
+              <label style="margin-right:0.75rem;">
+                <input type="checkbox" name="can_manage_operations_residents_record"
+                       {% if profile.can_manage_operations_residents_record or profile.can_manage_operations or is_admin %}checked{% endif %}>
+                Enable
+              </label>
+              <label style="margin-right:0.5rem;">
+                <input type="checkbox" name="can_add_operations_residents_record"
+                       {% if profile.can_add_operations_residents_record %}checked{% endif %}>
+                Add
+              </label>
+              <label style="margin-right:0.5rem;">
+                <input type="checkbox" name="can_edit_operations_residents_record"
+                       {% if profile.can_edit_operations_residents_record %}checked{% endif %}>
+                Edit
+              </label>
+              <label>
+                <input type="checkbox" name="can_delete_operations_residents_record"
+                       {% if profile.can_delete_operations_residents_record %}checked{% endif %}>
+                Delete
+              </label>
+            </div>
+
+            <div style="font-weight:600; margin-bottom:0.25rem;">Voters Registration</div>
+            <div style="margin-left:1.25rem; font-size:0.9rem;">
+              <label style="margin-right:0.75rem;">
+                <input type="checkbox" name="can_manage_operations_voters_registration"
+                       {% if profile.can_manage_operations_voters_registration or profile.can_manage_operations or is_admin %}checked{% endif %}>
+                Enable
+              </label>
+              <label style="margin-right:0.5rem;">
+                <input type="checkbox" name="can_add_operations_voters_registration"
+                       {% if profile.can_add_operations_voters_registration %}checked{% endif %}>
+                Add
+              </label>
+              <label style="margin-right:0.5rem;">
+                <input type="checkbox" name="can_edit_operations_voters_registration"
+                       {% if profile.can_edit_operations_voters_registration %}checked{% endif %}>
+                Edit
+              </label>
+              <label>
+                <input type="checkbox" name="can_delete_operations_voters_registration"
+                       {% if profile.can_delete_operations_voters_registration %}checked{% endif %}>
+                Delete
+              </label>
+            </div>
+          </div>
+          <div class="hint">
+            The <strong>Operations (all)</strong> toggle grants access to all Operations subsections; otherwise, only the checked subsections are manageable.
+          </div>
+        </div>
       </div>
     </div>
     <div class="form-actions">
@@ -65,4 +232,99 @@
     </div>
   </form>
 </div>
+<script>
+  (function () {
+    function checkByName(name) {
+      var el = document.querySelector('input[name="' + name + '"]');
+      if (el) el.checked = true;
+    }
+    function bindEnableWithActions(enableName, actionNames) {
+      var enable = document.querySelector('input[name="' + enableName + '"]');
+      if (!enable) return;
+      enable.addEventListener('change', function () {
+        if (!enable.checked) return;
+        actionNames.forEach(checkByName);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Reference subsections
+      bindEnableWithActions('can_manage_reference_barangay', [
+        'can_add_reference_barangay',
+        'can_edit_reference_barangay',
+        'can_delete_reference_barangay',
+      ]);
+      bindEnableWithActions('can_manage_reference_position', [
+        'can_add_reference_position',
+        'can_edit_reference_position',
+        'can_delete_reference_position',
+      ]);
+
+      // Operations subsections
+      bindEnableWithActions('can_manage_operations_coordinator', [
+        'can_add_operations_coordinator',
+        'can_edit_operations_coordinator',
+        'can_delete_operations_coordinator',
+      ]);
+      bindEnableWithActions('can_manage_operations_barangay_official', [
+        'can_add_operations_barangay_official',
+        'can_edit_operations_barangay_official',
+        'can_delete_operations_barangay_official',
+      ]);
+      bindEnableWithActions('can_manage_operations_residents_record', [
+        'can_add_operations_residents_record',
+        'can_edit_operations_residents_record',
+        'can_delete_operations_residents_record',
+      ]);
+      bindEnableWithActions('can_manage_operations_voters_registration', [
+        'can_add_operations_voters_registration',
+        'can_edit_operations_voters_registration',
+        'can_delete_operations_voters_registration',
+      ]);
+
+      // Main toggles: when turned on, auto-select all subsection toggles + actions
+      var refAll = document.querySelector('input[name="can_manage_reference"]');
+      if (refAll) {
+        refAll.addEventListener('change', function () {
+          if (!refAll.checked) return;
+          [
+            'can_manage_reference_barangay',
+            'can_add_reference_barangay',
+            'can_edit_reference_barangay',
+            'can_delete_reference_barangay',
+            'can_manage_reference_position',
+            'can_add_reference_position',
+            'can_edit_reference_position',
+            'can_delete_reference_position',
+          ].forEach(checkByName);
+        });
+      }
+
+      var opsAll = document.querySelector('input[name="can_manage_operations"]');
+      if (opsAll) {
+        opsAll.addEventListener('change', function () {
+          if (!opsAll.checked) return;
+          [
+            'can_manage_operations_coordinator',
+            'can_add_operations_coordinator',
+            'can_edit_operations_coordinator',
+            'can_delete_operations_coordinator',
+            'can_manage_operations_barangay_official',
+            'can_add_operations_barangay_official',
+            'can_edit_operations_barangay_official',
+            'can_delete_operations_barangay_official',
+            'can_manage_operations_residents_record',
+            'can_add_operations_residents_record',
+            'can_edit_operations_residents_record',
+            'can_delete_operations_residents_record',
+            'can_manage_operations_voters_registration',
+            'can_add_operations_voters_registration',
+            'can_edit_operations_voters_registration',
+            'can_delete_operations_voters_registration',
+          ].forEach(checkByName);
+        });
+      }
+    });
+  })();
+</script>
 {% endblock %}

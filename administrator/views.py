@@ -104,8 +104,51 @@ def user_permissions_edit(request, pk):
 
     if request.method == 'POST':
         role = request.POST.get('role', 'staff').strip().lower()
+        # Area delete flags (legacy – still supported if you keep them in the form)
         can_ops = request.POST.get('can_delete_in_operations') == 'on'
         can_ref = request.POST.get('can_delete_in_reference') == 'on'
+
+        # Section-level toggles
+        manage_ref_all = request.POST.get('can_manage_reference') == 'on'
+        manage_ref_barangay = request.POST.get('can_manage_reference_barangay') == 'on'
+        manage_ref_position = request.POST.get('can_manage_reference_position') == 'on'
+
+        manage_ops_all = request.POST.get('can_manage_operations') == 'on'
+        manage_ops_coord = request.POST.get('can_manage_operations_coordinator') == 'on'
+        manage_ops_bo = request.POST.get('can_manage_operations_barangay_official') == 'on'
+        manage_ops_res = request.POST.get('can_manage_operations_residents_record') == 'on'
+        manage_ops_voters = request.POST.get('can_manage_operations_voters_registration') == 'on'
+
+        # Fine-grained actions per subsection
+        # Reference → Barangay
+        add_ref_barangay = request.POST.get('can_add_reference_barangay') == 'on'
+        edit_ref_barangay = request.POST.get('can_edit_reference_barangay') == 'on'
+        delete_ref_barangay = request.POST.get('can_delete_reference_barangay') == 'on'
+
+        # Reference → Position
+        add_ref_position = request.POST.get('can_add_reference_position') == 'on'
+        edit_ref_position = request.POST.get('can_edit_reference_position') == 'on'
+        delete_ref_position = request.POST.get('can_delete_reference_position') == 'on'
+
+        # Operations → Coordinator
+        add_ops_coord = request.POST.get('can_add_operations_coordinator') == 'on'
+        edit_ops_coord = request.POST.get('can_edit_operations_coordinator') == 'on'
+        delete_ops_coord = request.POST.get('can_delete_operations_coordinator') == 'on'
+
+        # Operations → Barangay Official
+        add_ops_bo = request.POST.get('can_add_operations_barangay_official') == 'on'
+        edit_ops_bo = request.POST.get('can_edit_operations_barangay_official') == 'on'
+        delete_ops_bo = request.POST.get('can_delete_operations_barangay_official') == 'on'
+
+        # Operations → Residents Record
+        add_ops_res = request.POST.get('can_add_operations_residents_record') == 'on'
+        edit_ops_res = request.POST.get('can_edit_operations_residents_record') == 'on'
+        delete_ops_res = request.POST.get('can_delete_operations_residents_record') == 'on'
+
+        # Operations → Voters Registration
+        add_ops_voters = request.POST.get('can_add_operations_voters_registration') == 'on'
+        edit_ops_voters = request.POST.get('can_edit_operations_voters_registration') == 'on'
+        delete_ops_voters = request.POST.get('can_delete_operations_voters_registration') == 'on'
 
         if admin_group and staff_group:
             if role == 'admin':
@@ -117,6 +160,38 @@ def user_permissions_edit(request, pk):
 
         profile.can_delete_in_operations = can_ops
         profile.can_delete_in_reference = can_ref
+        profile.can_manage_reference = manage_ref_all
+        profile.can_manage_reference_barangay = manage_ref_barangay
+        profile.can_manage_reference_position = manage_ref_position
+        profile.can_manage_operations = manage_ops_all
+        profile.can_manage_operations_coordinator = manage_ops_coord
+        profile.can_manage_operations_barangay_official = manage_ops_bo
+        profile.can_manage_operations_residents_record = manage_ops_res
+        profile.can_manage_operations_voters_registration = manage_ops_voters
+
+        profile.can_add_reference_barangay = add_ref_barangay
+        profile.can_edit_reference_barangay = edit_ref_barangay
+        profile.can_delete_reference_barangay = delete_ref_barangay
+
+        profile.can_add_reference_position = add_ref_position
+        profile.can_edit_reference_position = edit_ref_position
+        profile.can_delete_reference_position = delete_ref_position
+
+        profile.can_add_operations_coordinator = add_ops_coord
+        profile.can_edit_operations_coordinator = edit_ops_coord
+        profile.can_delete_operations_coordinator = delete_ops_coord
+
+        profile.can_add_operations_barangay_official = add_ops_bo
+        profile.can_edit_operations_barangay_official = edit_ops_bo
+        profile.can_delete_operations_barangay_official = delete_ops_bo
+
+        profile.can_add_operations_residents_record = add_ops_res
+        profile.can_edit_operations_residents_record = edit_ops_res
+        profile.can_delete_operations_residents_record = delete_ops_res
+
+        profile.can_add_operations_voters_registration = add_ops_voters
+        profile.can_edit_operations_voters_registration = edit_ops_voters
+        profile.can_delete_operations_voters_registration = delete_ops_voters
         profile.save()
         log_activity(request, UserActivity.ACTION_UPDATE, f'Updated permissions for user "{user.username}".')
         messages.success(request, f'Permissions for {user.username} updated.')

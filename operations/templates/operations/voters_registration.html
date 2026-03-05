@@ -125,10 +125,11 @@
   font-size: 1.1rem !important;
 }
 
-/* View, Edit, Delete: same size and style as Add (transparent, no border, light text) */
+/* View, Edit, Delete, Print: same size and style as Add (transparent, no border, light text) */
 .voters-header-btn.btn-view-voter,
 .voters-header-btn.btn-edit-voter,
-.voters-header-btn.btn-delete-voter {
+.voters-header-btn.btn-delete-voter,
+.voters-header-btn.btn-print-voter {
   background: transparent;
   box-shadow: none;
   padding: 0.4rem;
@@ -142,28 +143,26 @@
 }
 .voters-header-btn.btn-view-voter:hover:not(:disabled),
 .voters-header-btn.btn-edit-voter:hover:not(:disabled),
-.voters-header-btn.btn-delete-voter:hover:not(:disabled) {
+.voters-header-btn.btn-delete-voter:hover:not(:disabled),
+.voters-header-btn.btn-print-voter:hover:not(:disabled) {
   background: transparent;
   box-shadow: none;
 }
 .voters-header-btn.btn-view-voter .btn-icon-wrap,
 .voters-header-btn.btn-edit-voter .btn-icon-wrap,
-.voters-header-btn.btn-delete-voter .btn-icon-wrap {
+.voters-header-btn.btn-delete-voter .btn-icon-wrap,
+.voters-header-btn.btn-print-voter .btn-icon-wrap {
   width: 2rem;
   height: 2rem;
 }
 .voters-header-btn.btn-view-voter .btn-label,
 .voters-header-btn.btn-edit-voter .btn-label,
-.voters-header-btn.btn-delete-voter .btn-label {
+.voters-header-btn.btn-delete-voter .btn-label,
+.voters-header-btn.btn-print-voter .btn-label {
   color: #8a8a8a;
   font-size: 0.75rem;
   font-weight: 500;
   margin-top: 0.35rem;
-}
-
-.voters-header-btn.btn-print-voter .btn-icon-wrap i {
-  color: #5f6368;
-  font-size: 1.1rem;
 }
 
 /* View: view-list.png */
@@ -936,7 +935,7 @@
     </button>
     <button type="button" class="voters-header-btn btn-print-voter" id="votersPrintBtn" title="Print voter or list">
       <span class="btn-icon-wrap">
-        <i class="fas fa-print"></i>
+        <img src="{% static 'images/printer.png' %}" alt="Print" width="20" height="30" object-fit: contain;>
       </span>
       <span class="btn-label">Print</span>
     </button>
@@ -947,6 +946,29 @@
 <form method="post" id="voterDeleteForm" action="" style="display: none;">
   {% csrf_token %}
 </form>
+
+<!-- Simple info modal (e.g., "Please select a voter first.") -->
+<div id="voterInfoModal" class="voter-modal-overlay">
+  <div class="voter-modal-card">
+    <div class="voter-modal-header">
+      <div class="voter-modal-header-icon">
+        <i class="fas fa-info"></i>
+      </div>
+      <div class="voter-modal-header-text">
+        <h2 class="voter-modal-title">Notice</h2>
+        <p class="voter-modal-subtitle" id="voterInfoModalMessage">Please select a voter first.</p>
+      </div>
+      <button type="button" class="voter-modal-close" id="voterInfoModalClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="voter-modal-body" style="padding-top: 0;">
+      <div class="voter-form-row" style="justify-content: flex-end; margin-top: 1rem;">
+        <button type="button" class="btn btn-primary" id="voterInfoModalOk">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Voter's Registration – Modify record modal -->
 <div id="voterModifyModal" class="voter-modal-overlay">
@@ -1153,8 +1175,13 @@
   var deleteBtn = document.getElementById('votersDeleteBtn');
   var printBtn = document.getElementById('votersPrintBtn');
   var deleteForm = document.getElementById('voterDeleteForm');
-  var initialBarangayId = {% if initial_barangay %}{{ initial_barangay.id }}{% else %}null{% endif %};
-  var initialBarangayName = {% if initial_barangay %}'{{ initial_barangay.name|escapejs }}'{% else %}null{% endif %};
+  {% if initial_barangay %}
+  var initialBarangayId = {{ initial_barangay.id }};
+  var initialBarangayName = "{{ initial_barangay.name|escapejs }}";
+  {% else %}
+  var initialBarangayId = null;
+  var initialBarangayName = null;
+  {% endif %}
 
   function setPanelLoading(show) {
     if (placeholder) placeholder.style.display = show ? 'none' : (tableWrap && header && tableWrap.style.display === 'none' && header.style.display === 'none' ? 'block' : 'none');
@@ -1304,11 +1331,36 @@
     votersSearch.addEventListener('input', filterVotersTable);
   }
 
+  // Simple info modal helper (used instead of browser alert)
+  function showVoterInfo(message) {
+    var modal = document.getElementById('voterInfoModal');
+    var msgEl = document.getElementById('voterInfoModalMessage');
+    if (!modal || !msgEl) return;
+    msgEl.textContent = message || 'Please select a voter first.';
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  (function() {
+    var modal = document.getElementById('voterInfoModal');
+    if (!modal) return;
+    var closeBtn = document.getElementById('voterInfoModalClose');
+    var okBtn = document.getElementById('voterInfoModalOk');
+    function close() {
+      modal.classList.remove('active');
+      document.body.style.overflow = '';
+    }
+    if (closeBtn) closeBtn.addEventListener('click', close);
+    if (okBtn) okBtn.addEventListener('click', close);
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) close();
+    });
+  })();
   if (viewBtn) {
     viewBtn.addEventListener('click', function() {
       if (viewBtn.disabled) return;
       var selected = document.querySelector('#votersTableBody tr.voter-row-clickable.selected');
-      if (!selected) { alert('Please select a voter first.'); return; }
+      if (!selected) { showVoterInfo('Please select a voter first.'); return; }
       openVoterViewModal(selected.getAttribute('data-id'));
     });
   }
@@ -1324,7 +1376,7 @@
     editBtn.addEventListener('click', function() {
       if (editBtn.disabled) return;
       var selected = document.querySelector('#votersTableBody tr.voter-row-clickable.selected');
-      if (!selected) { alert('Please select a voter first.'); return; }
+      if (!selected) { showVoterInfo('Please select a voter first.'); return; }
       openVoterModifyModal(selected.getAttribute('data-id'));
     });
   }
@@ -1339,13 +1391,7 @@
           return;
         }
       }
-
-      if (currentBarangayId) {
-        var listUrl = "{% url 'reports:list_voters' %}" + "?barangay=" + encodeURIComponent(currentBarangayId);
-        window.open(listUrl, 'print_voters', 'width=900,height=650');
-      } else {
-        window.open("{% url 'reports:list_voters' %}", 'print_voters', 'width=900,height=650');
-      }
+      showVoterInfo('Please select a voter first.');
     });
   }
 

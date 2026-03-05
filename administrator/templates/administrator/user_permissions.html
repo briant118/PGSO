@@ -27,7 +27,7 @@
 <div class="page-header">
   <div>
     <h1 class="page-title"><i class="fas fa-key" style="color: #4299e1;"></i> User Permissions</h1>
-    <p class="page-subtitle">Set role (Staff / Admin) and restrict or unrestrict delete in Operations and Reference.</p>
+    <p class="page-subtitle">Set role (Staff / Admin), area delete permissions, and per-section access for Reference and Operations.</p>
   </div>
   <a href="{% url 'administrator:user_accounts' %}" class="btn-edit"><i class="fas fa-user-friends"></i> User Accounts</a>
 </div>
@@ -63,6 +63,6 @@
 </div>
 
 <p style="margin-top: 1rem; color: #5f6368; font-size: 0.9rem;">
-  <strong>Admin</strong> can delete in both Operations and Reference. <strong>Staff</strong> cannot delete unless you unrestrict one or both areas on their permissions.
+  <strong>Admin</strong> can manage and delete in all sections. <strong>Staff</strong> cannot delete unless you unrestrict an area, and can only manage the specific sections you enable on their permissions.
 </p>
 {% endblock %}

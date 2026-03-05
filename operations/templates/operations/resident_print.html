@@ -13,33 +13,46 @@
       padding: 1.5rem;
       color: #1a1d24;
     }
+    /* Card canvas (matches Word template look) */
     .record-card {
-      max-width: 700px;
+      width: 8.56cm;
+      min-height: 5.40cm;
       margin: 0 auto;
       background: #fff;
-      padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid #e0e0e0;
+      position: relative;
+      overflow: hidden;
+      padding: 0.45cm 0.5cm;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
     }
-    .record-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 1.5rem;
+    .record-top-right {
+      position: absolute;
+      top: 0.35cm;
+      right: 0.5cm;
+      font-size: 0.38cm;
+      font-weight: 500;
+      white-space: nowrap;
     }
-    .record-left {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      gap: 1rem;
-      align-items: center;
+    .record-name {
+      position: absolute;
+      top: 0.75cm;
+      left: 0.5cm;
+      right: 0.5cm;
+      text-align: center;
+      font-size: 0.5cm;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      text-transform: uppercase;
+      line-height: 1.1;
     }
     .record-profile {
-      flex-shrink: 0;
-      width: 90px;
-      height: 90px;
+      position: absolute;
+      left: 0.55cm;
+      top: 1.65cm;
+      width: 2.0cm;
+      height: 2.0cm;
       overflow: hidden;
       background: #e8eaed;
-      border: 2px solid #2196F3;
+      border: 0.08cm solid #1e3a8a;
     }
     .record-profile img {
       width: 100%;
@@ -53,131 +66,79 @@
       align-items: center;
       justify-content: center;
       color: #9e9e9e;
-      font-size: 1.5rem;
-    }
-    .record-info { flex: 1; min-width: 0; }
-    .record-right {
-      flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.35rem;
-    }
-    .record-name {
-      font-size: 1.35rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.3px;
-      margin-bottom: 0.5rem;
-      border: 1px solid transparent;
-      padding: 0.15rem 0;
-      outline: none;
-    }
-    .record-name:focus {
-      border-color: #4299e1;
-      background: #f8fcff;
-    }
-    .record-details {
-      font-size: 0.95rem;
-      color: #333;
-      margin-bottom: 0.35rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    .record-details span { white-space: nowrap; }
-    .record-details .label { font-weight: 500; color: #666; }
-    .record-details input {
-      font: inherit;
-      border: none;
-      background: transparent;
-      padding: 0;
-      min-width: 80px;
-      border-bottom: 1px dashed transparent;
-    }
-    .record-details input:focus {
-      outline: none;
-      border-bottom-color: #4299e1;
-    }
-    .record-address {
-      font-size: 0.95rem;
-      color: #333;
-      border: 1px solid transparent;
-      padding: 0.15rem 0;
-      outline: none;
-    }
-    .record-address:focus {
-      border-color: #4299e1;
-      background: #f8fcff;
-    }
-    .record-address .label { font-weight: 500; color: #666; }
-    .record-badges {
-      font-size: 0.9rem;
-      color: #333;
-      margin-top: 0.35rem;
-      font-weight: 500;
+      font-size: 0.9cm;
     }
     .record-qr {
-      width: 80px;
-      height: 80px;
-      padding: 4px;
+      position: absolute;
+      right: 0.55cm;
+      top: 1.55cm;
+      width: 2.0cm;
+      height: 2.0cm;
+      padding: 0.12cm;
       background: #fff;
-      border: 1px solid #e0e0e0;
     }
     .record-qr img { width: 100%; height: 100%; display: block; }
-    /* Right side: precinct + economic status/legend/voters — bold text, no box */
-    .record-right-box {
-      margin-top: 0.5rem;
-      font-size: 0.8rem;
-      font-weight: 700;
-      width: 100%;
-      max-width: 140px;
+    .record-fields {
+      position: absolute;
+      left: 3.0cm;
+      right: 3.0cm;
+      top: 1.75cm;
+      font-size: 0.34cm;
+      color: #111827;
     }
-    .record-right-box .line {
-      border: 1px solid transparent;
-      padding: 0 0.15rem;
-      outline: none;
-      min-height: 1.2em;
-      font-weight: 700;
+    .field {
+      display: flex;
+      align-items: baseline;
+      gap: 0.2cm;
+      margin-bottom: 0.28cm;
+      white-space: nowrap;
     }
-    .record-right-box .line + .line { margin-top: 0.25rem; }
-    .record-right-box .line:focus {
-      border-color: #4299e1;
-      background: #fff;
-    }
-    .record-id {
-      font-size: 0.95rem;
+    .field .label {
       font-weight: 500;
-      text-align: center;
+      min-width: 1.55cm;
     }
-    .record-id input {
-      font: inherit;
+    .field .value {
+      flex: 1;
+      min-width: 0;
+      border-bottom: 1px solid #111827;
+      padding-bottom: 0.03cm;
+      line-height: 1.1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .field.inline-2 {
+      gap: 0.35cm;
+    }
+    .field.inline-2 .group {
+      display: flex;
+      align-items: baseline;
+      gap: 0.18cm;
+      min-width: 0;
+    }
+    .field.inline-2 .group .label { min-width: auto; }
+    .field.inline-2 .group .value { width: 1.2cm; }
+    .field.inline-2 .group.gender .value { width: 1.9cm; }
+    .record-precinct {
+      position: absolute;
+      right: 0.55cm;
+      top: 3.75cm;
+      width: 2.0cm;
+      text-align: center;
+      font-weight: 800;
+      font-size: 0.45cm;
+      border-bottom: 1px solid #111827;
+      padding-bottom: 0.05cm;
+      line-height: 1.05;
+    }
+    .record-right-notes {
+      position: absolute;
+      right: 0.55cm;
+      top: 4.35cm;
+      width: 2.0cm;
+      font-size: 0.25cm;
       font-weight: 600;
-      text-align: center;
-      border: none;
-      background: transparent;
-      width: 4em;
-      padding: 0.15rem;
-      border-bottom: 1px dashed transparent;
-    }
-    .record-id input:focus {
-      outline: none;
-      border-bottom-color: #4299e1;
-    }
-    .record-id-barangay {
-      font-size: 0.9rem;
-      font-weight: 600;
-      text-align: center;
-      margin-bottom: 0.35rem;
-      color: #1a1d24;
-      min-height: 1.2em;
-      border: 1px solid transparent;
-      padding: 0.1rem 0.25rem;
-    }
-    .record-id-barangay:focus {
-      outline: none;
-      border-color: #4299e1;
-      background: #f8fcff;
+      text-align: left;
+      line-height: 1.15;
     }
     .no-print { display: block; }
     .action-bar {
@@ -198,53 +159,73 @@
     .btn-print:hover { background: #152a45; }
     .btn-close { background: #6c757d; color: #fff; margin-left: 0.5rem; }
     .btn-close:hover { background: #5a6268; }
+    /* Print page size to match ID-1 (driver's license) card */
+    @page {
+      size: 8.56cm 5.40cm;
+      margin: 0;
+    }
     @media print {
-      body { background: #fff; padding: 0; }
-      .record-card { border-bottom: 1px solid #e0e0e0; box-shadow: none; }
-      .no-print { display: none !important; }
-      .record-name:focus, .record-details input:focus, .record-address:focus, .record-id-barangay:focus,
-      .record-right-box .line:focus {
-        border-color: transparent !important;
-        background: transparent !important;
+      body {
+        background: #fff;
+        padding: 0;
+        margin: 0;
       }
+      .record-card {
+        width: 8.56cm;
+        min-height: 5.40cm;
+        margin: 0;
+        padding: 0.45cm 0.5cm;
+        box-shadow: none;
+      }
+      .no-print { display: none !important; }
     }
   </style>
 </head>
 <body>
   <div class="record-card">
-    <div class="record-row">
-      <div class="record-left">
-        <div class="record-profile">
-          {% if profile_picture_url %}
-          <img src="{{ profile_picture_url }}" alt="Profile">
-          {% else %}
-          <div class="placeholder">&#128100;</div>
-          {% endif %}
+    <div class="record-top-right">{{ id_barangay }}</div>
+    <div class="record-name" id="printName">{{ full_name }}</div>
+
+    <div class="record-profile">
+      {% if profile_picture_url %}
+      <img src="{{ profile_picture_url }}" alt="Profile">
+      {% else %}
+      <div class="placeholder">&#128100;</div>
+      {% endif %}
+    </div>
+
+    <div class="record-fields">
+      <div class="field">
+        <div class="label">Birthdate:</div>
+        <div class="value" id="printBirthdate">{{ birthdate }}</div>
+      </div>
+      <div class="field inline-2">
+        <div class="group">
+          <div class="label">Age:</div>
+          <div class="value" id="printAge">{{ age }}</div>
         </div>
-        <div class="record-info">
-        <div class="record-name" contenteditable="true" id="printName">{{ full_name }}</div>
-        <div class="record-details">
-          <span><span class="label">Birthdate:</span> <input type="text" id="printBirthdate" value="{{ birthdate }}" size="12"></span>
-          <span><span class="label">Age:</span> <input type="text" id="printAge" value="{{ age }}" size="4"></span>
-          <span><span class="label">Gender:</span> <input type="text" id="printGender" value="{{ resident.get_gender_display }}" size="8"></span>
-          <span><span class="label">Contact No:</span> <input type="text" id="printContact" value="{{ resident.contact_no|default:'' }}" size="14"></span>
-        </div>
-        <div class="record-address" contenteditable="true" id="printAddress"><span class="label">Address:</span> {{ address_line }}</div>
-        {% if badges %}
-        <div class="record-badges">{% for b in badges %}{{ b }}{% if not forloop.last %}, {% endif %}{% endfor %}</div>
-        {% endif %}
+        <div class="group gender">
+          <div class="label">Gender:</div>
+          <div class="value" id="printGender">{{ resident.get_gender_display }}</div>
         </div>
       </div>
-      <div class="record-right">
-        <div class="record-id-barangay" contenteditable="true" id="printIdBarangay">{{ id_barangay }}</div>
-        <div class="record-qr">
-          <img src="{{ qr_code_url }}" alt="QR Code">
-        </div>
-        <div class="record-right-box">
-          <div class="line" contenteditable="true" id="printPrecinct">{% if resident.precinct_number %}{{ resident.precinct_number }}{% else %}&nbsp;{% endif %}</div>
-          <div class="line">{% if resident.get_economic_status_display %}{{ resident.get_economic_status_display|cut:" Member" }}{% endif %}{% if resident.get_economic_status_display and resident.get_voter_legend_display %}, {% endif %}{% if resident.get_voter_legend_display %}{{ resident.get_voter_legend_display }}{% endif %}{% if resident.is_voter %}{% if resident.get_economic_status_display or resident.get_voter_legend_display %}, {% endif %}Voters{% endif %}</div>
-        </div>
+      <div class="field">
+        <div class="label">Contact No:</div>
+        <div class="value" id="printContact">{{ resident.contact_no|default:"" }}</div>
       </div>
+      <div class="field">
+        <div class="label">Address:</div>
+        <div class="value" id="printAddress">{{ address_line }}</div>
+      </div>
+    </div>
+
+    <div class="record-qr">
+      <img src="{{ qr_code_url }}" alt="QR Code">
+    </div>
+    <div class="record-precinct" id="printPrecinct">{% if resident.precinct_number %}{{ resident.precinct_number }}{% else %}&nbsp;{% endif %}</div>
+    <div class="record-right-notes">
+      Economic status,<br>
+      legend, and voters
     </div>
   </div>
   <div class="action-bar no-print">

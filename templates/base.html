@@ -99,9 +99,9 @@
           <span class="nav-dropdown-chevron"><i class="fas fa-chevron-right"></i></span>
         </a>
         <div class="nav-dropdown js-nav-dropdown {% if request.resolver_match.app_name == 'administrator' %}open{% endif %}" data-nav="administrator">
-          <a href="{% url 'administrator:system_policy' %}" class="nav-link {% if request.resolver_match.url_name == 'system_policy' %}active{% endif %}">
+          <!-- <a href="{% url 'administrator:system_policy' %}" class="nav-link {% if request.resolver_match.url_name == 'system_policy' %}active{% endif %}">
             <span class="nav-icon"><i class="fas fa-shield-alt"></i></span> System Policy
-          </a>
+          </a> -->
           <a href="{% url 'administrator:user_accounts' %}" class="nav-link {% if request.resolver_match.url_name == 'user_accounts' %}active{% endif %}">
             <span class="nav-icon"><i class="fas fa-user-friends"></i></span> User Accounts
           </a>
@@ -210,9 +210,11 @@
         alerts.forEach(function (a) {
           var txt = (a.textContent || '').trim();
           if (!txt) return;
-          if (txt.indexOf('You do not have permission to delete in Operations.') !== -1 ||
-              txt.indexOf('You do not have permission to delete in Reference.') !== -1) {
-            match = txt;
+          // Any "You do not have permission to ..." message should be shown as a modal
+          if (txt.indexOf('You do not have permission to') !== -1) {
+            if (!match) {
+              match = txt;
+            }
             a.style.display = 'none';
           }
         });

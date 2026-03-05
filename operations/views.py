@@ -5,7 +5,17 @@ from django.db import transaction
 from django.db.models import Q, Count, Prefetch
 from django.urls import reverse
 from reference.models import Barangay, Municipality, Position
-from administrator.utils import user_can_delete_in_operations
+from administrator.utils import (
+    user_can_add_operations_coordinator,
+    user_can_edit_operations_coordinator,
+    user_can_delete_operations_coordinator,
+    user_can_add_operations_barangay_official,
+    user_can_edit_operations_barangay_official,
+    user_can_delete_operations_barangay_official,
+    user_can_add_operations_residents_record,
+    user_can_edit_operations_residents_record,
+    user_can_delete_operations_residents_record,
+)
 from administrator.activity_log import log_activity, ACTION_CREATE, ACTION_UPDATE, ACTION_DELETE
 from .models import Resident, BarangayOfficial, CoordinatorPosition, Coordinator
 from .supabase_storage import upload_profile_picture, upload_qr_image
@@ -104,6 +114,9 @@ def _fullname_matches_resident_in_barangay(barangay, fullname):
 @transaction.atomic
 def coordinator_add(request):
     """Create a new coordinator record."""
+    if not user_can_add_operations_coordinator(request.user):
+        messages.error(request, 'You do not have permission to add coordinators.')
+        return redirect('operations:coordinator')
     if request.method == 'POST':
         fullname = request.POST.get('fullname', '').strip()
         if not fullname:
@@ -151,6 +164,9 @@ def coordinator_add(request):
 def coordinator_edit(request, pk):
     """Edit an existing coordinator. GET redirects to coordinator list and opens edit modal; POST saves."""
     obj = get_object_or_404(Coordinator, pk=pk)
+    if not user_can_edit_operations_coordinator(request.user):
+        messages.error(request, 'You do not have permission to edit coordinators.')
+        return redirect('operations:coordinator')
     if request.method == 'GET':
         return redirect('operations:coordinator' + '?edit=' + str(pk))
     barangays = Barangay.objects.filter(is_active=True).order_by('name')
@@ -281,8 +297,8 @@ def get_barangays_by_municipality(request):
 
 def coordinator_delete(request, pk):
     """Delete a coordinator."""
-    if request.method == 'POST' and not user_can_delete_in_operations(request.user):
-        messages.error(request, 'You do not have permission to delete in Operations.')
+    if request.method == 'POST' and not user_can_delete_operations_coordinator(request.user):
+        messages.error(request, 'You do not have permission to delete coordinators.')
         return redirect(f"{reverse('operations:coordinator')}?no_delete_perm=ops")
     obj = get_object_or_404(Coordinator, pk=pk)
     if request.method == 'POST':
@@ -298,6 +314,9 @@ def coordinator_delete(request, pk):
 @transaction.atomic
 def coordinator_position_add(request):
     """Add a coordinator position (for coordinator module only, not reference Position)."""
+    if not user_can_add_operations_coordinator(request.user):
+        messages.error(request, 'You do not have permission to add coordinator positions.')
+        return redirect('operations:coordinator')
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
         description = request.POST.get('description', '').strip()
@@ -321,6 +340,9 @@ def coordinator_position_add(request):
 def coordinator_position_edit(request, pk):
     """Edit a coordinator position."""
     obj = get_object_or_404(CoordinatorPosition, pk=pk)
+    if not user_can_edit_operations_coordinator(request.user):
+        messages.error(request, 'You do not have permission to edit coordinator positions.')
+        return redirect('operations:coordinator')
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
         if not name:
@@ -339,8 +361,8 @@ def coordinator_position_edit(request, pk):
 
 def coordinator_position_delete(request, pk):
     """Delete a coordinator position (only if no coordinators use it)."""
-    if request.method == 'POST' and not user_can_delete_in_operations(request.user):
-        messages.error(request, 'You do not have permission to delete in Operations.')
+    if request.method == 'POST' and not user_can_delete_operations_coordinator(request.user):
+        messages.error(request, 'You do not have permission to delete coordinator positions.')
         return redirect(f"{reverse('operations:coordinator')}?no_delete_perm=ops")
     obj = get_object_or_404(CoordinatorPosition, pk=pk)
     if request.method == 'POST':
@@ -374,12 +396,23 @@ def barangay_officials(request):
 
 def residents_record(request):
     """Display list of residents."""
-    residents = Resident.objects.select_related('barangay').all()
-    barangays = Barangay.objects.filter(is_active=True)
+    residents = Resident.objects.select_related('barangay', 'barangay__municipality').all()
+    barangays = Barangay.objects.filter(is_active=True).select_related('municipality').order_by('name')
+    barangays_with_resident_count = Barangay.objects.filter(
+        is_active=True
+    ).annotate(
+        resident_count=Count('residents', distinct=True),
+    ).order_by('name')
+    municipalities = Municipality.objects.filter(
+        is_active=True
+    ).prefetch_related(
+        Prefetch('barangays', queryset=barangays_with_resident_count)
+    ).order_by('name')
     base_url = _get_base_url_for_devices(request)
     context = {
         'residents': residents,
         'barangays': barangays,
+        'municipalities': municipalities,
         'network_url': base_url,
     }
     return render(request, "operations/residents_record.html", context)
@@ -388,6 +421,9 @@ def residents_record(request):
 @transaction.atomic
 def resident_add(request):
     """Add a new resident - synced to Supabase database."""
+    if not user_can_add_operations_residents_record(request.user):
+        messages.error(request, 'You do not have permission to add residents.')
+        return redirect('operations:residents_record')
     if request.method == 'POST':
         try:
             # Get barangay
@@ -568,6 +604,9 @@ def resident_get(request, pk):
 def resident_edit(request, pk):
     """Edit an existing resident - changes synced to Supabase database."""
     resident = get_object_or_404(Resident, pk=pk)
+    if not user_can_edit_operations_residents_record(request.user):
+        messages.error(request, 'You do not have permission to edit residents.')
+        return redirect('operations:residents_record')
     
     if request.method == 'POST':
         try:
@@ -640,8 +679,8 @@ def resident_edit(request, pk):
 @transaction.atomic
 def resident_delete(request, pk):
     """Delete a resident - removed from Supabase database."""
-    if request.method == 'POST' and not user_can_delete_in_operations(request.user):
-        messages.error(request, 'You do not have permission to delete in Operations.')
+    if request.method == 'POST' and not user_can_delete_operations_residents_record(request.user):
+        messages.error(request, 'You do not have permission to delete residents.')
         return redirect(f"{reverse('operations:residents_record')}?no_delete_perm=ops")
     resident = get_object_or_404(Resident, pk=pk)
     
@@ -743,6 +782,9 @@ def get_voters_by_barangay(request, pk):
 @transaction.atomic
 def barangay_official_add(request):
     """Add a new barangay official."""
+    if not user_can_add_operations_barangay_official(request.user):
+        messages.error(request, 'You do not have permission to add barangay officials.')
+        return redirect('operations:barangay_officials')
     if request.method == 'POST':
         try:
             resident_id = request.POST.get('resident')
@@ -812,6 +854,9 @@ def barangay_official_get(request, pk):
 def barangay_official_edit(request, pk):
     """Edit an existing barangay official."""
     official = get_object_or_404(BarangayOfficial, pk=pk)
+    if not user_can_edit_operations_barangay_official(request.user):
+        messages.error(request, 'You do not have permission to edit barangay officials.')
+        return redirect('operations:barangay_officials')
     
     if request.method == 'POST':
         try:
@@ -859,8 +904,8 @@ def barangay_official_edit(request, pk):
 @transaction.atomic
 def barangay_official_delete(request, pk):
     """Delete a barangay official."""
-    if request.method == 'POST' and not user_can_delete_in_operations(request.user):
-        messages.error(request, 'You do not have permission to delete in Operations.')
+    if request.method == 'POST' and not user_can_delete_operations_barangay_official(request.user):
+        messages.error(request, 'You do not have permission to delete barangay officials.')
         return redirect(f"{reverse('operations:barangay_officials')}?no_delete_perm=ops")
     official = get_object_or_404(BarangayOfficial, pk=pk)
     

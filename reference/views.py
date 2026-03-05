@@ -3,7 +3,14 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db import transaction
 from django.urls import reverse
-from administrator.utils import user_can_delete_in_reference
+from administrator.utils import (
+    user_can_add_reference_barangay,
+    user_can_edit_reference_barangay,
+    user_can_delete_reference_barangay,
+    user_can_add_reference_position,
+    user_can_edit_reference_position,
+    user_can_delete_reference_position,
+)
 from administrator.activity_log import log_activity, ACTION_CREATE, ACTION_UPDATE, ACTION_DELETE
 from .models import Barangay, Municipality, Position
 from operations.models import BarangayOfficial
@@ -42,6 +49,9 @@ def barangay_list(request):
 @transaction.atomic
 def barangay_add(request):
     """Add a new barangay."""
+    if not user_can_add_reference_barangay(request.user):
+        messages.error(request, 'You do not have permission to add barangays.')
+        return redirect('reference:barangay_list')
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
         municipality_id = request.POST.get('municipality', '').strip()
@@ -90,6 +100,9 @@ def barangay_add(request):
 def barangay_edit(request, pk):
     """Edit an existing barangay."""
     barangay = get_object_or_404(Barangay, pk=pk, is_active=True)
+    if not user_can_edit_reference_barangay(request.user):
+        messages.error(request, 'You do not have permission to edit barangays.')
+        return redirect('reference:barangay_list')
     
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
@@ -128,8 +141,8 @@ def barangay_edit(request, pk):
 @transaction.atomic
 def barangay_delete(request, pk):
     """Delete a barangay and re-sequence all codes."""
-    if request.method == 'POST' and not user_can_delete_in_reference(request.user):
-        messages.error(request, 'You do not have permission to delete in Reference.')
+    if request.method == 'POST' and not user_can_delete_reference_barangay(request.user):
+        messages.error(request, 'You do not have permission to delete barangays.')
         return redirect(f"{reverse('reference:barangay_list')}?no_delete_perm=ref")
     barangay = get_object_or_404(Barangay, pk=pk, is_active=True)
     
@@ -191,6 +204,9 @@ def position_list(request):
 @transaction.atomic
 def position_add(request):
     """Add a new position."""
+    if not user_can_add_reference_position(request.user):
+        messages.error(request, 'You do not have permission to add positions.')
+        return redirect('reference:position_list')
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
         description = request.POST.get('description', '').strip()
@@ -231,6 +247,9 @@ def position_add(request):
 def position_edit(request, pk):
     """Edit an existing position."""
     position = get_object_or_404(Position, pk=pk, is_active=True)
+    if not user_can_edit_reference_position(request.user):
+        messages.error(request, 'You do not have permission to edit positions.')
+        return redirect('reference:position_list')
     
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
@@ -258,8 +277,8 @@ def position_edit(request, pk):
 @transaction.atomic
 def position_delete(request, pk):
     """Delete a position and re-sequence all codes."""
-    if request.method == 'POST' and not user_can_delete_in_reference(request.user):
-        messages.error(request, 'You do not have permission to delete in Reference.')
+    if request.method == 'POST' and not user_can_delete_reference_position(request.user):
+        messages.error(request, 'You do not have permission to delete positions.')
         return redirect(f"{reverse('reference:position_list')}?no_delete_perm=ref")
     position = get_object_or_404(Position, pk=pk, is_active=True)
     

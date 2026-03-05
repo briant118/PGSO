@@ -206,6 +206,186 @@
 .residents-header-btn.btn-delete-resident .btn-icon-wrap i { color: #dc3545; font-size: 1.1rem; }
 .residents-header-btn.btn-print-resident .btn-icon-wrap i { color: #5f6368; font-size: 1.1rem; }
 
+/* Layout: municipalities + residents table + all list */
+.residents-layout {
+  display: flex;
+  gap: 1.5rem;
+  align-items: stretch;
+  width: 100%;
+}
+.residents-layout-col {
+  min-width: 0;
+}
+.residents-layout-col.municipalities-col {
+  width: 28%;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(0, 0, 0, 0.12);
+  padding-right: 1rem;
+}
+.residents-layout-col.residents-col {
+  flex: 1;
+}
+.residents-layout-col.all-col {
+  width: 22%;
+  flex-shrink: 0;
+}
+@media (max-width: 1100px) {
+  .residents-layout {
+    flex-direction: column;
+  }
+  .residents-layout-col.municipalities-col,
+  .residents-layout-col.all-col {
+    width: 100%;
+    border-right: none;
+    padding-right: 0;
+  }
+}
+
+/* Municipalities list (folder-style, match voters) */
+.municipalities-section {
+  min-width: 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+.municipalities-section h2 {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1a1d24;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e8eaed;
+}
+.municipality-search-row {
+  padding: 0.5rem 1.25rem 0.75rem;
+  border-bottom: 1px solid #f1f3f4;
+}
+.municipality-block {
+  border-bottom: 1px solid #e8eaed;
+}
+.municipality-block:last-child {
+  border-bottom: none;
+}
+.municipality-name {
+  padding: 0.75rem 1.25rem;
+  font-weight: 600;
+  color: #1e3a5f;
+  font-size: 0.98rem;
+  background: #f0f4f8;
+}
+.barangay-folder {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1.25rem 0.65rem 2rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: 0.95rem;
+  color: #1a1d24;
+  background: transparent;
+}
+.barangay-folder:hover {
+  background: #e8f0fe;
+}
+.barangay-folder.selected {
+  background: #d2e3fc;
+  color: #1e3a5f;
+  font-weight: 600;
+}
+.barangay-folder .folder-icon {
+  color: #5f6368;
+  font-size: 1.1rem;
+}
+.barangay-folder.selected .folder-icon {
+  color: #1e3a5f;
+}
+.barangay-folder .folder-name {
+  flex: 1;
+}
+.barangay-folder .resident-badge {
+  font-size: 0.8rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  background: #e8eaed;
+  color: #5f6368;
+  font-weight: 500;
+}
+.barangay-folder.selected .resident-badge {
+  background: #1e3a5f;
+  color: #fff;
+}
+
+/* Right corner: All residents list panel */
+.all-residents-panel {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 220px);
+}
+.all-residents-panel-header {
+  padding: 0.9rem 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%);
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.btn-all-clear {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+}
+.btn-all-clear:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.all-residents-panel .panel-search {
+  padding: 0.75rem 1rem 0.6rem;
+  border-bottom: 1px solid #e8eaed;
+}
+.all-residents-list {
+  overflow: auto;
+  padding: 0.25rem 0;
+}
+.all-residents-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.all-residents-item:hover {
+  background: #f0f4f8;
+}
+.all-residents-item .name {
+  font-size: 0.9rem;
+  color: #1a1d24;
+  font-weight: 600;
+}
+.all-residents-item .meta {
+  font-size: 0.8rem;
+  color: #5f6368;
+}
+
 /* Table Styles */
 .residents-table-container {
   background: #fff;
@@ -1020,6 +1200,47 @@
 .add-barangay-item:hover {
   background: #e8f4fc;
 }
+
+.search-input-wrap{
+  padding:10px 10px;
+  margin:0
+}
+
+.table-search-container{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding: 7px 7px;
+}
+
+.table-search-box{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.search-btn{
+  padding:6px 12px;
+  background:#007bff;
+  color:white;
+  border:none;
+  border-radius:4px;
+  cursor:pointer;
+}
+
+.search-btn:hover{
+  background:#0056b3;
+}
+
+.resident-badge{
+  background:#2773c0;
+  color:white;
+  padding:5px 10px;
+  border-radius:6px;
+  font-size:16px;
+}
+
+
 </style>
 
 <!-- Messages -->
@@ -1083,14 +1304,83 @@
   </div>
 </div>
 
-<div class="search-input-wrap">
-  <i class="fas fa-search search-icon" aria-hidden="true"></i>
-  <input type="text" id="residentsSearch" placeholder="Search residents by name, ID, barangay, contact..." oninput="filterResidentsTable()">
+
 </div>
-</div>
-<!-- Residents Table -->
+
+<div class="residents-layout">
+  <!-- Left: Municipalities → Barangays -->
+  <div class="residents-layout-col municipalities-col">
+    <div class="municipalities-section">
+      <h2><i class="fas fa-map-marker-alt"></i> Municipalities &amp; Barangays</h2>
+      <div class="municipality-search-row">
+        <div class="search-input-wrap" style="margin-bottom: 0;">
+          <i class="fas fa-search search-icon" aria-hidden="true"></i>
+          <input type="text" id="residentMunicipalitySearch" placeholder="Search municipality or barangay">
+        </div>
+      </div>
+
+      <!-- All residents folder -->
+      <div class="municipality-block">
+        <button type="button"
+                class="barangay-folder"
+                id="allBarangaysFolder"
+                aria-label="Show residents in all barangays">
+          <span class="folder-icon"><i class="fas fa-folder-open"></i></span>
+          <span class="folder-name">All</span>
+        </button>
+      </div>
+      {% for municipality in municipalities %}
+      <div class="municipality-block">
+        <div class="municipality-name">{{ municipality.name }}</div>
+        {% for barangay in municipality.barangays.all %}
+        <button type="button" class="barangay-folder" data-barangay-id="{{ barangay.id }}" data-barangay-name="{{ barangay.name|escapejs }}" aria-label="Show residents in {{ barangay.name }}">
+          <span class="folder-icon"><i class="fas fa-folder"></i></span>
+          <span class="folder-name">{{ barangay.name }}</span>
+          <span class="resident-badge">{{ barangay.resident_count|default:0 }} resident{{ barangay.resident_count|default:0|pluralize }}</span>
+        </button>
+        {% empty %}
+        <div style="padding: 0.5rem 1.25rem 0.5rem 2rem; font-size: 0.9rem; color: #5f6368;">No barangays</div>
+        {% endfor %}
+      </div>
+      {% empty %}
+      <div style="padding: 2rem; text-align: center; color: #5f6368;">No municipalities in the system.</div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Middle: Residents table -->
+  <div class="residents-layout-col residents-col">
+    <!-- Residents Table -->
 {% if residents %}
 <div class="residents-table-container">
+  <tr>
+    <th colspan="7" class="table-search-row">
+      <div class="table-search-container">
+   <!-- Right side: Search -->
+   <div class="search-input-wrap table-search-box">
+    <i class="fas fa-search search-icon" aria-hidden="true"></i>
+
+    <input type="text"
+           id="residentsSearch"
+           placeholder="Search residents by name, ID, contact...">
+
+    <button type="button" class="search-btn" onclick="filterResidentsTable()">
+      Search
+    </button>
+  </div>
+        <!-- left side: Resident count -->
+        {% with residents|length as residents_count %}
+        <span class="resident-badge" id="residentsCountBadge">
+          {{ residents_count|default:0 }} resident{{ residents_count|default:0|pluralize }}
+        </span>
+        {% endwith %}
+  
+       
+  
+      </div>
+    </th>
+  </tr>
+</div>
   <table class="residents-table">
     <thead>
       <tr>
@@ -1104,8 +1394,9 @@
       </tr>
     </thead>
     <tbody>
+
       {% for resident in residents %}
-      <tr class="resident-row-clickable" data-id="{{ resident.id }}" data-name="{{ resident.get_full_name|escapejs }}">
+      <tr class="resident-row-clickable" data-id="{{ resident.id }}" data-name="{{ resident.get_full_name|escapejs }}" data-barangay-id="{{ resident.barangay.id }}" data-barangay-name="{{ resident.barangay.name|escapejs }}">
         <td>
           <span class="badge badge-id">{{ resident.resident_id }}</span>
         </td>
@@ -1146,6 +1437,9 @@
   </button>
 </div>
 {% endif %}
+  </div>
+
+
 
 <!-- Add Modal -->
 <div id="addModal" class="modal">
@@ -1793,22 +2087,64 @@
 
 <script>
 // Search / Filter Residents Table
-function filterResidentsTable() {
+var currentBarangayFilterId = null;
+var currentBarangayFilterName = null;
+
+function applyResidentsFilters() {
   var searchInput = document.getElementById('residentsSearch');
   var tableBody = document.querySelector('.residents-table tbody');
-  if (!searchInput || !tableBody) return;
+  if (!tableBody) return;
 
-  var term = searchInput.value.trim().toLowerCase();
+  var term = (searchInput && searchInput.value ? searchInput.value : '').trim().toLowerCase();
   var rows = tableBody.querySelectorAll('tr.resident-row-clickable');
 
+  var visibleCount = 0;
+
   rows.forEach(function (tr) {
-    if (!term) {
-      tr.style.display = '';
-      return;
+    var matchesBarangay = true;
+    if (currentBarangayFilterId) {
+      matchesBarangay = tr.getAttribute('data-barangay-id') === String(currentBarangayFilterId);
     }
-    var text = tr.textContent.toLowerCase();
-    tr.style.display = text.indexOf(term) !== -1 ? '' : 'none';
+    var matchesTerm = true;
+    if (term) {
+      var text = tr.textContent.toLowerCase();
+      matchesTerm = text.indexOf(term) !== -1;
+    }
+    var isVisible = (matchesBarangay && matchesTerm);
+    tr.style.display = isVisible ? '' : 'none';
+    if (isVisible) visibleCount++;
   });
+
+  // If selected row is now hidden, clear selection to avoid acting on invisible record.
+  var selected = document.querySelector('tr.resident-row-clickable.selected');
+  if (selected && selected.style.display === 'none') {
+    selected.classList.remove('selected');
+  }
+
+  // Update residents count badge (per current filter/barangay)
+  var countBadge = document.getElementById('residentsCountBadge');
+  if (countBadge) {
+    var label = visibleCount === 1 ? 'resident' : 'residents';
+    countBadge.textContent = visibleCount + ' ' + label;
+  }
+}
+
+function filterResidentsTable() {
+  applyResidentsFilters();
+}
+
+function setBarangayFilter(barangayId, barangayName) {
+  currentBarangayFilterId = barangayId ? String(barangayId) : null;
+  currentBarangayFilterName = barangayName || null;
+  applyResidentsFilters();
+}
+
+function clearBarangayFilter() {
+  currentBarangayFilterId = null;
+  currentBarangayFilterName = null;
+  var searchInput = document.getElementById('residentsSearch');
+  if (searchInput) searchInput.value = '';
+  applyResidentsFilters();
 }
 
 // Status Toggle Function
@@ -2289,6 +2625,115 @@ document.addEventListener('DOMContentLoaded', function() {
       openViewModal(viewId);
     }
   })();
+
+// Municipality/Barangay folders + right "All" list (match voters layout behavior)
+(function() {
+  var folderBtns = document.querySelectorAll('.barangay-folder');
+  var allFolder = document.getElementById('allBarangaysFolder');
+  var clearBtn = document.getElementById('clearBarangayFilterBtn');
+  var muniSearch = document.getElementById('residentMunicipalitySearch');
+  var muniBlocks = document.querySelectorAll('.municipality-block');
+  var allSearch = document.getElementById('allResidentsSearch');
+  var allList = document.getElementById('allResidentsList');
+
+  function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text == null ? '' : String(text);
+    return div.innerHTML;
+  }
+
+  function buildAllResidentsList() {
+    if (!allList) return;
+    var rows = document.querySelectorAll('.residents-table tbody tr.resident-row-clickable');
+    allList.innerHTML = '';
+    rows.forEach(function(row) {
+      var id = row.getAttribute('data-id');
+      var name = row.getAttribute('data-name') || '';
+      var barangay = row.getAttribute('data-barangay-name') || '';
+
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'all-residents-item';
+      btn.setAttribute('data-id', id || '');
+      btn.innerHTML =
+        '<span class="name">' + escapeHtml(name) + '</span>' +
+        '<span class="meta">' + escapeHtml(barangay) + '</span>';
+      btn.addEventListener('click', function() {
+        // Ensure row is visible even if a barangay filter is active
+        if (row.getAttribute('data-barangay-id')) {
+          setBarangayFilter(row.getAttribute('data-barangay-id'), row.getAttribute('data-barangay-name'));
+        }
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        row.click();
+      });
+      allList.appendChild(btn);
+    });
+  }
+
+  function filterAllResidentsList() {
+    if (!allSearch || !allList) return;
+    var term = allSearch.value.trim().toLowerCase();
+    var items = allList.querySelectorAll('.all-residents-item');
+    items.forEach(function(btn) {
+      if (!term) { btn.style.display = ''; return; }
+      btn.style.display = btn.textContent.toLowerCase().indexOf(term) !== -1 ? '' : 'none';
+    });
+  }
+
+  folderBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var id = this.getAttribute('data-barangay-id');
+      var name = this.getAttribute('data-barangay-name');
+      folderBtns.forEach(function(b) { b.classList.remove('selected'); });
+      this.classList.add('selected');
+      setBarangayFilter(id, name);
+    });
+  });
+
+  // "All" folder: show residents from all barangays
+  if (allFolder) {
+    allFolder.addEventListener('click', function() {
+      folderBtns.forEach(function(b) { b.classList.remove('selected'); });
+      this.classList.add('selected');
+      clearBarangayFilter();
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function() {
+      folderBtns.forEach(function(b) { b.classList.remove('selected'); });
+      clearBarangayFilter();
+      if (allSearch) allSearch.value = '';
+      filterAllResidentsList();
+    });
+  }
+
+  if (muniSearch) {
+    muniSearch.addEventListener('input', function () {
+      var term = this.value.trim().toLowerCase();
+      muniBlocks.forEach(function (block) {
+        if (!term) { block.style.display = ''; return; }
+        var mNameEl = block.querySelector('.municipality-name');
+        var bNames = block.querySelectorAll('.folder-name');
+        var matched = false;
+        if (mNameEl && mNameEl.textContent.toLowerCase().indexOf(term) !== -1) matched = true;
+        if (!matched) {
+          bNames.forEach(function (el) {
+            if (el.textContent.toLowerCase().indexOf(term) !== -1) matched = true;
+          });
+        }
+        block.style.display = matched ? '' : 'none';
+      });
+    });
+  }
+
+  if (allSearch) {
+    allSearch.addEventListener('input', filterAllResidentsList);
+  }
+
+  // Initial build
+  buildAllResidentsList();
+})();
 </script>
 
 {% endblock %}
