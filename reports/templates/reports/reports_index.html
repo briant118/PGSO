@@ -138,5 +138,17 @@
     <p>View all resident records in the system.</p>
     <span class="report-card-link">View Report <i class="fas fa-arrow-right"></i></span>
   </a>
+
+  <a href="{% url 'reports:list_deceased' %}" class="report-card" style="border-left-color:#dc3545;">
+    <h3><i class="fas fa-skull-crossbones" style="color: #dc3545;"></i> List of Deceased</h3>
+    <p>View all deceased residents (separate from alive counts).</p>
+    <span class="report-card-link">View Report <i class="fas fa-arrow-right"></i></span>
+  </a>
+
+  <a href="{% url 'reports:list_birth_by_year' %}" class="report-card">
+    <h3><i class="fas fa-calendar" style="color: #4299e1;"></i> Birth By Year</h3>
+    <p>View residents by birth year.</p>
+    <span class="report-card-link">View Report <i class="fas fa-arrow-right"></i></span>
+  </a>
 </div>
 {% endblock %}

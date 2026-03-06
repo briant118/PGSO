@@ -716,6 +716,30 @@
   color: #721c24;
 }
 
+/* ========== DECEASED ROW HIGHLIGHT (GLOBAL) ========== */
+.row-deceased {
+  color: #b71c1c;
+}
+tr.row-deceased td,
+tr.row-deceased th {
+  color: #b71c1c !important;
+}
+tr.row-deceased {
+  background: rgba(220, 53, 69, 0.08);
+}
+tr.row-deceased:hover {
+  background: rgba(220, 53, 69, 0.12) !important;
+}
+.row-deceased .badge-id,
+.row-deceased .badge,
+.row-deceased .status-badge {
+  border: 1px solid rgba(183, 28, 28, 0.35);
+}
+.row-deceased a,
+.row-deceased button {
+  color: inherit;
+}
+
 /* ========== ALERTS & MESSAGES ========== */
 .messages {
   margin-bottom: 1.5rem;

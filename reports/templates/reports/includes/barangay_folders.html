@@ -1,0 +1,66 @@
+<div class="municipalities-section">
+  <h2><i class="fas fa-map-marker-alt"></i> Municipalities &amp; Barangays</h2>
+
+  <div class="municipality-search-row">
+    <div class="search-input-wrap" style="margin-bottom: 0;">
+      <i class="fas fa-search search-icon" aria-hidden="true"></i>
+      <input type="text" id="reportMunicipalitySearch" placeholder="Search municipality or barangay">
+    </div>
+  </div>
+
+  <!-- All folder -->
+  <div class="municipality-block">
+    <a href="{{ base_path }}{% if selected_year %}?year={{ selected_year }}{% if selected_month %}&month={{ selected_month }}{% endif %}{% endif %}"
+       class="barangay-folder {% if not selected_barangay_id %}selected{% endif %}"
+       id="allBarangaysFolder"
+       aria-label="Show all barangays">
+      <span class="folder-icon"><i class="fas fa-folder-open"></i></span>
+      <span class="folder-name">All</span>
+    </a>
+  </div>
+
+  {% for municipality in municipalities %}
+    <div class="municipality-block">
+      <div class="municipality-name">{{ municipality.name }}</div>
+      {% for b in municipality.barangays.all %}
+        <a href="{{ base_path }}?barangay={{ b.id }}{% if selected_year %}&year={{ selected_year }}{% if selected_month %}&month={{ selected_month }}{% endif %}{% endif %}"
+           class="barangay-folder {% if selected_barangay_id == b.id|stringformat:"s" %}selected{% endif %}"
+           data-municipality-block="1"
+           aria-label="Show records in {{ b.name }}">
+          <span class="folder-icon"><i class="fas fa-folder"></i></span>
+          <span class="folder-name">{{ b.name }}</span>
+          <span class="resident-badge">{{ b.report_count|default:0 }}</span>
+        </a>
+      {% empty %}
+        <div style="padding: 0.5rem 1.25rem 0.5rem 2rem; font-size: 0.9rem; color: #5f6368;">No barangays</div>
+      {% endfor %}
+    </div>
+  {% empty %}
+    <div style="padding: 2rem; text-align: center; color: #5f6368;">No municipalities in the system.</div>
+  {% endfor %}
+</div>
+
+<script>
+// Filter folder list only (no table filtering; report uses server-side barangay filter via querystring)
+(function() {
+  var search = document.getElementById('reportMunicipalitySearch');
+  var blocks = document.querySelectorAll('.municipality-block');
+  if (!search) return;
+  search.addEventListener('input', function () {
+    var term = (this.value || '').trim().toLowerCase();
+    blocks.forEach(function (block) {
+      if (!term) { block.style.display = ''; return; }
+      var mNameEl = block.querySelector('.municipality-name');
+      var bNames = block.querySelectorAll('.folder-name');
+      var matched = false;
+      if (mNameEl && mNameEl.textContent.toLowerCase().indexOf(term) !== -1) matched = true;
+      if (!matched) {
+        bNames.forEach(function (el) {
+          if (el.textContent.toLowerCase().indexOf(term) !== -1) matched = true;
+        });
+      }
+      block.style.display = matched ? '' : 'none';
+    });
+  });
+})();
+</script>

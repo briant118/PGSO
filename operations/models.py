@@ -82,6 +82,7 @@ class Resident(models.Model):
     # Personal Information
     gender = models.CharField(max_length=10, choices=GENDER_CHOICES)
     date_of_birth = models.DateField()
+    date_of_death = models.DateField(null=True, blank=True, help_text='Auto-set when status becomes Deceased')
     place_of_birth = models.CharField(max_length=200)
     
     # Contact Information

@@ -7,8 +7,8 @@
   {% load static %}
   <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="{% static 'css/base.css' %}?v=2">
-  <link rel="stylesheet" href="{% static 'css/shared.css' %}?v=1">
+  <link rel="stylesheet" href="{% static 'css/base.css' %}?v=3">
+  <link rel="stylesheet" href="{% static 'css/shared.css' %}?v=3">
   {% block extra_css %}{% endblock %}
 </head>
 <body>
@@ -88,6 +88,13 @@
           <a href="{% url 'reports:list_residents_record' %}" class="nav-link {% if request.resolver_match.url_name == 'list_residents_record' %}active{% endif %}">
             <span class="nav-icon"><i class="fas fa-file-alt"></i></span> List of Resident's Record
           </a>
+          <a href="{% url 'reports:list_birth_by_year' %}" class="nav-link {% if request.resolver_match.url_name == 'list_birth_by_year' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-calendar"></i></span> Birth By Year
+          </a>
+          <a href="{% url 'reports:list_deceased' %}" class="nav-link {% if request.resolver_match.url_name == 'list_deceased' %}active{% endif %}">
+            <span class="nav-icon"><i class="fas fa-skull-crossbones"></i></span> List of Deceased
+          </a>
+        
         </div>
       </div>
       {% load admin_tags %}
@@ -142,6 +149,16 @@
   </aside>
   <div class="main-wrap">
     <main class="main-content">
+      {% if messages %}
+      <div class="messages" role="status" aria-live="polite">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags|default:'info' }}">
+          <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
       {% block content %}{% endblock %}
     </main>
   </div>
@@ -234,6 +251,20 @@
         });
       }
     })();
+
+    // Auto-hide Django messages (alerts)
+    document.addEventListener('DOMContentLoaded', function () {
+      var alerts = Array.prototype.slice.call(document.querySelectorAll('.messages .alert'));
+      if (!alerts.length) return;
+      alerts.forEach(function (alert) {
+        setTimeout(function () {
+          alert.classList.add('fade-out');
+          setTimeout(function () {
+            try { alert.remove(); } catch (e) {}
+          }, 300);
+        }, 5000);
+      });
+    });
   </script>
 </body>
 </html>

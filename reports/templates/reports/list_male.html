@@ -95,6 +95,8 @@
   margin: 0;
   color: #5f6368;
 }
+
+{% include 'reports/includes/barangay_folders_styles.html' %}
 </style>
 
 <!-- Page Header -->
@@ -102,43 +104,58 @@
   <h1 class="page-title">
     <i class="fas fa-male" style="color: #4299e1;"></i> List of Male Residents
   </h1>
-  <p class="page-subtitle">This report displays all male residents in the system. Total: <strong>{{ count }}</strong></p>
+  <p class="page-subtitle">
+    {% if barangay %}
+      Male residents in <strong>{{ barangay.name }}</strong>. Total: <strong>{{ count }}</strong>
+    {% else %}
+      This report displays all male residents in the system. Total: <strong>{{ count }}</strong>
+    {% endif %}
+  </p>
 </div>
 
-<!-- Report Table -->
-{% if residents %}
-<div class="report-table-container">
-  <table class="report-table">
-    <thead>
-      <tr>
-        <th>Resident ID</th>
-        <th>Name</th>
-        <th>Age</th>
-        <th>Barangay</th>
-        <th>Purok</th>
-        <th>Contact</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for resident in residents %}
-      <tr>
-        <td><strong>{{ resident.resident_id }}</strong></td>
-        <td>{{ resident.get_full_name }}</td>
-        <td style="color: #5f6368;">{{ resident.get_age }}</td>
-        <td>{{ resident.barangay.name }}</td>
-        <td style="color: #5f6368;">{{ resident.purok }}</td>
-        <td style="color: #5f6368;">{{ resident.contact_no }}</td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<div class="reports-layout">
+  <div class="reports-layout-col folders-col">
+    {% include 'reports/includes/barangay_folders.html' %}
+  </div>
+  <div class="reports-layout-col table-col">
+    {% include 'reports/includes/report_view_modal.html' %}
+    {% include 'reports/includes/report_name_search.html' %}
+    <!-- Report Table -->
+    {% if residents %}
+    <div class="report-table-container">
+      <table class="report-table">
+        <thead>
+          <tr>
+            <th>Resident ID</th>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Barangay</th>
+            <th>Purok</th>
+            <th>Contact</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for resident in residents %}
+          <tr class="report-row-selectable" data-resident-pk="{{ resident.id }}">
+            <td><strong>{{ resident.resident_id }}</strong></td>
+            <td>{{ resident.get_full_name }}</td>
+            <td style="color: #5f6368;">{{ resident.get_age }}</td>
+            <td>{{ resident.barangay.name }}</td>
+            <td style="color: #5f6368;">{{ resident.purok }}</td>
+            <td style="color: #5f6368;">{{ resident.contact_no }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">👨</div>
+      <h3>No Male Residents Found</h3>
+      <p>There are currently no male residents in the database.</p>
+    </div>
+    {% endif %}
+  </div>
 </div>
-{% else %}
-<div class="empty-state">
-  <div class="empty-icon">👨</div>
-  <h3>No Male Residents Found</h3>
-  <p>There are currently no male residents in the database.</p>
-</div>
-{% endif %}
 
 {% endblock %}

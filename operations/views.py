@@ -22,6 +22,7 @@ from .supabase_storage import upload_profile_picture, upload_qr_image
 from django.conf import settings
 import logging
 import socket
+from django.utils import timezone
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -431,15 +432,18 @@ def resident_add(request):
             barangay = get_object_or_404(Barangay, id=barangay_id)
             
             # Create resident (profile uploaded to Supabase Storage after save to get pk)
+            status_val = request.POST.get('status', 'ALIVE')
+            date_of_death_val = (request.POST.get('date_of_death') or '').strip()
             resident = Resident(
                 barangay=barangay,
-                status=request.POST.get('status', 'ALIVE'),
+                status=status_val,
                 lastname=request.POST.get('lastname'),
                 firstname=request.POST.get('firstname'),
                 middlename=request.POST.get('middlename', ''),
                 suffix=request.POST.get('suffix', ''),
                 gender=request.POST.get('gender'),
                 date_of_birth=request.POST.get('date_of_birth'),
+                date_of_death=(date_of_death_val or timezone.now().date()) if status_val == Resident.STATUS_DECEASED else None,
                 place_of_birth=request.POST.get('place_of_birth'),
                 address=request.POST.get('address'),
                 purok=request.POST.get('purok'),
@@ -576,6 +580,7 @@ def resident_get(request, pk):
         'suffix': resident.suffix or '',
         'gender': resident.gender or '',
         'date_of_birth': date_of_birth_str,
+        'date_of_death': resident.date_of_death.strftime('%Y-%m-%d') if resident.date_of_death else '',
         'place_of_birth': resident.place_of_birth or '',
         'address': resident.address or '',
         'purok': resident.purok or '',
@@ -616,7 +621,16 @@ def resident_edit(request, pk):
             # Update fields (automatically saved to Supabase)
             barangay_id = request.POST.get('barangay')
             resident.barangay = get_object_or_404(Barangay, id=barangay_id)
-            resident.status = request.POST.get('status', 'ALIVE')
+            status_val = request.POST.get('status', 'ALIVE')
+            resident.status = status_val
+            date_of_death_val = (request.POST.get('date_of_death') or '').strip()
+            if status_val == Resident.STATUS_DECEASED:
+                if date_of_death_val:
+                    resident.date_of_death = date_of_death_val
+                elif not resident.date_of_death:
+                    resident.date_of_death = timezone.now().date()
+            if status_val == Resident.STATUS_ALIVE:
+                resident.date_of_death = None
             if 'profile_picture' in request.FILES:
                 profile_file = request.FILES['profile_picture']
                 url = upload_profile_picture(profile_file, resident.id)
@@ -643,19 +657,26 @@ def resident_edit(request, pk):
             resident.health_status = request.POST.get('health_status')
             resident.economic_status = request.POST.get('economic_status')
             resident.is_voter = request.POST.get('is_voter') == 'on'
-            resident.precinct_number = request.POST.get('precinct_number', '').strip()
-            # Legend: comma-separated e.g. A,B or A,B,C (Illiterate, PWD, Senior)
-            resident.voter_legend = request.POST.get('voter_legend', '').strip()
-            date_verified_val = request.POST.get('date_verified', '').strip()
-            resident.date_verified = None
-            if date_verified_val:
-                try:
-                    from datetime import datetime
-                    resident.date_verified = datetime.strptime(date_verified_val, '%Y-%m-%d').date()
-                except ValueError:
-                    pass
-            # Verified by: set to the logged-in user's full name (or username if no full name)
-            resident.verified_by = (request.user.get_full_name() or request.user.get_username() or '').strip()
+            # Only update voter fields when they are in POST (from Voters Registration).
+            # Residents Record edit form does not include these; preserve existing voter data.
+            if 'precinct_number' in request.POST:
+                resident.precinct_number = request.POST.get('precinct_number', '').strip()
+            if 'voter_legend' in request.POST:
+                resident.voter_legend = request.POST.get('voter_legend', '').strip()
+            if 'date_verified' in request.POST:
+                date_verified_val = request.POST.get('date_verified', '').strip()
+                resident.date_verified = None
+                if date_verified_val:
+                    try:
+                        from datetime import datetime
+                        resident.date_verified = datetime.strptime(date_verified_val, '%Y-%m-%d').date()
+                    except ValueError:
+                        pass
+            if 'verified_by' in request.POST:
+                resident.verified_by = request.POST.get('verified_by', '').strip()
+            elif 'date_verified' in request.POST:
+                # When voter form sets date_verified, also set verified_by to current user
+                resident.verified_by = (request.user.get_full_name() or request.user.get_username() or '').strip()
             resident.remarks = request.POST.get('remarks', '')
             
             resident.save()

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}List of PWD - PGSO{% endblock %}
+{% block title %}Birth By Year - PGSO{% endblock %}
 
 {% block content %}
 <style>
@@ -102,13 +102,13 @@
 <!-- Page Header -->
 <div class="page-header">
   <h1 class="page-title">
-    <i class="fas fa-wheelchair" style="color: #4299e1;"></i> List of PWD (Persons with Disabilities)
+    <i class="fas fa-calendar" style="color: #4299e1;"></i> Birth By Year
   </h1>
   <p class="page-subtitle">
-    {% if barangay %}
-      PWD residents in <strong>{{ barangay.name }}</strong>. Total: <strong>{{ count }}</strong>
+    {% if selected_year %}
+      Residents born in <strong>{{ selected_year }}</strong>. Total: <strong>{{ count }}</strong>
     {% else %}
-      This report displays all persons with disabilities registered in the system. Total: <strong>{{ count }}</strong>
+      Select a year to view residents born in that year. Total: <strong>{{ count }}</strong>
     {% endif %}
   </p>
 </div>
@@ -120,7 +120,7 @@
   <div class="reports-layout-col table-col">
     {% include 'reports/includes/report_view_modal.html' %}
     {% include 'reports/includes/report_name_search.html' %}
-    <!-- Report Table -->
+
     {% if residents %}
     <div class="report-table-container">
       <table class="report-table">
@@ -128,8 +128,9 @@
           <tr>
             <th>Resident ID</th>
             <th>Name</th>
-            <th>Age</th>
             <th>Gender</th>
+            <th>Birthdate</th>
+            <th>Age</th>
             <th>Barangay</th>
             <th>Purok</th>
             <th>Contact</th>
@@ -137,11 +138,12 @@
         </thead>
         <tbody>
           {% for resident in residents %}
-          <tr class="report-row-selectable" data-resident-pk="{{ resident.id }}">
+          <tr class="report-row-selectable {% if resident.status == 'DECEASED' %}row-deceased{% endif %}" data-resident-pk="{{ resident.id }}">
             <td><strong>{{ resident.resident_id }}</strong></td>
             <td>{{ resident.get_full_name }}</td>
-            <td style="color: #5f6368;">{{ resident.get_age }}</td>
             <td>{{ resident.get_gender_display }}</td>
+            <td style="color: #5f6368;">{{ resident.date_of_birth|date:"Y-m-d" }}</td>
+            <td style="color: #5f6368;">{{ resident.get_age }}</td>
             <td>{{ resident.barangay.name }}</td>
             <td style="color: #5f6368;">{{ resident.purok }}</td>
             <td style="color: #5f6368;">{{ resident.contact_no }}</td>
@@ -152,12 +154,13 @@
     </div>
     {% else %}
     <div class="empty-state">
-      <div class="empty-icon">♿</div>
-      <h3>No PWD Records Found</h3>
-      <p>There are currently no PWD records in the database.</p>
+      <div class="empty-icon">📅</div>
+      <h3>No Records Found</h3>
+      <p>No residents match the selected year.</p>
     </div>
     {% endif %}
   </div>
 </div>
 
 {% endblock %}
+

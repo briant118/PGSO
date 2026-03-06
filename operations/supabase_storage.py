@@ -20,7 +20,7 @@ def _get_client():
 def upload_profile_picture(file, resident_id: int) -> str:
     """
     Upload profile image to Supabase Storage. Returns public URL or empty string on failure.
-    Path: resident_{id}.{ext} (ext from file name or 'jpg').
+    Path: {id}.{ext} (ext from file name or 'jpg').
     """
     client = _get_client()
     if not client:
@@ -30,7 +30,7 @@ def upload_profile_picture(file, resident_id: int) -> str:
     ext = name.rsplit('.', 1)[-1].lower() if '.' in name else 'jpg'
     if ext not in ('jpg', 'jpeg', 'png', 'gif', 'webp'):
         ext = 'jpg'
-    path = f'resident_{resident_id}.{ext}'
+    path = f'{resident_id}.{ext}'
     content_type = getattr(file, 'content_type', None) or f'image/{ext}' if ext != 'jpg' else 'image/jpeg'
     try:
         file.seek(0)
@@ -50,13 +50,13 @@ def upload_profile_picture(file, resident_id: int) -> str:
 def upload_qr_image(png_bytes: bytes, resident_id: int) -> str:
     """
     Upload QR code PNG to Supabase Storage. Returns public URL or empty string on failure.
-    Path: resident_{id}.png
+    Path: {id}.png
     """
     client = _get_client()
     if not client:
         return ''
     bucket = getattr(settings, 'SUPABASE_STORAGE_BUCKET_QR', 'qr')
-    path = f'resident_{resident_id}.png'
+    path = f'{resident_id}.png'
     try:
         client.storage.from_(bucket).upload(
             path=path,

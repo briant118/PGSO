@@ -1,0 +1,241 @@
+<div class="report-actions-bar">
+  <div class="report-actions-right">
+    {% if available_years %}
+      <label class="report-year-filter">
+        <span class="label">Year</span>
+        <select id="reportYearSelect"
+                data-base-path="{{ base_path }}"
+                data-selected-barangay="{{ selected_barangay_id|default:'' }}"
+                data-selected-month="{{ selected_month|default:'' }}">
+          <option value="">All</option>
+          {% for y in available_years %}
+            <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
+          {% endfor %}
+        </select>
+      </label>
+    {% endif %}
+
+    {% if available_months %}
+      <label class="report-year-filter">
+        <span class="label">Month</span>
+        <select id="reportMonthSelect"
+                data-base-path="{{ base_path }}"
+                data-selected-barangay="{{ selected_barangay_id|default:'' }}"
+                data-selected-year="{{ selected_year|default:'' }}">
+          <option value="">All</option>
+          {% for m in available_months %}
+            <option value="{{ m }}" {% if selected_month == m %}selected{% endif %}>
+              {{ m }}
+            </option>
+          {% endfor %}
+        </select>
+      </label>
+    {% endif %}
+    <button type="button"
+            id="reportViewBtn"
+            class="btn-view"
+            data-url-template="{% url 'operations:resident_get' 0 %}"
+            disabled>
+      View
+    </button>
+  </div>
+</div>
+
+<div class="report-modal" id="reportViewModal" aria-hidden="true">
+  <div class="report-modal-card" role="dialog" aria-modal="true" aria-label="View resident">
+    <div class="report-modal-header">
+      <div class="title">
+        <i class="fas fa-user"></i>
+        <span id="reportViewTitle">Resident Details</span>
+      </div>
+      <button type="button" class="close" id="reportViewCloseBtn" aria-label="Close">&times;</button>
+    </div>
+    <div class="report-modal-body">
+      <div class="report-view-top">
+        <div class="avatar">
+          <img id="reportViewAvatar" alt="" />
+          <div class="avatar-fallback" id="reportViewAvatarFallback"><i class="fas fa-user"></i></div>
+        </div>
+        <div class="meta">
+          <div class="name" id="reportViewName">-</div>
+          <div class="sub">
+            <span class="pill" id="reportViewResidentId">ID: -</span>
+            <span class="pill" id="reportViewStatus">Status: -</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="report-view-grid">
+        <div class="item"><div class="label">Barangay</div><div class="value" id="reportViewBarangay">-</div></div>
+        <div class="item"><div class="label">Purok</div><div class="value" id="reportViewPurok">-</div></div>
+        <div class="item"><div class="label">Gender</div><div class="value" id="reportViewGender">-</div></div>
+        <div class="item"><div class="label">Birthdate</div><div class="value" id="reportViewBirthdate">-</div></div>
+        <div class="item"><div class="label">Date of Death</div><div class="value" id="reportViewDeathdate">-</div></div>
+        <div class="item"><div class="label">Age</div><div class="value" id="reportViewAge">-</div></div>
+        <div class="item"><div class="label">Contact</div><div class="value" id="reportViewContact">-</div></div>
+        <div class="item item-wide"><div class="label">Address</div><div class="value" id="reportViewAddress">-</div></div>
+        <div class="item item-wide"><div class="label">Remarks</div><div class="value" id="reportViewRemarks">-</div></div>
+      </div>
+    </div>
+    <div class="report-modal-footer">
+      <button type="button" class="btn-secondary" id="reportViewCloseBtn2">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  var viewBtn = document.getElementById('reportViewBtn');
+  var modal = document.getElementById('reportViewModal');
+  var closeBtn = document.getElementById('reportViewCloseBtn');
+  var closeBtn2 = document.getElementById('reportViewCloseBtn2');
+  if (!viewBtn || !modal) return;
+
+  var selectedPk = null;
+
+  function setSelectedRow(tr) {
+    var table = document.querySelector('.report-table');
+    if (!table) return;
+    table.querySelectorAll('tbody tr.report-row-selectable.selected').forEach(function (r) {
+      r.classList.remove('selected');
+    });
+    if (tr) tr.classList.add('selected');
+    selectedPk = tr ? (tr.getAttribute('data-resident-pk') || null) : null;
+    viewBtn.disabled = !selectedPk;
+  }
+
+  function computeAge(yyyy_mm_dd) {
+    if (!yyyy_mm_dd || yyyy_mm_dd.length < 10) return '';
+    var parts = yyyy_mm_dd.split('-');
+    if (parts.length < 3) return '';
+    var y = parseInt(parts[0], 10), m = parseInt(parts[1], 10) - 1, d = parseInt(parts[2], 10);
+    if (!y || m < 0 || d < 1) return '';
+    var dob = new Date(y, m, d);
+    if (isNaN(dob.getTime())) return '';
+    var now = new Date();
+    var age = now.getFullYear() - dob.getFullYear();
+    var mo = now.getMonth() - dob.getMonth();
+    if (mo < 0 || (mo === 0 && now.getDate() < dob.getDate())) age--;
+    return age >= 0 ? String(age) : '';
+  }
+
+  function openModal() {
+    modal.style.display = 'flex';
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    modal.style.display = 'none';
+    modal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  function setText(id, value, prefix) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var v = (value == null ? '' : String(value)).trim();
+    el.textContent = (prefix || '') + (v || '-');
+  }
+
+  function setAvatar(url) {
+    var img = document.getElementById('reportViewAvatar');
+    var fallback = document.getElementById('reportViewAvatarFallback');
+    if (!img || !fallback) return;
+    if (url) {
+      img.src = url;
+      img.style.display = 'block';
+      fallback.style.display = 'none';
+    } else {
+      img.removeAttribute('src');
+      img.style.display = 'none';
+      fallback.style.display = 'flex';
+    }
+  }
+
+  async function loadAndShow(pk) {
+    var template = viewBtn.getAttribute('data-url-template') || '';
+    var url = template.replace('/0/', '/' + pk + '/');
+    try {
+      viewBtn.disabled = true;
+      var res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      if (!res.ok) throw new Error('Request failed');
+      var data = await res.json();
+      // Deceased styling (red) inside the modal
+      if (String(data.status || '').toUpperCase() === 'DECEASED') {
+        modal.classList.add('row-deceased');
+      } else {
+        modal.classList.remove('row-deceased');
+      }
+      setAvatar(data.profile_picture || '');
+      setText('reportViewName', data.full_name || '-');
+      setText('reportViewResidentId', data.resident_id || '-', 'ID: ');
+      setText('reportViewStatus', data.status || '-', 'Status: ');
+      setText('reportViewBarangay', data.barangay_name || '-');
+      setText('reportViewPurok', data.purok || '-');
+      setText('reportViewGender', data.gender || '-');
+      setText('reportViewBirthdate', data.date_of_birth || '-');
+      setText('reportViewDeathdate', data.date_of_death || '-');
+      setText('reportViewAge', computeAge(data.date_of_birth) || '-');
+      setText('reportViewContact', data.contact_no || '-');
+      setText('reportViewAddress', data.address || '-');
+      setText('reportViewRemarks', data.remarks || '-');
+      openModal();
+    } catch (e) {
+      // fallback: still open modal with minimal info
+      openModal();
+    } finally {
+      viewBtn.disabled = !selectedPk;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var table = document.querySelector('.report-table');
+    if (!table) return;
+    table.querySelectorAll('tbody tr.report-row-selectable').forEach(function (tr) {
+      tr.addEventListener('click', function () { setSelectedRow(tr); });
+      tr.addEventListener('dblclick', function () {
+        setSelectedRow(tr);
+        if (selectedPk) loadAndShow(selectedPk);
+      });
+    });
+  });
+
+  viewBtn.addEventListener('click', function () {
+    if (!selectedPk) return;
+    loadAndShow(selectedPk);
+  });
+
+  var yearSelect = document.getElementById('reportYearSelect');
+  var monthSelect = document.getElementById('reportMonthSelect');
+
+  function navigateWithFilters() {
+    var basePath = (yearSelect && yearSelect.getAttribute('data-base-path')) || (monthSelect && monthSelect.getAttribute('data-base-path')) || window.location.pathname;
+    var barangay = (yearSelect && yearSelect.getAttribute('data-selected-barangay')) || (monthSelect && monthSelect.getAttribute('data-selected-barangay')) || '';
+    var year = yearSelect ? (yearSelect.value || '') : ((monthSelect && monthSelect.getAttribute('data-selected-year')) || '');
+    var month = monthSelect ? (monthSelect.value || '') : ((yearSelect && yearSelect.getAttribute('data-selected-month')) || '');
+
+    // If no year selected, month filter should not apply
+    if (!year) month = '';
+
+    var params = new URLSearchParams();
+    if (barangay) params.set('barangay', barangay);
+    if (year) params.set('year', year);
+    if (month) params.set('month', month);
+    var qs = params.toString();
+    window.location.href = qs ? (basePath + '?' + qs) : basePath;
+  }
+
+  if (yearSelect) yearSelect.addEventListener('change', navigateWithFilters);
+  if (monthSelect) monthSelect.addEventListener('change', navigateWithFilters);
+
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (closeBtn2) closeBtn2.addEventListener('click', closeModal);
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && modal.style.display === 'flex') closeModal();
+  });
+})();
+</script>

@@ -13,4 +13,6 @@ urlpatterns = [
     path('4ps-member/', views.list_4ps_member, name='list_4ps_member'),
     path('voters/', views.list_voters, name='list_voters'),
     path('residents-record/', views.list_residents_record, name='list_residents_record'),
+    path('deceased/', views.list_deceased, name='list_deceased'),
+    path('birth-by-year/', views.list_birth_by_year, name='list_birth_by_year'),
 ]

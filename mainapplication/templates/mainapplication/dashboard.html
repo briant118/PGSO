@@ -3,8 +3,46 @@
 {% block content %}
 <div class="dashboard dashboard-rms">
   <header class="dashboard-rms-header">
-    <h1 class="dashboard-rms-title">Dashboard</h1>
-    <p class="dashboard-rms-subtitle">Resident Management System</p>
+    <div class="dashboard-rms-hero">
+      <div class="dashboard-rms-hero-text">
+        <h1 class="dashboard-rms-title">Dashboard</h1>
+        <p class="dashboard-rms-subtitle">Resident Management System</p>
+        <div class="dashboard-rms-meta">
+          <span class="dashboard-rms-pill"><i class="fas fa-calendar-day"></i> {% now "F j, Y" %}</span>
+          <span class="dashboard-rms-pill dashboard-rms-pill-muted"><i class="fas fa-database"></i> Live totals</span>
+        </div>
+      </div>
+      <div class="dashboard-rms-hero-actions" aria-label="Quick actions">
+        <a class="dashboard-rms-action" href="{% url 'operations:residents_record' %}">
+          <span class="dashboard-rms-action-icon"><i class="fas fa-address-book"></i></span>
+          <span class="dashboard-rms-action-text">
+            <span class="dashboard-rms-action-title">Residents</span>
+            <span class="dashboard-rms-action-sub">View records</span>
+          </span>
+        </a>
+        <a class="dashboard-rms-action" href="{% url 'operations:voters_registration' %}">
+          <span class="dashboard-rms-action-icon"><i class="fas fa-vote-yea"></i></span>
+          <span class="dashboard-rms-action-text">
+            <span class="dashboard-rms-action-title">Voters</span>
+            <span class="dashboard-rms-action-sub">Registration</span>
+          </span>
+        </a>
+        <a class="dashboard-rms-action" href="{% url 'reports:index' %}">
+          <span class="dashboard-rms-action-icon"><i class="fas fa-chart-bar"></i></span>
+          <span class="dashboard-rms-action-text">
+            <span class="dashboard-rms-action-title">Reports</span>
+            <span class="dashboard-rms-action-sub">Generate lists</span>
+          </span>
+        </a>
+        <a class="dashboard-rms-action dashboard-rms-action-secondary" href="{% url 'reference:barangay_list' %}">
+          <span class="dashboard-rms-action-icon"><i class="fas fa-map-marker-alt"></i></span>
+          <span class="dashboard-rms-action-text">
+            <span class="dashboard-rms-action-title">Barangays</span>
+            <span class="dashboard-rms-action-sub">Manage reference</span>
+          </span>
+        </a>
+      </div>
+    </div>
   </header>
 
   <!-- Top row: 4 stat cards -->
@@ -84,18 +122,18 @@
       </div>
     </section>
     <section class="dashboard-rms-chart-card">
-      <h2 class="dashboard-rms-chart-title">Residents by Birth Year</h2>
-      <p class="dashboard-rms-chart-subtitle">Distribution by birth year</p>
-      <div id="birthYearPeak" class="dashboard-rms-chart-peak" style="display: none;"></div>
-      <div class="dashboard-rms-chart-wrap">
-        <canvas id="birthYearChart" height="220"></canvas>
-      </div>
-    </section>
-    <section class="dashboard-rms-chart-card dashboard-rms-chart-card-full">
       <h2 class="dashboard-rms-chart-title">Total Barangays &amp; Municipalities</h2>
       <p class="dashboard-rms-chart-subtitle">Active barangays and municipalities in the system</p>
-      <div class="dashboard-rms-chart-wrap dashboard-rms-chart-wrap-bar-muni">
+      <div class="dashboard-rms-chart-wrap">
         <canvas id="barMuniChart" height="220"></canvas>
+      </div>
+    </section>
+    <section class="dashboard-rms-chart-card dashboard-rms-chart-card-full dashboard-rms-chart-card-birthyear">
+      <h2 class="dashboard-rms-chart-title">Birth Year vs Death Year</h2>
+      <p class="dashboard-rms-chart-subtitle">Click legend to hide/unhide series</p>
+      <div class="dashboard-rms-chart-wrap dashboard-rms-chart-wrap-tall">
+        <p id="yearSeriesEmpty" class="dashboard-rms-chart-empty" style="display:none;"></p>
+        <canvas id="birthYearChart" height="260"></canvas>
       </div>
     </section>
   </div>
@@ -183,70 +221,120 @@
 
 (function() {
   var birthYearData = {{ birth_year_data_json|safe }};
-  if (!birthYearData || !birthYearData.labels || !birthYearData.labels.length) {
-    document.getElementById('birthYearChart').parentElement.innerHTML = '<p class="dashboard-rms-chart-empty">No birth year data available yet.</p>';
+  var deathYearData = {{ death_year_data_json|safe }};
+
+  function hasData(d) {
+    return !!(d && d.labels && d.labels.length && d.counts && d.counts.length);
+  }
+
+  var ctx = document.getElementById('birthYearChart').getContext('2d');
+
+  function setEmpty(message) {
+    var emptyEl = document.getElementById('yearSeriesEmpty');
+    if (!emptyEl) return;
+    if (message) {
+      emptyEl.textContent = message;
+      emptyEl.style.display = 'block';
+    } else {
+      emptyEl.textContent = '';
+      emptyEl.style.display = 'none';
+    }
+  }
+
+  function toYearCountMap(d) {
+    var m = {};
+    if (!d || !d.labels || !d.counts) return m;
+    for (var i = 0; i < d.labels.length; i++) {
+      var y = String(d.labels[i] == null ? '' : d.labels[i]).trim();
+      if (!y) continue;
+      m[y] = Number(d.counts[i] || 0);
+    }
+    return m;
+  }
+
+  var birthMap = toYearCountMap(birthYearData);
+  var deathMap = toYearCountMap(deathYearData);
+
+  var yearsSet = {};
+  Object.keys(birthMap).forEach(function(y) { yearsSet[y] = true; });
+  Object.keys(deathMap).forEach(function(y) { yearsSet[y] = true; });
+
+  var years = Object.keys(yearsSet).sort(function(a, b) { return Number(a) - Number(b); });
+
+  if (!years.length) {
+    setEmpty('No year-based data available yet.');
     return;
   }
-  var ctx = document.getElementById('birthYearChart').getContext('2d');
-  var maxCount = Math.max.apply(null, birthYearData.counts);
-  var maxYearIdx = birthYearData.counts.indexOf(maxCount);
-  var maxYear = birthYearData.labels[maxYearIdx];
-  var peakEl = document.getElementById('birthYearPeak');
-  if (peakEl) {
-    peakEl.innerHTML = '<i class="fas fa-chart-line"></i> Peak Year: ' + maxYear + ' with ' + maxCount + ' residents';
-    peakEl.style.display = 'flex';
+
+  var birthSeries = years.map(function(y) { return birthMap[y] != null ? birthMap[y] : 0; });
+  var deathSeries = years.map(function(y) { return deathMap[y] != null ? deathMap[y] : 0; });
+
+  // If one series is totally empty, still render the chart but show a hint
+  var hasBirth = birthSeries.some(function(v) { return v > 0; });
+  var hasDeath = deathSeries.some(function(v) { return v > 0; });
+  if (!hasBirth && !hasDeath) {
+    setEmpty('No year-based data available yet.');
+    return;
   }
+  if (!hasDeath) {
+    setEmpty('No death year data yet (series will be flat).');
+  } else if (!hasBirth) {
+    setEmpty('No birth year data yet (series will be flat).');
+  } else {
+    setEmpty(null);
+  }
+
   new Chart(ctx, {
-    type: 'bar',
+    type: 'line',
     data: {
-      labels: birthYearData.labels,
-      datasets: [{
-        label: 'Residents',
-        data: birthYearData.counts,
-        backgroundColor: 'rgba(66, 153, 225, 0.8)',
-        borderColor: 'rgb(66, 153, 225)',
-        borderWidth: 1
-      }]
+      labels: years,
+      datasets: [
+        {
+          label: 'Birth Year (Residents)',
+          data: birthSeries,
+          borderColor: 'rgb(66, 153, 225)',
+          backgroundColor: 'rgba(66, 153, 225, 0.12)',
+          pointBackgroundColor: 'rgb(66, 153, 225)',
+          pointRadius: 3,
+          tension: 0.35,
+          fill: false
+        },
+        {
+          label: 'Death Year (Deaths)',
+          data: deathSeries,
+          borderColor: 'rgb(220, 53, 69)',
+          backgroundColor: 'rgba(220, 53, 69, 0.10)',
+          pointBackgroundColor: 'rgb(220, 53, 69)',
+          pointRadius: 3,
+          tension: 0.35,
+          fill: false
+        }
+      ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
       plugins: {
-        legend: { display: false },
+        legend: {
+          display: true,
+          labels: { usePointStyle: true, pointStyle: 'line' }
+        },
         tooltip: {
-          enabled: false,
-          external: function(context) {
-            var el = document.getElementById('chartTooltip');
-            if (!context.tooltip || context.tooltip.opacity === 0) {
-              el.style.display = 'none';
-              return;
-            }
-            var tooltip = context.tooltip;
-            var idx = tooltip.dataPoints && tooltip.dataPoints[0] ? tooltip.dataPoints[0].dataIndex : 0;
-            var year = birthYearData.labels[idx] != null ? birthYearData.labels[idx] : '';
-            var count = birthYearData.counts[idx] != null ? birthYearData.counts[idx] : 0;
-            el.innerHTML =
-              '<div class="chart-tooltip-title">' + year + '</div>' +
-              '<div class="chart-tooltip-line chart-tooltip-residents">residents : ' + count + '</div>';
-            el.style.display = 'block';
-            el.style.opacity = '1';
-            var canvas = context.chart.canvas.getBoundingClientRect();
-            var left = canvas.left + tooltip.caretX + 10;
-            var top = canvas.top + tooltip.caretY - el.offsetHeight / 2;
-            el.style.left = left + 'px';
-            el.style.top = top + 'px';
-          }
+          enabled: true,
+          mode: 'index',
+          intersect: false
         }
       },
       scales: {
         x: {
-          title: { display: false },
+          title: { display: true, text: 'Year' },
           grid: { display: false }
         },
         y: {
           beginAtZero: true,
           title: { display: true, text: 'Count' },
-          ticks: { stepSize: 1 }
+          ticks: { precision: 0 }
         }
       }
     }

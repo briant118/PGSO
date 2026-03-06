@@ -1243,19 +1243,6 @@
 
 </style>
 
-<!-- Messages -->
-{% if messages %}
-<div class="messages">
-  {% for message in messages %}
-  <div class="alert alert-{{ message.tags }}">
-    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% endif %}"></i>
-    {{ message }}
-  </div>
-  {% endfor %}
-</div>
-{% endif %}
-
-
 <!-- Sticky Header: Page Header + Search (stays at top when scrolling) -->
 <div class="residents-sticky-header">
 <!-- Page Header -->
@@ -1396,7 +1383,12 @@
     <tbody>
 
       {% for resident in residents %}
-      <tr class="resident-row-clickable" data-id="{{ resident.id }}" data-name="{{ resident.get_full_name|escapejs }}" data-barangay-id="{{ resident.barangay.id }}" data-barangay-name="{{ resident.barangay.name|escapejs }}">
+      <tr class="resident-row-clickable {% if resident.status == 'DECEASED' %}row-deceased{% endif %}"
+          data-id="{{ resident.id }}"
+          data-name="{{ resident.get_full_name|escapejs }}"
+          data-status="{{ resident.status }}"
+          data-barangay-id="{{ resident.barangay.id }}"
+          data-barangay-name="{{ resident.barangay.name|escapejs }}">
         <td>
           <span class="badge badge-id">{{ resident.resident_id }}</span>
         </td>
@@ -1491,6 +1483,15 @@
                 </label>
               </div>
             </div>
+          </div>
+
+          <div class="form-row cols-2" id="addDeathDetailsRow" style="display:none;">
+            <div class="form-group">
+              <label for="add_date_of_death">Date of Death <span class="required">*</span></label>
+              <input type="date" id="add_date_of_death" name="date_of_death">
+              <small style="color:#5f6368; font-size:0.85rem;">Required when status is DECEASED.</small>
+            </div>
+            <div class="form-group"></div>
           </div>
         </div>
 
@@ -1733,6 +1734,14 @@
                   DECEASED
                 </label>
               </div>
+            </div>
+          </div>
+
+          <div class="form-row cols-3" id="editDeathDetailsRow" style="display:none;">
+            <div class="form-group">
+              <label for="edit_date_of_death">Date of Death <span class="required">*</span></label>
+              <input type="date" id="edit_date_of_death" name="date_of_death">
+              <small style="color:#5f6368; font-size:0.85rem;">Required when status is DECEASED.</small>
             </div>
           </div>
         </div>
@@ -2025,6 +2034,10 @@
           <td class="detail-value" id="view_date_of_birth">-</td>
         </tr>
         <tr class="detail-row">
+          <td class="detail-label">Date of Death</td>
+          <td class="detail-value" id="view_date_of_death">-</td>
+        </tr>
+        <tr class="detail-row">
           <td class="detail-label">Age</td>
           <td class="detail-value" id="view_age">-</td>
         </tr>
@@ -2155,6 +2168,37 @@ function setStatus(element, status) {
   });
   element.classList.add('active');
   element.querySelector('input[type="radio"]').checked = true;
+  toggleDeathDetailsForModal(element.closest('.modal'), status);
+}
+
+function toggleDeathDetailsForModal(modalEl, status, existingDate) {
+  if (!modalEl) return;
+  var isDeceased = String(status || '').toUpperCase() === 'DECEASED';
+  var isAdd = modalEl.id === 'addModal';
+  var row = document.getElementById(isAdd ? 'addDeathDetailsRow' : 'editDeathDetailsRow');
+  var input = document.getElementById(isAdd ? 'add_date_of_death' : 'edit_date_of_death');
+  if (!row || !input) return;
+
+  row.style.display = isDeceased ? '' : 'none';
+  input.required = !!isDeceased;
+
+  if (!isDeceased) {
+    input.value = '';
+    return;
+  }
+
+  if (existingDate != null && String(existingDate).trim() !== '') {
+    input.value = String(existingDate).trim();
+    return;
+  }
+
+  if (!input.value) {
+    var today = new Date();
+    var yyyy = today.getFullYear();
+    var mm = String(today.getMonth() + 1).padStart(2, '0');
+    var dd = String(today.getDate()).padStart(2, '0');
+    input.value = yyyy + '-' + mm + '-' + dd;
+  }
 }
 
 // Add Modal Functions
@@ -2171,6 +2215,7 @@ function closeAddModal() {
   // Reset status toggle
   document.querySelector('#addModal .status-option.alive').classList.add('active');
   document.querySelector('#addModal .status-option.deceased').classList.remove('active');
+  toggleDeathDetailsForModal(document.getElementById('addModal'), 'ALIVE');
   // Reset barangay search
   var display = document.getElementById('add_barangay_display');
   var hidden = document.getElementById('add_barangay');
@@ -2266,6 +2311,8 @@ function openEditModal(id) {
         document.querySelector('#editModal .status-option.deceased').classList.add('active');
         document.querySelector('#editModal .status-option.alive').classList.remove('active');
       }
+      // Deceased details
+      toggleDeathDetailsForModal(document.getElementById('editModal'), data.status, data.date_of_death || '');
       
       document.getElementById('edit_lastname').value = data.lastname;
       document.getElementById('edit_firstname').value = data.firstname;
@@ -2273,6 +2320,8 @@ function openEditModal(id) {
       document.getElementById('edit_suffix').value = data.suffix;
       document.getElementById('edit_gender').value = data.gender;
       document.getElementById('edit_date_of_birth').value = data.date_of_birth;
+      var dod = document.getElementById('edit_date_of_death');
+      if (dod) dod.value = data.date_of_death || '';
       document.getElementById('edit_place_of_birth').value = data.place_of_birth;
       document.getElementById('edit_address').value = data.address;
       document.getElementById('edit_purok').value = data.purok;
@@ -2381,6 +2430,16 @@ function openViewModal(id) {
       } else {
         dobElement.textContent = '-';
         ageElement.textContent = '-';
+      }
+
+      // Date of Death (only when deceased)
+      var dodElement = document.getElementById('view_date_of_death');
+      if (dodElement) {
+        if (String(data.status || '').toUpperCase() === 'DECEASED' && data.date_of_death) {
+          dodElement.textContent = formatDateShort(data.date_of_death);
+        } else {
+          dodElement.textContent = '-';
+        }
       }
       
       document.getElementById('view_place_of_birth').textContent = data.place_of_birth || '-';
@@ -2586,20 +2645,6 @@ document.addEventListener('DOMContentLoaded', function() {
   setupPreview('add_profile_picture', 'add_profile_preview');
 });
 
-// Auto-hide messages after 5 seconds
-document.addEventListener('DOMContentLoaded', function() {
-  const alerts = document.querySelectorAll('.alert');
-  if (alerts.length > 0) {
-    alerts.forEach(alert => {
-      setTimeout(() => {
-        alert.classList.add('fade-out');
-        setTimeout(() => {
-          alert.remove();
-        }, 300);
-      }, 5000);
-    });
-  }
-});
 </script>
 
 <script>
@@ -2650,11 +2695,15 @@ document.addEventListener('DOMContentLoaded', function() {
       var id = row.getAttribute('data-id');
       var name = row.getAttribute('data-name') || '';
       var barangay = row.getAttribute('data-barangay-name') || '';
+      var status = row.getAttribute('data-status') || '';
 
       var btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'all-residents-item';
       btn.setAttribute('data-id', id || '');
+      if (String(status).toUpperCase() === 'DECEASED') {
+        btn.classList.add('row-deceased');
+      }
       btn.innerHTML =
         '<span class="name">' + escapeHtml(name) + '</span>' +
         '<span class="meta">' + escapeHtml(barangay) + '</span>';

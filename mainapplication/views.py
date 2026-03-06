@@ -76,6 +76,28 @@ def dashboard(request):
     }
     birth_year_data_json = json.dumps(birth_year_data)
 
+    # Death year chart: count deceased residents by death year
+    by_death_year = (
+        Resident.objects
+        .filter(status=Resident.STATUS_DECEASED, date_of_death__isnull=False)
+        .annotate(death_year=ExtractYear('date_of_death'))
+        .values('death_year')
+        .annotate(count=Count('id'))
+        .order_by('death_year')
+    )
+    death_year_labels = []
+    death_year_counts = []
+    for row in by_death_year:
+        if row['death_year']:
+            death_year_labels.append(str(row['death_year']))
+            death_year_counts.append(row['count'])
+
+    death_year_data = {
+        'labels': death_year_labels,
+        'counts': death_year_counts,
+    }
+    death_year_data_json = json.dumps(death_year_data)
+
     # Barangays and municipalities totals for chart
     total_barangays = Barangay.objects.filter(is_active=True).count()
     total_municipalities = Municipality.objects.filter(is_active=True).count()
@@ -89,6 +111,7 @@ def dashboard(request):
         'stats': stats,
         'chart_data_json': chart_data_json,
         'birth_year_data_json': birth_year_data_json,
+        'death_year_data_json': death_year_data_json,
         'bar_muni_chart_json': bar_muni_chart_json,
     })
 

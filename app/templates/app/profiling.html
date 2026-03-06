@@ -141,6 +141,7 @@
       font-size: 0.95rem;
     }
     .btn-download:hover { opacity: 0.9; }
+    .badge-deceased { background: #f8d7da; color: #721c24; }
   </style>
 </head>
 <body>
@@ -176,6 +177,9 @@
         {% endif %}
         {% if resident.health_status == 'PWD' %}
         <span class="badge badge-pwd">PWD</span>
+        {% endif %}
+        {% if resident.status == 'DECEASED' %}
+        <span class="badge badge-deceased">Deceased{% if resident.date_of_death %} – {{ resident.date_of_death|date:"Y-m-d" }}{% endif %}</span>
         {% endif %}
       </div>
     </div>

@@ -1,0 +1,30 @@
+<div class="report-table-toolbar" style="margin-bottom: 1rem;">
+  <div class="search-input-wrap" style="max-width: 420px;">
+    <i class="fas fa-search search-icon" aria-hidden="true"></i>
+    <input type="text" id="reportNameSearch" placeholder="Search name or ID...">
+  </div>
+</div>
+
+<script>
+(function () {
+  var input = document.getElementById('reportNameSearch');
+  if (!input) return;
+
+  function apply() {
+    var table = document.querySelector('.report-table');
+    if (!table) return;
+    var term = (input.value || '').trim().toLowerCase();
+    var rows = table.querySelectorAll('tbody tr');
+    rows.forEach(function (tr) {
+      var idCell = tr.querySelector('td:nth-child(1)');
+      var nameCell = tr.querySelector('td:nth-child(2)');
+      var idText = (idCell ? idCell.textContent : '').trim().toLowerCase();
+      var nameText = (nameCell ? nameCell.textContent : tr.textContent || '').trim().toLowerCase();
+      var match = (!term) || (nameText.indexOf(term) !== -1) || (idText.indexOf(term) !== -1);
+      tr.style.display = match ? '' : 'none';
+    });
+  }
+
+  input.addEventListener('input', apply);
+})();
+</script>
