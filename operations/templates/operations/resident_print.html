@@ -32,7 +32,7 @@
       position: absolute;
       top: 0.15cm;
       right: 0.35cm;
-      font-size: 0.28cm;
+      font-size: 0.32cm;
       font-weight: 600;
       white-space: nowrap;
       color: #1a1d24;
@@ -40,25 +40,25 @@
     .record-name {
       position: absolute;
       top: 0.5cm;
-      left: 0.35cm;
-      right: 0.35cm;
-      text-align: left-align; /* align with profile picture edge */
-      font-size: 0.32cm;
+      /* Start after profile photo; keep clear of QR column */
+      left: 2.10cm;
+      right: 1.95cm;
+      text-align: left;
+      font-size: 0.36cm;
       font-weight: 800;
-      letter-spacing: 0.03em;
+      letter-spacing: 0.02em;
       text-transform: uppercase;
       line-height: 1.05;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      margin-left: 1.35cm;
     }
     .record-profile {
       position: absolute;
       left: 0.35cm;
       top: 1.0cm;
-      width: 1.35cm;
-      height: 1.35cm;
+      width: 1.55cm;
+      height: 1.55cm;
       overflow: hidden;
       background: #e8eaed;
       border: none;
@@ -75,24 +75,24 @@
       align-items: center;
       justify-content: center;
       color: #9e9e9e;
-      font-size: 0.6cm;
+      font-size: 0.75cm;
     }
     .record-qr {
       position: absolute;
       right: 0.35cm;
       top: 0.95cm;
-      width: 1.35cm;
-      height: 1.35cm;
+      width: 1.45cm;
+      height: 1.45cm;
       padding: 0.06cm;
       background: #fff;
     }
     .record-qr img { width: 100%; height: 100%; display: block; }
     .record-fields {
       position: absolute;
-      left: 1.85cm;
-      right: 1.85cm;
-      top: 1.0cm;
-      font-size: 0.22cm;
+      left: 2.10cm;
+      right: 1.95cm;
+      top: 1.05cm;
+      font-size: 0.26cm;
       color: #111827;
       line-height: 1.2;
     }
@@ -100,12 +100,12 @@
       display: flex;
       align-items: baseline;
       gap: 0.12cm;
-      margin-bottom: 0.12cm;
+      margin-bottom: 0.10cm;
     }
     .field .label {
       font-weight: 600;
       flex-shrink: 0;
-      min-width: 1.1cm;
+      min-width: 1.25cm;
     }
     .field .value {
       flex: 1;
@@ -123,7 +123,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 0.2cm 0.35cm;
-      margin-bottom: 0.12cm;
+      margin-bottom: 0.10cm;
     }
     .field.inline-row .pair {
       display: flex;
@@ -134,20 +134,20 @@
     .record-precinct {
       position: absolute;
       right: 0.35cm;
-      top: 2.45cm;
-      width: 1.35cm;
+      top: 2.60cm;
+      width: 1.45cm;
       text-align: center;
       font-weight: 800;
-      font-size: 0.28cm;
+      font-size: 0.32cm;
       padding-bottom: 0.02cm;
       line-height: 1.1;
     }
     .record-right-notes {
       position: absolute;
       right: 0.35cm;
-      top: 2.85cm;
-      width: 1.35cm;
-      font-size: 0.17cm;
+      top: 3.05cm;
+      width: 1.45cm;
+      font-size: 0.20cm;
       font-weight: 600;
       text-align: left;
       line-height: 1.2;
@@ -181,7 +181,8 @@
     /* Print page size to match ID-1 (driver's license) card */
     /* Zero margin removes space for browser headers/footers (URL, date) */
     @page {
-      size: 8.56cm 5.40cm;
+      /* Slightly bigger than ID-1 (about +15%) */
+      size: 9.85cm 6.21cm;
       margin: 0mm;
     }
     @media print {
@@ -189,6 +190,8 @@
         background: #fff;
         padding: 0;
         margin: 0;
+        width: 9.85cm;
+        height: 6.21cm;
       }
       .record-card {
         width: 8.56cm;
@@ -197,6 +200,8 @@
         margin: 0;
         padding: 0.25cm 0.35cm;
         box-shadow: none;
+        transform: scale(1.15);
+        transform-origin: top left;
       }
       .no-print { display: none !important; }
     }
@@ -252,11 +257,45 @@
   </div>
   <script>
     (function() {
+      function cmToPx(cm, el) {
+        // 1in = 2.54cm; 96px per inch (CSS reference pixel)
+        // Works well enough for fitting text prior to print.
+        return (cm / 2.54) * 96;
+      }
+
+      function fitName() {
+        var nameEl = document.getElementById('printName');
+        if (!nameEl) return;
+
+        // Reset to default size first (matches CSS)
+        var startCm = 0.36;
+        var minCm = 0.26;
+        nameEl.style.fontSize = startCm + 'cm';
+        nameEl.style.letterSpacing = '0.02em';
+
+        // Reduce font-size until it fits the available width
+        var cm = startCm;
+        var safety = 60;
+        while (safety-- > 0 && cm > minCm && nameEl.scrollWidth > nameEl.clientWidth) {
+          cm = Math.max(minCm, Math.round((cm - 0.01) * 100) / 100);
+          nameEl.style.fontSize = cm + 'cm';
+          if (cm <= 0.30) nameEl.style.letterSpacing = '0.01em';
+          if (cm <= 0.28) nameEl.style.letterSpacing = '0em';
+        }
+
+        // If still too long, allow ellipsis (CSS already has it)
+      }
+
+      // Fit on load and before printing (covers print preview / button)
+      try { fitName(); } catch(e) {}
+      window.addEventListener('beforeprint', function(){ try { fitName(); } catch(e) {} });
+
       var btn = document.getElementById('btnPrint');
       if (!btn) return;
       btn.addEventListener('click', function() {
         var prevTitle = document.title;
         document.title = '';
+        try { fitName(); } catch(e) {}
         window.print();
         document.title = prevTitle;
       });

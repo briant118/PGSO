@@ -460,7 +460,8 @@ body {
   box-sizing: border-box;
   background: #f0f2f5;
   margin: -2rem -2.5rem;
-  padding: 2rem 2.5rem;
+  /* Reduce side padding so cards can use more width */
+  padding: 2rem 1.25rem;
   min-height: calc(100vh - 0px);
   position: relative;
   overflow-x: hidden;
@@ -688,15 +689,13 @@ body {
 .dashboard-rms-cards {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1.25rem;
+  gap: 0.75rem;
   margin-bottom: 1.5rem;
   width: 100%;
 }
-@media (min-width: 1500px) {
-  .dashboard-rms-cards { grid-template-columns: repeat(8, minmax(0, 1fr)); }
-}
+/* Keep 4 columns on very wide screens so rows stay full-width */
 @media (max-width: 1200px) {
-  .dashboard-rms-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .dashboard-rms-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; }
 }
 .dashboard-rms-card-link {
   text-decoration: none !important;
@@ -962,7 +961,7 @@ body {
     width: 100%;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .dashboard-rms-cards { grid-template-columns: repeat(2, 1fr); }
+  .dashboard-rms-cards { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
   .dashboard-rms-additional-grid { grid-template-columns: repeat(2, 1fr); }
   .dashboard-rms-charts { grid-template-columns: 1fr; }
 }
@@ -970,6 +969,6 @@ body {
   .dashboard.dashboard-rms { padding: 1.25rem 1.25rem; margin: -2rem -2.5rem; }
   .dashboard-rms-hero { padding: 1rem 1rem; }
   .dashboard-rms-hero-actions { grid-template-columns: 1fr; }
-  .dashboard-rms-cards { grid-template-columns: 1fr; }
+  .dashboard-rms-cards { grid-template-columns: 1fr; gap: 0.75rem; }
   .dashboard-rms-additional-grid { grid-template-columns: 1fr; }
 }

@@ -177,6 +177,7 @@
 <body>
   <div class="login-bg-pattern"></div>
   <div class="login-layout" style="grid-template-columns: 1fr; max-width: 520px;">
+    {% url 'mainapplication:dashboard' as dashboard_url %}
     <div class="tabbar" role="tablist" aria-label="Sign in as">
       <button type="button" class="tabbtn" id="tab-admin" role="tab" aria-selected="false" aria-controls="panel-admin">Admin</button>
       <button type="button" class="tabbtn" id="tab-user" role="tab" aria-selected="true" aria-controls="panel-user">User</button>
@@ -190,7 +191,7 @@
       </div>
       <form method="post" action="{% url 'login' %}" class="login-form">
         {% csrf_token %}
-        <input type="hidden" name="next" value="{% url 'administrator:index' %}">
+        <input type="hidden" name="next" value="{% firstof next dashboard_url %}">
         <input type="hidden" name="login_type" value="admin">
         {% if form.non_field_errors %}
           <ul class="errorlist">
@@ -230,7 +231,7 @@
       </div>
       <form method="post" action="{% url 'login' %}" class="login-form">
         {% csrf_token %}
-        <input type="hidden" name="next" value="{{ next }}">
+        <input type="hidden" name="next" value="{% firstof next dashboard_url %}">
         <input type="hidden" name="login_type" value="user">
         {% if form.non_field_errors %}
           <ul class="errorlist">

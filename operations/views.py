@@ -514,8 +514,14 @@ def resident_print(request, pk):
     resident = get_object_or_404(Resident, pk=pk)
     profile_picture_url = _resident_profile_picture_url(resident, request)
     # Format: LASTNAME, FIRSTNAME SUFFIX MIDDLENAME
+    middlename = (resident.middlename or '').strip()
+    middle_initial = ''
+    if middlename:
+        first_char = (middlename.split()[0][:1] or '').strip()
+        if first_char:
+            middle_initial = f'{first_char}.'
     parts = [resident.lastname or '']
-    name_parts = [resident.firstname or '', resident.suffix or '', resident.middlename or '']
+    name_parts = [resident.firstname or '', resident.suffix or '', middle_initial]
     parts.append(' '.join(p for p in name_parts if p).strip())
     full_name = ', '.join(p for p in parts if p).upper() or '-'
     birthdate = resident.date_of_birth.strftime('%b-%d-%Y') if resident.date_of_birth else '-'

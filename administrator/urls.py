@@ -9,7 +9,6 @@ urlpatterns = [
     path('user-accounts/', views.user_accounts, name='user_accounts'),
     path('user-accounts/add/', views.user_add, name='user_add'),
     path('user-accounts/<int:pk>/change-password/', views.user_change_password, name='user_change_password'),
-    path('user-accounts/<int:pk>/change-password/send-otp/', views.user_change_password_send_otp, name='user_change_password_send_otp'),
     path('user-accounts/<int:pk>/edit/', views.user_edit, name='user_edit'),
     path('user-accounts/<int:pk>/delete/', views.user_delete, name='user_delete'),
     path('user-permissions/', views.user_permissions, name='user_permissions'),
@@ -18,5 +17,4 @@ urlpatterns = [
     path('sent-emails/', views.sent_emails, name='sent_emails'),
     path('sent-emails/<int:pk>/view/', views.sent_email_view, name='sent_email_view'),
     path('password-requests/<int:pk>/mark-read/', views.mark_request_read, name='mark_request_read'),
-    path('password-requests/<int:pk>/send-otp/', views.password_request_send_otp, name='password_request_send_otp'),
 ]
