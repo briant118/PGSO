@@ -30,5 +30,9 @@ class LoginRequiredMiddleware:
                 return self.get_response(request)
             if path == '/favicon.ico':
                 return self.get_response(request)
+            if path.startswith('/password-reset/'):
+                return self.get_response(request)
+            if path == '/password-reset':
+                return self.get_response(request)
             return redirect(settings.LOGIN_URL + '?next=' + request.get_full_path())
         return self.get_response(request)

@@ -12,6 +12,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('sign-in/', auth_views.LoginView.as_view(template_name='registration/login.html'), name='login'),
     path('sign-out/', main_views.sign_out, name='logout'),
+    path('password-reset/', main_views.password_reset_request, name='password_reset'),
+    path('password-reset/done/', main_views.password_reset_done, name='password_reset_done'),
     path('', include('mainapplication.urls')),
     path('reference/', include('reference.urls')),
     path('operations/', include('operations.urls')),

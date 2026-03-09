@@ -118,6 +118,12 @@
           <a href="{% url 'administrator:user_activity' %}" class="nav-link {% if request.resolver_match.url_name == 'user_activity' %}active{% endif %}">
             <span class="nav-icon"><i class="fas fa-chart-line"></i></span> User Activity
           </a>
+          <a href="{% url 'administrator:sent_emails' %}" class="nav-link {% if request.resolver_match.url_name == 'sent_emails' %}active{% endif %}" style="position: relative;">
+            <span class="nav-icon"><i class="fas fa-envelope"></i></span> Email
+            {% if pending_request_count > 0 %}
+            <span class="nav-badge-pending" style="position: absolute; top: 0.25rem; right: 0.5rem; color: #dc3545; font-size: 0.6rem;" title="{{ pending_request_count }} unread request{{ pending_request_count|pluralize }}"><i class="fas fa-file-invoice"></i></span>
+            {% endif %}
+          </a>
         </div>
       </div>
       {% endif %}

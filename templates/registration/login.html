@@ -132,6 +132,9 @@
       font-size: 0.85rem;
       color: #5f6368;
     }
+    .forgot-link:hover {
+      text-decoration: underline !important;
+    }
   </style>
 </head>
 <body>
@@ -178,6 +181,9 @@
             {% endfor %}
           </ul>
         {% endif %}
+      </div>
+      <div class="form-group" style="margin-bottom: 0.5rem;">
+        <a href="{% url 'password_reset' %}" class="forgot-link" style="font-size: 0.9rem; color: #1e3a5f; text-decoration: none;">Request password change</a>
       </div>
       <button type="submit" class="login-btn">
         <i class="fas fa-sign-in-alt" style="margin-right: 0.5rem;"></i> Sign In

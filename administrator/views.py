@@ -4,9 +4,10 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.db import transaction
 from django.views.decorators.http import require_http_methods
-from .models import UserProfile, UserActivity
+from .models import UserProfile, UserActivity, SentEmail, PasswordChangeRequest
 from .utils import ADMIN_GROUP_NAME, STAFF_GROUP_NAME, user_is_admin, is_fixed_admin_user, get_fixed_admin_username
 from .activity_log import log_activity
+from .email_utils import send_and_log_email
 
 User = get_user_model()
 
@@ -32,6 +33,112 @@ def _ensure_groups():
 def administrator_index(request):
     """Administrator control index view"""
     return render(request, 'administrator/administrator_index.html')
+
+
+@admin_required
+def sent_emails(request):
+    """List sent emails and pending password change requests. Admin can approve/reject from here."""
+    from django.utils import timezone
+
+    # Handle approve/reject for password change requests
+    if request.method == 'POST':
+        approve_id = request.POST.get('approve_id')
+        if approve_id:
+            req = get_object_or_404(PasswordChangeRequest, pk=approve_id, status=PasswordChangeRequest.STATUS_PENDING)
+            user = req.user
+            user_email = (user.email or '').strip()
+            if not user_email:
+                messages.error(request, f'User {user.username} has no email. Add email in User Edit first.')
+                return redirect('administrator:sent_emails')
+
+            new_password = (request.POST.get('new_password') or '').strip()
+            new_password_confirm = (request.POST.get('new_password_confirm') or '').strip()
+            if not new_password or len(new_password) < 8:
+                messages.error(request, 'Password must be at least 8 characters.')
+                return redirect('administrator:sent_emails')
+            if new_password != new_password_confirm:
+                messages.error(request, 'Passwords do not match.')
+                return redirect('administrator:sent_emails')
+
+            user.set_password(new_password)
+            user.save()
+
+            body = (
+                f'Hello {user.get_full_name() or user.username},\n\n'
+                f'Your password change request has been approved. Here are your new login details:\n\n'
+                f'Username: {user.username}\n'
+                f'New password: {new_password}\n\n'
+                f'Please sign in and change your password after logging in if you wish.\n\n'
+                f'— Profiling System'
+            )
+            if send_and_log_email(
+                recipient_email=user_email,
+                subject='Your new password – Profiling System',
+                body_plain=body,
+                email_type=SentEmail.TYPE_PASSWORD_RESET,
+                sent_by=request.user,
+                related_user=user,
+            ):
+                req.status = PasswordChangeRequest.STATUS_APPROVED
+                req.processed_at = timezone.now()
+                req.processed_by = request.user
+                req.save()
+                log_activity(request, UserActivity.ACTION_UPDATE, f'Approved password change for {user.username}, sent new password to email.')
+                messages.success(request, f'New password sent to {user.username} ({user_email}).')
+            else:
+                messages.error(request, 'Failed to send email. Please try again.')
+
+        reject_id = request.POST.get('reject_id')
+        if reject_id:
+            req = get_object_or_404(PasswordChangeRequest, pk=reject_id, status=PasswordChangeRequest.STATUS_PENDING)
+            req.status = PasswordChangeRequest.STATUS_REJECTED
+            req.processed_at = timezone.now()
+            req.processed_by = request.user
+            req.save()
+            log_activity(request, UserActivity.ACTION_UPDATE, f'Rejected password change request for {req.user.username}.')
+            messages.success(request, 'Request rejected.')
+
+        return redirect('administrator:sent_emails')
+
+    emails = SentEmail.objects.select_related('sent_by', 'related_user').order_by('-sent_at')[:200]
+    pending_requests = PasswordChangeRequest.objects.filter(status=PasswordChangeRequest.STATUS_PENDING).select_related('user').order_by('-requested_at')
+
+    # Combined list: requests first (as "items"), then emails - all in Email Log
+    items = []
+    for req in pending_requests:
+        items.append({'type': 'request', 'request': req, 'date': req.requested_at})
+    for em in emails:
+        items.append({'type': 'email', 'email': em, 'date': em.sent_at})
+    items.sort(key=lambda x: x['date'], reverse=True)
+
+    return render(request, 'administrator/sent_emails.html', {'items': items})
+
+
+@admin_required
+def mark_request_read(request, pk):
+    """Mark a password change request as read. Uses GET to avoid CSRF for fetch."""
+    from django.http import JsonResponse
+    from django.utils import timezone
+    req = get_object_or_404(PasswordChangeRequest, pk=pk, status=PasswordChangeRequest.STATUS_PENDING)
+    req.read_at = timezone.now()
+    req.save()
+    return JsonResponse({'ok': True})
+
+
+@admin_required
+def sent_email_view(request, pk):
+    """Return email detail as JSON for the view modal."""
+    from django.http import JsonResponse
+    email = get_object_or_404(SentEmail, pk=pk)
+    return JsonResponse({
+        'subject': email.subject,
+        'recipient_email': email.recipient_email,
+        'sent_at': email.sent_at.strftime('%Y-%m-%d %H:%M:%S'),
+        'email_type': email.get_email_type_display(),
+        'body_plain': email.body_plain or '',
+        'sent_by': email.sent_by.get_full_name() or email.sent_by.username if email.sent_by else '',
+        'related_user': email.related_user.username if email.related_user else '',
+    })
 
 
 @admin_required
@@ -326,6 +433,26 @@ def user_change_password(request, pk):
         target_user.set_password(new_password)
         target_user.save()
         log_activity(request, UserActivity.ACTION_UPDATE, f'Changed password for user "{target_user.username}".')
+
+        # Send email notification to the user whose password was changed
+        user_email = (target_user.email or '').strip()
+        if user_email:
+            email_body = (
+                f'Hello {target_user.get_full_name() or target_user.username},\n\n'
+                f'Your password for the Profiling System has been changed by an administrator.\n\n'
+                f'Username: {target_user.username}\n\n'
+                f'If you did not request this change, please contact your administrator immediately.\n\n'
+                f'— Profiling System'
+            )
+            send_and_log_email(
+                recipient_email=user_email,
+                subject='Your Profiling System password has been changed',
+                body_plain=email_body,
+                email_type=SentEmail.TYPE_PASSWORD_CHANGE,
+                sent_by=request.user,
+                related_user=target_user,
+            )
+
         messages.success(request, f'Password for {target_user.username} has been changed.')
         return redirect('administrator:user_accounts')
 
@@ -338,41 +465,90 @@ def user_change_password(request, pk):
 @admin_required
 @require_http_methods(['GET', 'POST'])
 def user_edit(request, pk):
-    """Edit staff username and full name. Not allowed for the fixed admin."""
+    """Edit user: username, full name, and email. For fixed admin, only email and name can be edited (not username)."""
     target_user = get_object_or_404(User, pk=pk)
-    if is_fixed_admin_user(target_user):
-        messages.error(request, 'The fixed admin account cannot be edited.')
-        return redirect('administrator:user_accounts')
+    is_fixed = is_fixed_admin_user(target_user)
 
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip()
 
-        if not username:
+        if not is_fixed and not username:
             messages.error(request, 'Username is required.')
-            return render(request, 'administrator/user_edit.html', {'target_user': target_user})
+            return render(request, 'administrator/user_edit.html', {'target_user': target_user, 'is_fixed_admin': is_fixed})
 
-        if User.objects.filter(username__iexact=username).exclude(pk=target_user.pk).exists():
+        if not is_fixed and User.objects.filter(username__iexact=username).exclude(pk=target_user.pk).exists():
             messages.error(request, 'That username is already taken.')
-            return render(request, 'administrator/user_edit.html', {'target_user': target_user})
+            return render(request, 'administrator/user_edit.html', {'target_user': target_user, 'is_fixed_admin': is_fixed})
 
-        target_user.username = username
+        if not is_fixed:
+            target_user.username = username
         target_user.first_name = first_name
         target_user.last_name = last_name
+        target_user.email = email
         target_user.save()
-        log_activity(request, UserActivity.ACTION_UPDATE, f'Updated user "{username}".')
-        messages.success(request, f'User "{username}" updated.')
+        log_activity(request, UserActivity.ACTION_UPDATE, f'Updated user "{target_user.username}".')
+        messages.success(request, f'User "{target_user.username}" updated.')
         return redirect('administrator:user_accounts')
 
-    return render(request, 'administrator/user_edit.html', {'target_user': target_user})
+    return render(request, 'administrator/user_edit.html', {'target_user': target_user, 'is_fixed_admin': is_fixed})
 
 
 @admin_required
 def user_activity(request):
     """User activity logs – show real activity from UserActivity model."""
-    activities = UserActivity.objects.select_related('user').all()[:500]
-    return render(request, 'administrator/user_activity.html', {'activities': activities})
+    activities_qs = UserActivity.objects.select_related('user').all()
+
+    # Filters from query params
+    username = request.GET.get('user') or ''
+    action = request.GET.get('action') or ''
+    date_str = request.GET.get('date') or ''
+
+    if username:
+        activities_qs = activities_qs.filter(user__username=username)
+
+    if action:
+        activities_qs = activities_qs.filter(action=action)
+
+    if date_str:
+        # HTML date input typically sends YYYY-MM-DD; keep it simple and safe
+        from datetime import datetime
+
+        try:
+            # Try ISO format (default for type="date")
+            day = datetime.strptime(date_str, '%Y-%m-%d').date()
+        except ValueError:
+            try:
+                # Fallback to MM/DD/YYYY if manually typed
+                day = datetime.strptime(date_str, '%m/%d/%Y').date()
+            except ValueError:
+                day = None
+
+        if day:
+            activities_qs = activities_qs.filter(created_at__date=day)
+
+    activities = activities_qs[:500]
+
+    # Distinct users and actions for dropdowns
+    user_list = (
+        User.objects.filter(activity_logs__isnull=False)
+        .distinct()
+        .order_by('username')
+    )
+    action_choices = UserActivity.ACTION_CHOICES
+
+    context = {
+        'activities': activities,
+        'filter_user': username,
+        'filter_action': action,
+        'filter_date': date_str,
+        'activity_users': user_list,
+        'activity_actions': action_choices,
+    }
+
+    return render(request, 'administrator/user_activity.html', context)
 
 
 @admin_required

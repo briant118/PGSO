@@ -1,6 +1,73 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard – PGSO{% endblock %}
+{% block extra_css %}
+<style>
+.dashboard-rms-chart-card-birthyear.js-birth-death-chart-clickable { cursor: pointer; }
+.dashboard-bd-modal { display: none; position: fixed; inset: 0; z-index: 1100; align-items: center; justify-content: center; padding: 1.5rem; }
+.dashboard-bd-modal[aria-hidden="false"] { display: flex; }
+.dashboard-bd-modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.45); }
+.dashboard-bd-modal-card { position: relative; background: #fff; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); max-width: 900px; width: 100%; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; }
+.dashboard-bd-modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid #e8eaed; background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%); color: #fff; }
+.dashboard-bd-modal-title { margin: 0; font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; }
+.dashboard-bd-modal-close { background: none; border: none; color: rgba(255,255,255,0.9); font-size: 1.5rem; cursor: pointer; padding: 0 0.25rem; line-height: 1; }
+.dashboard-bd-modal-close:hover { color: #fff; }
+.dashboard-bd-modal-body { padding: 1.25rem; overflow-y: auto; flex: 1; min-height: 0; }
+.dashboard-bd-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+.dashboard-bd-tab { padding: 0.5rem 1rem; border: 1px solid #e8eaed; background: #f8f9fa; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.9rem; color: #5f6368; }
+.dashboard-bd-tab:hover { background: #e8eaed; color: #1a1d24; }
+.dashboard-bd-tab.is-active { background: #1e3a5f; color: #fff; border-color: #1e3a5f; }
+.dashboard-bd-filters { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; margin-bottom: 1rem; }
+.dashboard-bd-filter { display: flex; flex-direction: column; gap: 0.25rem; }
+.dashboard-bd-filter span { font-size: 0.85rem; font-weight: 600; color: #5f6368; }
+.dashboard-bd-filter select { padding: 0.45rem 0.75rem; border: 1px solid #e8eaed; border-radius: 8px; font-size: 0.95rem; min-width: 120px; }
+.dashboard-bd-btn-apply { padding: 0.45rem 1rem; background: #1e3a5f; color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+.dashboard-bd-btn-apply:hover { background: #152a45; }
+.dashboard-bd-table-wrap { overflow-x: auto; border: 1px solid #e8eaed; border-radius: 8px; }
+.dashboard-bd-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.dashboard-bd-table th { padding: 0.75rem 1rem; text-align: left; background: #f0f2f5; font-weight: 600; color: #1a1d24; }
+.dashboard-bd-table td { padding: 0.75rem 1rem; border-top: 1px solid #e8eaed; color: #1a1d24; }
+.dashboard-bd-table tbody tr:hover { background: #f8f9fa; }
+.dashboard-bd-empty { color: #5f6368; text-align: center; padding: 2rem !important; font-style: italic; }
+.dashboard-bd-modal-footer { padding: 0.9rem 1.25rem; border-top: 1px solid #e8eaed; }
+.dashboard-bd-modal-footer .btn-secondary { background: #4a5568; color: #fff; border: none; border-radius: 8px; padding: 0.45rem 1rem; font-weight: 700; cursor: pointer; }
+.dashboard-bd-modal-footer .btn-secondary:hover { background: #2d3748; color: #fff; }
+.dashboard-bd-table tbody tr[data-resident-pk] { cursor: pointer; }
+.dashboard-bd-resident-modal { display: none; position: fixed; inset: 0; z-index: 1300; align-items: center; justify-content: center; padding: 1.25rem; background: rgba(0,0,0,0.5); }
+.dashboard-bd-resident-modal[aria-hidden="false"] { display: flex; }
+.dashboard-bd-resident-modal .modal-card { max-width: 760px; width: 100%; background: #fff; border-radius: 12px; box-shadow: 0 12px 48px rgba(0,0,0,0.25); overflow: hidden; }
+.dashboard-bd-resident-modal .modal-header { padding: 0.9rem 1.1rem; background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%); color: #fff; display: flex; align-items: center; justify-content: space-between; }
+.dashboard-bd-resident-modal .modal-header .title { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; }
+.dashboard-bd-resident-modal .modal-header .close { background: none; border: none; color: rgba(255,255,255,0.9); font-size: 1.5rem; cursor: pointer; }
+.dashboard-bd-resident-modal .modal-body { padding: 1.1rem 1.25rem; }
+.dashboard-bd-resident-modal .view-top { display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; }
+.dashboard-bd-resident-modal .view-avatar { width: 64px; height: 64px; border-radius: 50%; overflow: hidden; background: #e8eaed; flex-shrink: 0; }
+.dashboard-bd-resident-modal .view-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.dashboard-bd-resident-modal .view-avatar .avatar-fallback { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #9e9e9e; font-size: 1.2rem; }
+.dashboard-bd-resident-modal .view-meta .name { font-size: 1.15rem; font-weight: 800; }
+.dashboard-bd-resident-modal .view-meta .sub { margin-top: 0.35rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.dashboard-bd-resident-modal .view-pill { font-size: 0.82rem; padding: 0.25rem 0.55rem; border-radius: 999px; background: #f0f4f8; color: #1e3a5f; font-weight: 700; }
+.dashboard-bd-resident-modal .view-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.85rem; }
+.dashboard-bd-resident-modal .view-grid .item { background: #f8f9fa; border: 1px solid #e8eaed; border-radius: 10px; padding: 0.75rem 0.85rem; }
+.dashboard-bd-resident-modal .view-grid .item-wide { grid-column: span 3; }
+.dashboard-bd-resident-modal .view-grid .label { font-size: 0.75rem; font-weight: 800; color: #5f6368; text-transform: uppercase; margin-bottom: 0.25rem; }
+.dashboard-bd-resident-modal .view-grid .value { font-size: 0.95rem; color: #1a1d24; word-break: break-word; }
+.dashboard-bd-resident-modal .modal-footer { padding: 0.9rem 1.25rem; border-top: 1px solid #e8eaed; }
+.dashboard-bd-resident-modal.row-deceased .modal-header { background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); }
+.dashboard-rms-chart-legend-activity { flex-wrap: wrap; gap: 0.5rem 1rem; }
+.dashboard-rms-activity-filters { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; margin-bottom: 0.75rem; }
+.dashboard-rms-activity-filter { display: flex; flex-direction: column; gap: 0.25rem; }
+.dashboard-rms-activity-filter span { font-size: 0.8rem; font-weight: 600; color: #5f6368; }
+.dashboard-rms-activity-filter select { padding: 0.4rem 0.65rem; border: 1px solid #e8eaed; border-radius: 8px; font-size: 0.9rem; min-width: 100px; }
+.dashboard-rms-hero-notify-wrap { display: flex !important; align-items: center !important; justify-content: center !important; border: 2px solid rgba(0,0,0,0.15) !important; border-radius: 50% !important; padding: 4px !important; transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease !important; }
+.dashboard-rms-hero-notify-wrap:hover { border-color: rgba(234,179,8,0.6) !important; box-shadow: 0 2px 10px rgba(234,179,8,0.3) !important; }
+.dashboard-rms-hero-notify-wrap:active,
+.dashboard-rms-hero-notify-wrap:has(.dashboard-rms-hero-notify:active) { border-color: rgba(234,179,8,0.9) !important; box-shadow: 0 0 0 3px rgba(234,179,8,0.3) !important; transform: scale(0.96) !important; }
+.dashboard-rms-hero-notify:active { transform: scale(0.95) !important; background: rgba(234,179,8,0.4) !important; }
+</style>
+{% endblock %}
 {% block content %}
+{% load admin_tags %}
+{% load static %}
 <div class="dashboard dashboard-rms">
   <header class="dashboard-rms-header">
     <div class="dashboard-rms-hero">
@@ -12,41 +79,54 @@
           <span class="dashboard-rms-pill dashboard-rms-pill-muted"><i class="fas fa-database"></i> Live totals</span>
         </div>
       </div>
-      <div class="dashboard-rms-hero-actions" aria-label="Quick actions">
-        <a class="dashboard-rms-action" href="{% url 'operations:residents_record' %}">
-          <span class="dashboard-rms-action-icon"><i class="fas fa-address-book"></i></span>
-          <span class="dashboard-rms-action-text">
-            <span class="dashboard-rms-action-title">Residents</span>
-            <span class="dashboard-rms-action-sub">View records</span>
-          </span>
-        </a>
-        <a class="dashboard-rms-action" href="{% url 'operations:voters_registration' %}">
-          <span class="dashboard-rms-action-icon"><i class="fas fa-vote-yea"></i></span>
-          <span class="dashboard-rms-action-text">
-            <span class="dashboard-rms-action-title">Voters</span>
-            <span class="dashboard-rms-action-sub">Registration</span>
-          </span>
-        </a>
-        <a class="dashboard-rms-action" href="{% url 'reports:index' %}">
-          <span class="dashboard-rms-action-icon"><i class="fas fa-chart-bar"></i></span>
-          <span class="dashboard-rms-action-text">
-            <span class="dashboard-rms-action-title">Reports</span>
-            <span class="dashboard-rms-action-sub">Generate lists</span>
-          </span>
-        </a>
-        <a class="dashboard-rms-action dashboard-rms-action-secondary" href="{% url 'reference:barangay_list' %}">
-          <span class="dashboard-rms-action-icon"><i class="fas fa-map-marker-alt"></i></span>
-          <span class="dashboard-rms-action-text">
-            <span class="dashboard-rms-action-title">Barangays</span>
-            <span class="dashboard-rms-action-sub">Manage reference</span>
-          </span>
+      {% if user.is_authenticated and user|is_admin %}
+      <div class="dashboard-rms-hero-notify-wrap">
+        <a href="{% url 'administrator:sent_emails' %}" class="dashboard-rms-hero-notify" title="Email{% if pending_request_count > 0 %} – {{ pending_request_count }} unread request{{ pending_request_count|pluralize }}{% endif %}">
+          {% if pending_request_count > 0 %}
+          <img src="{% static 'animation/alarm-bell.gif' %}" alt="Notifications" class="dashboard-rms-hero-notify-img" width="40" height="40">
+          {% else %}
+          <img src="{% static 'images/message.png' %}" alt="Email" class="dashboard-rms-hero-notify-img" width="40" height="40">
+          {% endif %}
         </a>
       </div>
+      {% endif %}
     </div>
   </header>
 
-  <!-- Top row: 4 stat cards -->
+  <!-- Top row: 4 action links + 4 stat cards -->
   <div class="dashboard-rms-cards">
+    <a class="dashboard-rms-card dashboard-rms-card-link" href="{% url 'operations:residents_record' %}">
+      <div class="dashboard-rms-card-icon-wrap dashboard-rms-icon-blue">
+        <i class="fas fa-address-book"></i>
+      </div>
+      <div class="dashboard-rms-card-body">
+        <span class="dashboard-rms-card-label">Residents</span>
+      </div>
+    </a>
+    <a class="dashboard-rms-card dashboard-rms-card-link" href="{% url 'operations:voters_registration' %}">
+      <div class="dashboard-rms-card-icon-wrap dashboard-rms-icon-orange">
+        <i class="fas fa-vote-yea"></i>
+      </div>
+      <div class="dashboard-rms-card-body">
+        <span class="dashboard-rms-card-label">Voters</span>
+      </div>
+    </a>
+    <a class="dashboard-rms-card dashboard-rms-card-link" href="{% url 'reports:index' %}">
+      <div class="dashboard-rms-card-icon-wrap dashboard-rms-icon-purple">
+        <i class="fas fa-chart-bar"></i>
+      </div>
+      <div class="dashboard-rms-card-body">
+        <span class="dashboard-rms-card-label">Reports</span>
+      </div>
+    </a>
+    <a class="dashboard-rms-card dashboard-rms-card-link" href="{% url 'reference:barangay_list' %}">
+      <div class="dashboard-rms-card-icon-wrap dashboard-rms-icon-green">
+        <i class="fas fa-map-marker-alt"></i>
+      </div>
+      <div class="dashboard-rms-card-body">
+        <span class="dashboard-rms-card-label">Barangays</span>
+      </div>
+    </a>
     <div class="dashboard-rms-card">
       <div class="dashboard-rms-card-icon-wrap dashboard-rms-icon-blue">
         <i class="fas fa-users"></i>
@@ -111,14 +191,47 @@
   <!-- Charts row -->
   <div class="dashboard-rms-charts">
     <section class="dashboard-rms-chart-card">
-      <h2 class="dashboard-rms-chart-title">Alive & Deceased</h2>
-      <p class="dashboard-rms-chart-subtitle">By registration month</p>
-      <div class="dashboard-rms-chart-legend">
-        <span class="dashboard-rms-legend-item dashboard-rms-legend-alive"><i class="fas fa-circle"></i> Alive: <strong>{{ stats.total_alive|default:0 }}</strong></span>
-        <span class="dashboard-rms-legend-item dashboard-rms-legend-dead"><i class="fas fa-circle"></i> Deceased: <strong>{{ stats.total_dead|default:0 }}</strong></span>
+      <h2 class="dashboard-rms-chart-title">User Activity</h2>
+      <form class="dashboard-rms-activity-filters" id="activityFilterForm">
+        <label class="dashboard-rms-activity-filter">
+          <span>Year</span>
+          <select name="activity_year" id="activityYearSelect">
+            <option value="">All</option>
+            {% for y in activity_years %}
+            <option value="{{ y }}" {% if activity_year == y %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <label class="dashboard-rms-activity-filter">
+          <span>Month</span>
+          <select name="activity_month" id="activityMonthSelect" {% if not activity_year %}disabled{% endif %}>
+            <option value="">All</option>
+            <option value="1" {% if activity_month == 1 %}selected{% endif %}>January</option>
+            <option value="2" {% if activity_month == 2 %}selected{% endif %}>February</option>
+            <option value="3" {% if activity_month == 3 %}selected{% endif %}>March</option>
+            <option value="4" {% if activity_month == 4 %}selected{% endif %}>April</option>
+            <option value="5" {% if activity_month == 5 %}selected{% endif %}>May</option>
+            <option value="6" {% if activity_month == 6 %}selected{% endif %}>June</option>
+            <option value="7" {% if activity_month == 7 %}selected{% endif %}>July</option>
+            <option value="8" {% if activity_month == 8 %}selected{% endif %}>August</option>
+            <option value="9" {% if activity_month == 9 %}selected{% endif %}>September</option>
+            <option value="10" {% if activity_month == 10 %}selected{% endif %}>October</option>
+            <option value="11" {% if activity_month == 11 %}selected{% endif %}>November</option>
+            <option value="12" {% if activity_month == 12 %}selected{% endif %}>December</option>
+          </select>
+        </label>
+      </form>
+      <p class="dashboard-rms-chart-subtitle">By month</p>
+      <div class="dashboard-rms-chart-legend dashboard-rms-chart-legend-activity">
+        <span class="dashboard-rms-legend-item" style="color:#28a745;"><i class="fas fa-sign-in-alt"></i> Login: <strong id="activityLegendLogin">{{ chart_totals.login|default:0 }}</strong></span>
+        <span class="dashboard-rms-legend-item" style="color:#6c757d;"><i class="fas fa-sign-out-alt"></i> Logout: <strong id="activityLegendLogout">{{ chart_totals.logout|default:0 }}</strong></span>
+        <span class="dashboard-rms-legend-item" style="color:#4299e1;"><i class="fas fa-plus"></i> Create: <strong id="activityLegendCreate">{{ chart_totals.create|default:0 }}</strong></span>
+        <span class="dashboard-rms-legend-item" style="color:#ed8936;"><i class="fas fa-edit"></i> Update: <strong id="activityLegendUpdate">{{ chart_totals.update|default:0 }}</strong></span>
+        <span class="dashboard-rms-legend-item" style="color:#dc3545;"><i class="fas fa-trash"></i> Delete: <strong id="activityLegendDelete">{{ chart_totals.delete|default:0 }}</strong></span>
       </div>
       <div class="dashboard-rms-chart-wrap">
-        <canvas id="aliveDeadChart" height="220"></canvas>
+        <p id="activityChartEmpty" class="dashboard-rms-chart-empty" style="display:none;">No user activity data yet.</p>
+        <canvas id="userActivityChart" height="220"></canvas>
       </div>
     </section>
     <section class="dashboard-rms-chart-card">
@@ -128,12 +241,12 @@
         <canvas id="barMuniChart" height="220"></canvas>
       </div>
     </section>
-    <section class="dashboard-rms-chart-card dashboard-rms-chart-card-full dashboard-rms-chart-card-birthyear">
+    <section class="dashboard-rms-chart-card dashboard-rms-chart-card-full dashboard-rms-chart-card-birthyear js-birth-death-chart-clickable" role="button" tabindex="0" aria-label="Click to view birth and death records">
       <h2 class="dashboard-rms-chart-title">Birth Year vs Death Year</h2>
-      <p class="dashboard-rms-chart-subtitle">Click legend to hide/unhide series</p>
+      <p class="dashboard-rms-chart-subtitle">Click legend to hide/unhide series · Click chart to view records</p>
       <div class="dashboard-rms-chart-wrap dashboard-rms-chart-wrap-tall">
         <p id="yearSeriesEmpty" class="dashboard-rms-chart-empty" style="display:none;"></p>
-        <canvas id="birthYearChart" height="260"></canvas>
+        <canvas id="birthYearChart" height="350"></canvas>
       </div>
     </section>
   </div>
@@ -142,86 +255,239 @@
 <!-- Custom chart tooltip (used by both charts) -->
 <div id="chartTooltip" class="chart-tooltip-custom" style="display: none;"></div>
 
+<!-- Birth & Death Records Modal -->
+<div class="dashboard-bd-modal" id="birthDeathModal" aria-hidden="true">
+  <div class="dashboard-bd-modal-backdrop" id="birthDeathModalBackdrop"></div>
+  <div class="dashboard-bd-modal-card" role="dialog" aria-modal="true" aria-label="Birth and Death Records">
+    <div class="dashboard-bd-modal-header">
+      <h2 class="dashboard-bd-modal-title"><i class="fas fa-chart-line"></i> Birth & Death Records</h2>
+      <button type="button" class="dashboard-bd-modal-close" id="birthDeathModalClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="dashboard-bd-modal-body">
+      <div class="dashboard-bd-tabs">
+        <button type="button" class="dashboard-bd-tab is-active" data-tab="birth">Birth by Year/Month</button>
+        <button type="button" class="dashboard-bd-tab" data-tab="death">Death by Year/Month</button>
+      </div>
+      <div class="dashboard-bd-filters">
+        <label class="dashboard-bd-filter">
+          <span>Year</span>
+          <select id="bdYearSelect">
+            <option value="">All</option>
+          </select>
+        </label>
+        <label class="dashboard-bd-filter">
+          <span>Month</span>
+          <select id="bdMonthSelect" disabled>
+            <option value="">All</option>
+            <option value="1">January</option>
+            <option value="2">February</option>
+            <option value="3">March</option>
+            <option value="4">April</option>
+            <option value="5">May</option>
+            <option value="6">June</option>
+            <option value="7">July</option>
+            <option value="8">August</option>
+            <option value="9">September</option>
+            <option value="10">October</option>
+            <option value="11">November</option>
+            <option value="12">December</option>
+          </select>
+        </label>
+        <button type="button" class="dashboard-bd-btn-apply" id="bdApplyBtn">Apply</button>
+      </div>
+      <p class="dashboard-bd-hint" style="margin:0 0 0.75rem;font-size:0.85rem;color:#5f6368;"><i class="fas fa-info-circle"></i> Double-click a row to view resident details</p>
+      <div class="dashboard-bd-table-wrap">
+        <table class="dashboard-bd-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Barangay</th>
+              <th>Birthdate</th>
+              <th>Date of Death</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="bdTableBody">
+            <tr><td colspan="5" class="dashboard-bd-empty">Select year (or All) and optionally month, then click Apply</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="dashboard-bd-modal-footer">
+      <button type="button" class="btn-secondary" id="birthDeathModalCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Resident Detail Modal (double-click row to view) -->
+<div class="dashboard-bd-resident-modal" id="bdResidentDetailModal" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true" aria-label="Resident Details">
+    <div class="modal-header">
+      <div class="title"><i class="fas fa-user"></i> <span id="bdResidentDetailTitle">Resident Details</span></div>
+      <button type="button" class="close" id="bdResidentDetailClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="view-top">
+        <div class="view-avatar">
+          <img id="bdResidentDetailAvatar" alt="" style="display:none;" />
+          <div class="avatar-fallback" id="bdResidentDetailAvatarFallback"><i class="fas fa-user"></i></div>
+        </div>
+        <div class="view-meta">
+          <div class="name" id="bdResidentDetailName">-</div>
+          <div class="sub">
+            <span class="view-pill" id="bdResidentDetailId">ID: -</span>
+            <span class="view-pill" id="bdResidentDetailStatus">Status: -</span>
+          </div>
+        </div>
+      </div>
+      <div class="view-grid">
+        <div class="item"><div class="label">Barangay</div><div class="value" id="bdResidentDetailBarangay">-</div></div>
+        <div class="item"><div class="label">Purok</div><div class="value" id="bdResidentDetailPurok">-</div></div>
+        <div class="item"><div class="label">Gender</div><div class="value" id="bdResidentDetailGender">-</div></div>
+        <div class="item"><div class="label">Birthdate</div><div class="value" id="bdResidentDetailBirthdate">-</div></div>
+        <div class="item"><div class="label">Date of Death</div><div class="value" id="bdResidentDetailDeathdate">-</div></div>
+        <div class="item"><div class="label">Age</div><div class="value" id="bdResidentDetailAge">-</div></div>
+        <div class="item"><div class="label">Contact</div><div class="value" id="bdResidentDetailContact">-</div></div>
+        <div class="item item-wide"><div class="label">Address</div><div class="value" id="bdResidentDetailAddress">-</div></div>
+        <div class="item item-wide"><div class="label">Remarks</div><div class="value" id="bdResidentDetailRemarks">-</div></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-secondary" id="bdResidentDetailCloseBtn">Close</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 (function() {
-  var chartData = {{ chart_data_json|safe }};
-  if (!chartData || !chartData.labels || !chartData.labels.length) {
-    document.getElementById('aliveDeadChart').parentElement.innerHTML = '<p class="dashboard-rms-chart-empty">No resident data by month yet.</p>';
-    return;
+  var activityChartApiUrl = '{% url "mainapplication:dashboard_activity_chart" %}';
+  var yearSelect = document.getElementById('activityYearSelect');
+  var monthSelect = document.getElementById('activityMonthSelect');
+  var canvas = document.getElementById('userActivityChart');
+  var activityChart = null;
+
+  function updateLegend(totals) {
+    var el;
+    if (totals && (el = document.getElementById('activityLegendLogin'))) el.textContent = totals.login || 0;
+    if (totals && (el = document.getElementById('activityLegendLogout'))) el.textContent = totals.logout || 0;
+    if (totals && (el = document.getElementById('activityLegendCreate'))) el.textContent = totals.create || 0;
+    if (totals && (el = document.getElementById('activityLegendUpdate'))) el.textContent = totals.update || 0;
+    if (totals && (el = document.getElementById('activityLegendDelete'))) el.textContent = totals.delete || 0;
   }
-  var ctx = document.getElementById('aliveDeadChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: chartData.labels,
-      datasets: [
-        {
-          label: 'Alive',
-          data: chartData.alive,
-          backgroundColor: 'rgba(40, 167, 69, 0.8)',
-          borderColor: 'rgb(40, 167, 69)',
-          borderWidth: 1
-        },
-        {
-          label: 'Deceased',
-          data: chartData.dead,
-          backgroundColor: 'rgba(220, 53, 69, 0.8)',
-          borderColor: 'rgb(220, 53, 69)',
-          borderWidth: 1
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          enabled: false,
-          external: function(context) {
-            var el = document.getElementById('chartTooltip');
-            if (!context.tooltip || context.tooltip.opacity === 0) {
-              el.style.display = 'none';
-              return;
-            }
-            var tooltip = context.tooltip;
-            var idx = tooltip.dataPoints && tooltip.dataPoints[0] ? tooltip.dataPoints[0].dataIndex : 0;
-            var label = (chartData.labels && chartData.labels[idx]) ? chartData.labels[idx] : '';
-            var aliveVal = chartData.alive[idx] != null ? chartData.alive[idx] : 0;
-            var deadVal = chartData.dead[idx] != null ? chartData.dead[idx] : 0;
-            el.innerHTML =
-              '<div class="chart-tooltip-title">' + (label || '') + '</div>' +
-              '<div class="chart-tooltip-line chart-tooltip-alive">Alive : ' + aliveVal + '</div>' +
-              '<div class="chart-tooltip-line chart-tooltip-dead">Deceased : ' + deadVal + '</div>';
-            el.style.display = 'block';
-            el.style.opacity = '1';
-            var canvas = context.chart.canvas.getBoundingClientRect();
-            var left = canvas.left + tooltip.caretX + 10;
-            var top = canvas.top + tooltip.caretY - el.offsetHeight / 2;
-            el.style.left = left + 'px';
-            el.style.top = top + 'px';
-          }
-        }
+
+  function buildTooltipFn(data) {
+    return function(context) {
+      var el = document.getElementById('chartTooltip');
+      if (!context.tooltip || context.tooltip.opacity === 0) {
+        el.style.display = 'none';
+        return;
+      }
+      var tooltip = context.tooltip;
+      var idx = tooltip.dataPoints && tooltip.dataPoints[0] ? tooltip.dataPoints[0].dataIndex : 0;
+      var label = (data.labels && data.labels[idx]) ? data.labels[idx] : '';
+      var loginVal = (data.login && data.login[idx]) != null ? data.login[idx] : 0;
+      var logoutVal = (data.logout && data.logout[idx]) != null ? data.logout[idx] : 0;
+      var createVal = (data.create && data.create[idx]) != null ? data.create[idx] : 0;
+      var updateVal = (data.update && data.update[idx]) != null ? data.update[idx] : 0;
+      var deleteVal = (data.delete && data.delete[idx]) != null ? data.delete[idx] : 0;
+      el.innerHTML =
+        '<div class="chart-tooltip-title">' + (label || '') + '</div>' +
+        '<div class="chart-tooltip-line" style="color:#28a745;">Login: ' + loginVal + '</div>' +
+        '<div class="chart-tooltip-line" style="color:#6c757d;">Logout: ' + logoutVal + '</div>' +
+        '<div class="chart-tooltip-line" style="color:#4299e1;">Create: ' + createVal + '</div>' +
+        '<div class="chart-tooltip-line" style="color:#ed8936;">Update: ' + updateVal + '</div>' +
+        '<div class="chart-tooltip-line" style="color:#dc3545;">Delete: ' + deleteVal + '</div>';
+      el.style.display = 'block';
+      el.style.opacity = '1';
+      var rect = context.chart.canvas.getBoundingClientRect();
+      el.style.left = (rect.left + tooltip.caretX + 10) + 'px';
+      el.style.top = (rect.top + tooltip.caretY - el.offsetHeight / 2) + 'px';
+    };
+  }
+
+  function renderActivityChart(data) {
+    var emptyEl = document.getElementById('activityChartEmpty');
+    if (!canvas) return;
+    if (!data || !data.labels || !data.labels.length) {
+      if (activityChart) { activityChart.destroy(); activityChart = null; }
+      if (emptyEl) { emptyEl.style.display = 'block'; emptyEl.textContent = 'No user activity data yet.'; }
+      canvas.style.display = 'none';
+      updateLegend(data && data.totals ? data.totals : { login: 0, logout: 0, create: 0, update: 0, delete: 0 });
+      return;
+    }
+    if (emptyEl) emptyEl.style.display = 'none';
+    canvas.style.display = 'block';
+    var chartData = { labels: data.labels, login: data.login || [], logout: data.logout || [], create: data.create || [], update: data.update || [], delete: data.delete || [] };
+    updateLegend(data.totals);
+    if (activityChart) {
+      activityChart.data.labels = chartData.labels;
+      activityChart.data.datasets[0].data = chartData.login;
+      activityChart.data.datasets[1].data = chartData.logout;
+      activityChart.data.datasets[2].data = chartData.create;
+      activityChart.data.datasets[3].data = chartData.update;
+      activityChart.data.datasets[4].data = chartData.delete;
+      activityChart.options.plugins.tooltip.external = buildTooltipFn(chartData);
+      activityChart.update();
+      return;
+    }
+    var ctx = canvas.getContext('2d');
+    activityChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: chartData.labels,
+        datasets: [
+          { label: 'Login', data: chartData.login, backgroundColor: 'rgba(40, 167, 69, 0.8)', borderColor: 'rgb(40, 167, 69)', borderWidth: 1 },
+          { label: 'Logout', data: chartData.logout, backgroundColor: 'rgba(108, 117, 125, 0.8)', borderColor: 'rgb(108, 117, 125)', borderWidth: 1 },
+          { label: 'Create', data: chartData.create, backgroundColor: 'rgba(66, 153, 225, 0.8)', borderColor: 'rgb(66, 153, 225)', borderWidth: 1 },
+          { label: 'Update', data: chartData.update, backgroundColor: 'rgba(237, 137, 54, 0.8)', borderColor: 'rgb(237, 137, 54)', borderWidth: 1 },
+          { label: 'Delete', data: chartData.delete, backgroundColor: 'rgba(220, 53, 69, 0.8)', borderColor: 'rgb(220, 53, 69)', borderWidth: 1 }
+        ]
       },
-      scales: {
-        x: {
-          title: { display: false },
-          grid: { display: false }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, position: 'top', labels: { usePointStyle: true, boxWidth: 12 } },
+          tooltip: { enabled: false, external: buildTooltipFn(chartData) }
         },
-        y: {
-          beginAtZero: true,
-          title: { display: true, text: 'Count' },
-          ticks: { stepSize: 1 }
+        scales: {
+          x: { title: { display: false }, grid: { display: false } },
+          y: { beginAtZero: true, title: { display: true, text: 'Count' }, ticks: { stepSize: 1 } }
         }
       }
-    }
-  });
+    });
+  }
+
+  function fetchAndRefreshActivity() {
+    var url = activityChartApiUrl + '?activity_year=' + encodeURIComponent(yearSelect ? yearSelect.value : '') + '&activity_month=' + encodeURIComponent(monthSelect && yearSelect && yearSelect.value ? (monthSelect.value || '') : '');
+    fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(); })
+      .then(function(data) { renderActivityChart(data); })
+      .catch(function() { renderActivityChart(null); });
+  }
+
+  var initialData = {{ chart_data_json|default:'{"labels":[],"login":[],"logout":[],"create":[],"update":[],"delete":[]}'|safe }};
+  var initialTotals = { login: {{ chart_totals.login|default:0 }}, logout: {{ chart_totals.logout|default:0 }}, create: {{ chart_totals.create|default:0 }}, update: {{ chart_totals.update|default:0 }}, delete: {{ chart_totals.delete|default:0 }} };
+  renderActivityChart(initialData.labels && initialData.labels.length ? Object.assign({}, initialData, { totals: initialTotals }) : { labels: [], totals: initialTotals });
+
+  if (yearSelect) {
+    yearSelect.addEventListener('change', function() {
+      if (monthSelect) {
+        monthSelect.disabled = !yearSelect.value;
+        if (!yearSelect.value) monthSelect.value = '';
+      }
+      fetchAndRefreshActivity();
+    });
+  }
+  if (monthSelect) {
+    monthSelect.addEventListener('change', fetchAndRefreshActivity);
+  }
 })();
 
 (function() {
-  var birthYearData = {{ birth_year_data_json|safe }};
-  var deathYearData = {{ death_year_data_json|safe }};
+  var birthYearData = {{ birth_year_data_json|default:'{"labels":[],"counts":[]}'|safe }};
+  var deathYearData = {{ death_year_data_json|default:'{"labels":[],"counts":[]}'|safe }};
 
   function hasData(d) {
     return !!(d && d.labels && d.labels.length && d.counts && d.counts.length);
@@ -258,11 +524,15 @@
   var yearsSet = {};
   Object.keys(birthMap).forEach(function(y) { yearsSet[y] = true; });
   Object.keys(deathMap).forEach(function(y) { yearsSet[y] = true; });
+  var currentYear = new Date().getFullYear();
+  yearsSet[String(currentYear)] = true;
 
   var years = Object.keys(yearsSet).sort(function(a, b) { return Number(a) - Number(b); });
 
   if (!years.length) {
     setEmpty('No year-based data available yet.');
+    var canvas = document.getElementById('birthYearChart');
+    if (canvas) canvas.style.display = 'none';
     return;
   }
 
@@ -272,10 +542,6 @@
   // If one series is totally empty, still render the chart but show a hint
   var hasBirth = birthSeries.some(function(v) { return v > 0; });
   var hasDeath = deathSeries.some(function(v) { return v > 0; });
-  if (!hasBirth && !hasDeath) {
-    setEmpty('No year-based data available yet.');
-    return;
-  }
   if (!hasDeath) {
     setEmpty('No death year data yet (series will be flat).');
   } else if (!hasBirth) {
@@ -314,6 +580,7 @@
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: { padding: { top: 8, right: 8, bottom: 8, left: 8 } },
       interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: {
@@ -342,7 +609,7 @@
 })();
 
 (function() {
-  var barMuniData = {{ bar_muni_chart_json|safe }};
+  var barMuniData = {{ bar_muni_chart_json|default:'{"labels":[],"counts":[]}'|safe }};
   var canvas = document.getElementById('barMuniChart');
   if (!canvas || !barMuniData || !barMuniData.labels || !barMuniData.labels.length) {
     if (canvas && canvas.parentElement) {
@@ -406,6 +673,216 @@
           ticks: { stepSize: 1 }
         }
       }
+    }
+  });
+})();
+
+(function() {
+  var modal = document.getElementById('birthDeathModal');
+  var chartCard = document.querySelector('.js-birth-death-chart-clickable');
+  var closeBtn = document.getElementById('birthDeathModalClose');
+  var closeBtn2 = document.getElementById('birthDeathModalCloseBtn');
+  var backdrop = document.getElementById('birthDeathModalBackdrop');
+  var yearSelect = document.getElementById('bdYearSelect');
+  var monthSelect = document.getElementById('bdMonthSelect');
+  var applyBtn = document.getElementById('bdApplyBtn');
+  var tableBody = document.getElementById('bdTableBody');
+  var tabs = document.querySelectorAll('.dashboard-bd-tab');
+
+  var currentTab = 'birth';
+  var apiUrl = '{% url "mainapplication:dashboard_birth_death_list" %}';
+  var residentGetUrl = '{% url "operations:resident_get" 0 %}'.replace('/0/', '/');
+
+  function openModal() {
+    if (modal) {
+      modal.setAttribute('aria-hidden', 'false');
+      modal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      populateYears();
+      fetchResidents();
+    }
+  }
+  function closeModal() {
+    if (modal) {
+      modal.setAttribute('aria-hidden', 'true');
+      modal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+  }
+  function populateYears() {
+    if (!yearSelect) return;
+    var cur = new Date().getFullYear();
+    var opts = yearSelect.querySelectorAll('option');
+    for (var i = 1; i < opts.length; i++) opts[i].remove();
+    for (var y = cur; y >= 1950; y--) {
+      var opt = document.createElement('option');
+      opt.value = y;
+      opt.textContent = y;
+      yearSelect.appendChild(opt);
+    }
+    yearSelect.value = '';
+    monthSelect.value = '';
+    monthSelect.disabled = true;
+  }
+  yearSelect && yearSelect.addEventListener('change', function() {
+    monthSelect.disabled = !yearSelect.value;
+    if (!yearSelect.value) monthSelect.value = '';
+  });
+  function fetchResidents() {
+    if (!tableBody) return;
+    var year = yearSelect ? yearSelect.value : '';
+    var month = monthSelect && year ? monthSelect.value : '';
+    tableBody.innerHTML = '<tr><td colspan="5" class="dashboard-bd-empty">Loading...</td></tr>';
+    var url = apiUrl + '?type=' + encodeURIComponent(currentTab);
+    if (year) url += '&year=' + encodeURIComponent(year);
+    if (month) url += '&month=' + encodeURIComponent(month);
+    fetch(url, {
+      credentials: 'same-origin',
+      headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+    })
+      .then(function(r) {
+        if (!r.ok) throw new Error('Request failed: ' + r.status);
+        var ct = r.headers.get('Content-Type') || '';
+        if (ct.indexOf('application/json') === -1) throw new Error('Invalid response');
+        return r.json();
+      })
+      .then(function(data) {
+        var rows = data.residents || [];
+        if (!rows.length) {
+          tableBody.innerHTML = '<tr><td colspan="5" class="dashboard-bd-empty">No records found</td></tr>';
+          return;
+        }
+        var html = '';
+        rows.forEach(function(r) {
+          var pk = r.id ? String(r.id) : '';
+          var attr = pk ? ' data-resident-pk="' + pk + '"' : '';
+          html += '<tr' + attr + '><td>' + (r.full_name || '-') + '</td><td>' + (r.barangay || '-') + '</td><td>' + (r.date_of_birth || '-') + '</td><td>' + (r.date_of_death || '-') + '</td><td>' + (r.status || '-') + '</td></tr>';
+        });
+        tableBody.innerHTML = html;
+        tableBody.querySelectorAll('tr[data-resident-pk]').forEach(function(tr) {
+          tr.addEventListener('dblclick', function() {
+            var pk = tr.getAttribute('data-resident-pk');
+            if (pk) loadResidentDetail(pk);
+          });
+        });
+      })
+      .catch(function(err) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="dashboard-bd-empty">Error loading data. Ensure you are logged in.</td></tr>';
+      });
+  }
+  applyBtn && applyBtn.addEventListener('click', fetchResidents);
+  tabs && tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      tabs.forEach(function(t) { t.classList.remove('is-active'); });
+      tab.classList.add('is-active');
+      currentTab = tab.getAttribute('data-tab') || 'birth';
+      tableBody.innerHTML = '<tr><td colspan="5" class="dashboard-bd-empty">Select year (or All) and optionally month, then click Apply</td></tr>';
+    });
+  });
+  if (chartCard) {
+    chartCard.addEventListener('click', function() { openModal(); });
+    chartCard.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(); }
+    });
+  }
+  closeBtn && closeBtn.addEventListener('click', closeModal);
+  closeBtn2 && closeBtn2.addEventListener('click', closeModal);
+  backdrop && backdrop.addEventListener('click', closeModal);
+  var detailModal = document.getElementById('bdResidentDetailModal');
+  var detailCloseBtn = document.getElementById('bdResidentDetailClose');
+  var detailCloseBtn2 = document.getElementById('bdResidentDetailCloseBtn');
+
+  function setDetailText(id, value, prefix) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var v = (value == null ? '' : String(value)).trim();
+    el.textContent = (prefix || '') + (v || '-');
+  }
+  function setDetailAvatar(url) {
+    var img = document.getElementById('bdResidentDetailAvatar');
+    var fallback = document.getElementById('bdResidentDetailAvatarFallback');
+    if (!img || !fallback) return;
+    if (url) {
+      img.src = url;
+      img.style.display = 'block';
+      fallback.style.display = 'none';
+    } else {
+      img.removeAttribute('src');
+      img.style.display = 'none';
+      fallback.style.display = 'flex';
+    }
+  }
+  function computeAge(yyyy_mm_dd) {
+    if (!yyyy_mm_dd || yyyy_mm_dd.length < 10) return '';
+    var parts = yyyy_mm_dd.split('-');
+    if (parts.length < 3) return '';
+    var y = parseInt(parts[0], 10), m = parseInt(parts[1], 10) - 1, d = parseInt(parts[2], 10);
+    if (!y || m < 0 || d < 1) return '';
+    var dob = new Date(y, m, d);
+    if (isNaN(dob.getTime())) return '';
+    var now = new Date();
+    var age = now.getFullYear() - dob.getFullYear();
+    var mo = now.getMonth() - dob.getMonth();
+    if (mo < 0 || (mo === 0 && now.getDate() < dob.getDate())) age--;
+    return age >= 0 ? String(age) : '';
+  }
+  function openDetailModal() {
+    if (detailModal) {
+      detailModal.setAttribute('aria-hidden', 'false');
+      detailModal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+  }
+  function closeDetailModal() {
+    if (detailModal) {
+      detailModal.setAttribute('aria-hidden', 'true');
+      detailModal.style.display = 'none';
+      document.body.style.overflow = (modal && modal.getAttribute('aria-hidden') === 'false') ? 'hidden' : '';
+    }
+  }
+  function loadResidentDetail(pk) {
+    var url = residentGetUrl + pk + '/';
+    fetch(url, { credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+      .then(function(r) {
+        if (!r.ok) throw new Error('Request failed');
+        return r.json();
+      })
+      .then(function(data) {
+        if (String(data.status || '').toUpperCase() === 'DECEASED') {
+          detailModal.classList.add('row-deceased');
+        } else {
+          detailModal.classList.remove('row-deceased');
+        }
+        setDetailAvatar(data.profile_picture || '');
+        setDetailText('bdResidentDetailName', data.full_name || '-');
+        setDetailText('bdResidentDetailId', data.resident_id || '-', 'ID: ');
+        setDetailText('bdResidentDetailStatus', data.status || '-', 'Status: ');
+        setDetailText('bdResidentDetailBarangay', data.barangay_name || '-');
+        setDetailText('bdResidentDetailPurok', data.purok || '-');
+        setDetailText('bdResidentDetailGender', data.gender || '-');
+        setDetailText('bdResidentDetailBirthdate', data.date_of_birth || '-');
+        setDetailText('bdResidentDetailDeathdate', data.date_of_death || '-');
+        setDetailText('bdResidentDetailAge', computeAge(data.date_of_birth) || '-');
+        setDetailText('bdResidentDetailContact', data.contact_no || '-');
+        setDetailText('bdResidentDetailAddress', data.address || '-');
+        setDetailText('bdResidentDetailRemarks', data.remarks || '-');
+        openDetailModal();
+      })
+      .catch(function() {
+        alert('Could not load resident details.');
+      });
+  }
+  detailCloseBtn && detailCloseBtn.addEventListener('click', closeDetailModal);
+  detailCloseBtn2 && detailCloseBtn2.addEventListener('click', closeDetailModal);
+  detailModal && detailModal.addEventListener('click', function(e) {
+    if (e.target === detailModal) closeDetailModal();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Escape') return;
+    if (detailModal && detailModal.getAttribute('aria-hidden') === 'false') {
+      closeDetailModal();
+    } else if (modal && modal.getAttribute('aria-hidden') === 'false') {
+      closeModal();
     }
   });
 })();

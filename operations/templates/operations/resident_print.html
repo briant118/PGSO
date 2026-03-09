@@ -12,6 +12,10 @@
       min-height: 100vh;
       padding: 1.5rem;
       color: #1a1d24;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-y: auto;
     }
     /* Card canvas: ID-1 size 8.56cm x 5.40cm — all content fits inside */
     .record-card {
@@ -153,10 +157,14 @@
     }
     .no-print { display: block; }
     .action-bar {
+      flex-shrink: 0;
       text-align: center;
       margin-top: 1.5rem;
       padding-top: 1rem;
+      padding-bottom: 1rem;
       border-top: 1px solid #e8eaed;
+      width: 100%;
+      max-width: 8.56cm;
     }
     .action-bar button {
       padding: 0.5rem 1.5rem;
@@ -171,12 +179,13 @@
     .btn-close { background: #6c757d; color: #fff; margin-left: 0.5rem; }
     .btn-close:hover { background: #5a6268; }
     /* Print page size to match ID-1 (driver's license) card */
+    /* Zero margin removes space for browser headers/footers (URL, date) */
     @page {
       size: 8.56cm 5.40cm;
-      margin: 0;
+      margin: 0mm;
     }
     @media print {
-      body {
+      html, body {
         background: #fff;
         padding: 0;
         margin: 0;

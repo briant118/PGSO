@@ -136,3 +136,81 @@ class UserActivity(models.Model):
 
     def __str__(self):
         return f'{self.get_action_display()} by {self.user_id} at {self.created_at}'
+
+
+class PasswordChangeRequest(models.Model):
+    """User requests password change. Admin confirms, then new password is sent to user's email."""
+    STATUS_PENDING = 'pending'
+    STATUS_APPROVED = 'approved'
+    STATUS_REJECTED = 'rejected'
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_APPROVED, 'Approved'),
+        (STATUS_REJECTED, 'Rejected'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='password_change_requests',
+    )
+    requested_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    processed_at = models.DateTimeField(null=True, blank=True)
+    read_at = models.DateTimeField(null=True, blank=True, help_text='When admin viewed this request')
+    processed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='processed_password_requests',
+    )
+
+    class Meta:
+        ordering = ['-requested_at']
+        verbose_name = 'Password change request'
+        verbose_name_plural = 'Password change requests'
+
+    def __str__(self):
+        return f'{self.user.username} – {self.get_status_display()}'
+
+
+class SentEmail(models.Model):
+    """Log of emails sent by the system (e.g. password change notifications)."""
+    TYPE_PASSWORD_CHANGE = 'password_change'
+    TYPE_PASSWORD_RESET = 'password_reset'
+    TYPE_OTHER = 'other'
+    TYPE_CHOICES = [
+        (TYPE_PASSWORD_CHANGE, 'Password Change'),
+        (TYPE_PASSWORD_RESET, 'Password Reset'),
+        (TYPE_OTHER, 'Other'),
+    ]
+
+    recipient_email = models.EmailField()
+    subject = models.CharField(max_length=255)
+    body_plain = models.TextField(blank=True)
+    email_type = models.CharField(max_length=50, choices=TYPE_CHOICES, default=TYPE_OTHER)
+    sent_at = models.DateTimeField(auto_now_add=True)
+    sent_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='sent_emails',
+    )
+    related_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='emails_received',
+        help_text='User this email was about (e.g. user whose password was changed)',
+    )
+
+    class Meta:
+        ordering = ['-sent_at']
+        verbose_name = 'Sent email'
+        verbose_name_plural = 'Sent emails'
+
+    def __str__(self):
+        return f'{self.subject} to {self.recipient_email} at {self.sent_at}'

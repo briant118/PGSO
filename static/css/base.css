@@ -463,17 +463,8 @@ body {
   padding: 2rem 2.5rem;
   min-height: calc(100vh - 0px);
   position: relative;
-  overflow: hidden;
-}
-.dashboard.dashboard-rms::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 12% 10%, rgba(66, 153, 225, 0.14) 0%, transparent 42%),
-    radial-gradient(circle at 90% 25%, rgba(124, 58, 237, 0.10) 0%, transparent 45%),
-    radial-gradient(circle at 30% 95%, rgba(40, 167, 69, 0.10) 0%, transparent 45%);
-  pointer-events: none;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 .dashboard.dashboard-rms > * {
   position: relative;
@@ -484,15 +475,91 @@ body {
 }
 .dashboard-rms-hero {
   display: flex;
-  gap: 1.25rem;
   align-items: flex-start;
   justify-content: space-between;
+  gap: 1rem;
   padding: 1.25rem 1.5rem;
   border-radius: 16px;
   background: linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.78) 100%);
   border: 1px solid rgba(0,0,0,0.06);
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
   backdrop-filter: blur(6px);
+}
+.dashboard-rms-hero-notify-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  padding: 4px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+}
+.dashboard-rms-hero-notify-wrap:hover {
+  border-color: rgba(234, 179, 8, 0.5);
+  box-shadow: 0 2px 8px rgba(234, 179, 8, 0.2);
+}
+.dashboard-rms-hero-notify-wrap:active,
+.dashboard-rms-hero-notify-wrap:has(a:active) {
+  border-color: rgba(234, 179, 8, 0.7);
+  box-shadow: 0 0 0 2px rgba(234, 179, 8, 0.25);
+  transform: scale(0.97);
+}
+.dashboard-rms-hero-notify {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  font-size: 1.25rem;
+  border-radius: 50%;
+  border: 2px solid rgba(234, 179, 8, 0.55);
+  background: rgba(234, 179, 8, 0.18);
+  color: #b45309;
+  font-size: 1rem;
+  text-decoration: none !important;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+}
+.dashboard-rms-hero-notify:hover {
+  background: rgba(234, 179, 8, 0.28);
+  color: #92400e;
+  transform: translateY(-1px);
+  border-color: rgba(234, 179, 8, 0.65);
+}
+.dashboard-rms-hero-notify:active {
+  transform: translateY(0) scale(0.98);
+  background: rgba(234, 179, 8, 0.35);
+  border-color: rgba(234, 179, 8, 0.8);
+}
+.dashboard-rms-hero-notify-img,
+.dashboard-rms-hero-notify .dashboard-rms-hero-notify-img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  max-width: 40px !important;
+  max-height: 40px !important;
+  object-fit: contain;
+  object-position: center center;
+  display: block;
+  border-radius: 50%;
+  mix-blend-mode: multiply;
+}
+.dashboard-rms-hero-notify-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #dc3545;
+  border: 2px solid rgba(255,255,255,0.95);
+  box-shadow: 0 0 0 1px rgba(220, 53, 69, 0.4);
 }
 .dashboard-rms-hero-text {
   min-width: 0;
@@ -559,41 +626,40 @@ body {
 .dashboard-rms-pill-muted i { color: #6c757d; }
 
 .dashboard-rms-hero-actions {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 210px));
-  gap: 0.75rem;
-  align-content: start;
+  gap: 0.5rem;
+  margin-top: 1rem;
 }
 .dashboard-rms-action {
   text-decoration: none !important;
   color: inherit !important;
   background: #fff;
   border: 1px solid rgba(0,0,0,0.08);
-  border-radius: 14px;
-  padding: 0.85rem 0.95rem;
-  display: flex;
-  gap: 0.85rem;
+  border-radius: 10px;
+  padding: 0.45rem 0.65rem;
+  display: inline-flex;
+  gap: 0.5rem;
   align-items: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
 }
 .dashboard-rms-action:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   border-color: rgba(66, 153, 225, 0.35);
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
 }
 .dashboard-rms-action:active {
-  transform: translateY(-1px);
+  transform: translateY(0);
 }
 .dashboard-rms-action-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, rgba(66, 153, 225, 0.16) 0%, rgba(124, 58, 237, 0.12) 100%);
   color: #1e3a8a;
+  font-size: 0.75rem;
   flex-shrink: 0;
 }
 .dashboard-rms-action-secondary .dashboard-rms-action-icon {
@@ -603,27 +669,36 @@ body {
 .dashboard-rms-action-text {
   min-width: 0;
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.35rem;
 }
 .dashboard-rms-action-title {
-  font-weight: 700;
-  font-size: 0.95rem;
+  font-weight: 600;
+  font-size: 0.8rem;
   color: #1a1d24;
   line-height: 1.1;
 }
 .dashboard-rms-action-sub {
-  font-size: 0.82rem;
+  font-size: 0.7rem;
   color: #5f6368;
   line-height: 1.2;
 }
 
 .dashboard-rms-cards {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 1.25rem;
   margin-bottom: 1.5rem;
   width: 100%;
+}
+@media (max-width: 1200px) {
+  .dashboard-rms-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+.dashboard-rms-card-link {
+  text-decoration: none !important;
+  color: inherit !important;
+  cursor: pointer;
 }
 .dashboard-rms-card {
   min-width: 0;
@@ -725,6 +800,9 @@ body {
 .dashboard-rms-chart-card-full {
   grid-column: 1 / -1;
 }
+.dashboard-rms-chart-card-birthyear {
+  overflow: visible;
+}
 .dashboard-rms-chart-wrap-bar-muni {
   max-width: 400px;
   margin-left: 0;
@@ -820,7 +898,12 @@ body {
   overflow: hidden;
 }
 .dashboard-rms-chart-wrap-tall {
-  height: 280px;
+  height: 350px;
+  overflow: visible;
+}
+.dashboard-rms-chart-wrap-tall canvas {
+  max-width: 100%;
+  display: block;
 }
 .dashboard-rms-chart-wrap canvas {
   max-width: 100%;

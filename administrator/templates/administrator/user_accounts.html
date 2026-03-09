@@ -656,10 +656,6 @@ document.querySelectorAll('.user-accounts-modal').forEach(function (modal) {
   createHeaderButton('Edit', 'fas fa-pen', 'btn-edit-header', function () {
     var row = getSelectedOrModal();
     if (!row) return;
-    if (row.dataset.isFixedAdmin === 'true') {
-      openUserAccountsModal('fixedAdminEditModal');
-      return;
-    }
     window.location.href = "{% url 'administrator:user_edit' 0 %}".replace('/0/', '/' + row.dataset.id + '/');
   });
 

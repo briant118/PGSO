@@ -13,7 +13,8 @@
 .form-body { padding: 1.5rem; }
 .form-group { margin-bottom: 1.25rem; }
 .form-group label { display: block; font-weight: 600; color: #1a1d24; margin-bottom: 0.4rem; font-size: 0.95rem; }
-.form-group input[type="text"] { width: 100%; max-width: 320px; padding: 0.6rem 0.75rem; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 1rem; }
+.form-group input[type="text"],
+.form-group input[type="email"] { width: 100%; max-width: 320px; padding: 0.6rem 0.75rem; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 1rem; }
 .form-group .hint { font-size: 0.85rem; color: #5f6368; margin-top: 0.35rem; }
 .form-actions { padding: 1rem 1.5rem; border-top: 1px solid #e8eaed; display: flex; gap: 0.75rem; }
 .btn { padding: 0.6rem 1.25rem; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; text-decoration: none; border: none; display: inline-flex; align-items: center; gap: 0.5rem; }
@@ -24,7 +25,7 @@
 <div class="page-header">
   <div>
     <h1 class="page-title"><i class="fas fa-user-edit" style="color: #4299e1;"></i> Edit user</h1>
-    <p class="page-subtitle">Edit username and full name (Staff only).</p>
+    <p class="page-subtitle">Edit username, full name, and email.</p>
   </div>
   <a href="{% url 'administrator:user_accounts' %}" class="btn btn-secondary">Back to User Accounts</a>
 </div>
@@ -36,7 +37,8 @@
     <div class="form-body">
       <div class="form-group">
         <label for="id_username">Username <span style="color:#dc3545;">*</span></label>
-        <input type="text" name="username" id="id_username" required value="{{ target_user.username }}" placeholder="Login username">
+        <input type="text" name="username" id="id_username" required value="{{ target_user.username }}" placeholder="Login username" {% if is_fixed_admin %}readonly disabled{% endif %}>
+        {% if is_fixed_admin %}<input type="hidden" name="username" value="{{ target_user.username }}">{% endif %}
       </div>
       <div class="form-group">
         <label for="id_first_name">First name</label>
@@ -45,6 +47,11 @@
       <div class="form-group">
         <label for="id_last_name">Last name</label>
         <input type="text" name="last_name" id="id_last_name" value="{{ target_user.last_name|default:'' }}" placeholder="Last name">
+      </div>
+      <div class="form-group">
+        <label for="id_email">Email</label>
+        <input type="email" name="email" id="id_email" value="{{ target_user.email|default:'' }}" placeholder="user@example.com">
+        <div class="hint">Required for password reset and change notifications.</div>
       </div>
       <div class="form-group"><div class="hint">Full name is shown as First name + Last name.</div></div>
     </div>

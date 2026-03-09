@@ -2607,7 +2607,7 @@ document.querySelectorAll('.modal').forEach(modal => {
         return;
       }
       var id = selected.getAttribute('data-id');
-      window.open("{% url 'operations:resident_print' 0 %}".replace('0', id), 'print', 'width=750,height=550');
+      window.open("{% url 'operations:resident_print' 0 %}".replace('0', id), 'print', 'width=750,height=680');
     });
   }
 })();

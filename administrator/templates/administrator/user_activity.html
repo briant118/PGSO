@@ -155,21 +155,37 @@
   <div class="card-header">
     <h2>Activity Logs</h2>
     
-    <div class="filter-group">
-      <select>
-        <option>All Users</option>
-        <option>admin</option>
-      </select>
-      <select>
-        <option>All Actions</option>
-        <option>Login</option>
-        <option>Logout</option>
-        <option>Create</option>
-        <option>Update</option>
-        <option>Delete</option>
-      </select>
-      <input type="date" placeholder="Filter by date">
-    </div>
+    <form method="get">
+      <div class="filter-group">
+        <select name="user">
+          <option value="">{% if filter_user %}All Users{% else %}All Users{% endif %}</option>
+          {% for u in activity_users %}
+          <option value="{{ u.username }}" {% if filter_user == u.username %}selected{% endif %}>
+            {{ u.get_full_name|default:u.username }} ({{ u.username }})
+          </option>
+          {% endfor %}
+        </select>
+
+        <select name="action">
+          <option value="">{% if filter_action %}All Actions{% else %}All Actions{% endif %}</option>
+          {% for value,label in activity_actions %}
+          <option value="{{ value }}" {% if filter_action == value %}selected{% endif %}>
+            {{ label }}
+          </option>
+          {% endfor %}
+        </select>
+
+        <input
+          type="date"
+          name="date"
+          value="{{ filter_date }}"
+          placeholder="MM/DD/YYYY"
+        >
+
+        <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+        <a href="{% url 'administrator:user_activity' %}" class="btn btn-secondary btn-sm">Reset</a>
+      </div>
+    </form>
   </div>
 
   <table class="activity-table">

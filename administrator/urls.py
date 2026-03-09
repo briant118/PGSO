@@ -14,4 +14,7 @@ urlpatterns = [
     path('user-permissions/', views.user_permissions, name='user_permissions'),
     path('user-permissions/<int:pk>/edit/', views.user_permissions_edit, name='user_permissions_edit'),
     path('user-activity/', views.user_activity, name='user_activity'),
+    path('sent-emails/', views.sent_emails, name='sent_emails'),
+    path('sent-emails/<int:pk>/view/', views.sent_email_view, name='sent_email_view'),
+    path('password-requests/<int:pk>/mark-read/', views.mark_request_read, name='mark_request_read'),
 ]

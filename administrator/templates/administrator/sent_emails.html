@@ -1,0 +1,510 @@
+{% extends 'base.html' %}
+
+{% block title %}Sent Emails - PGSO{% endblock %}
+
+{% block content %}
+<style>
+/* Page Header */
+.page-header {
+  margin-bottom: 2rem;
+}
+
+.page-title {
+  margin: 0 0 0.5rem;
+  font-size: 2rem;
+  color: #1a1d24;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-subtitle {
+  margin: 0;
+  color: #5f6368;
+  font-size: 0.95rem;
+}
+
+/* Card Container */
+.card-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e8eaed;
+}
+
+.card-header h2 {
+  margin: 0 0 1rem;
+  font-size: 1.5rem;
+  color: #1a1d24;
+  font-weight: 700;
+}
+
+/* Table Styles */
+.email-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.email-table thead {
+  background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%);
+}
+
+.email-table thead th {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.email-table tbody tr {
+  border-bottom: 1px solid #e8eaed;
+  transition: background 0.15s ease;
+}
+
+.email-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.email-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.email-table tbody td {
+  padding: 1rem 1.25rem;
+  color: #1a1d24;
+}
+
+/* Badge Styles */
+.badge-password-change {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+.badge-other {
+  color: #6c757d;
+}
+
+.badge-request {
+  color: #e67e22;
+  font-weight: 600;
+}
+.badge-unread { font-size: 0.75rem; background: #dc3545; color: #fff; padding: 0.2rem 0.5rem; border-radius: 6px; margin-left: 0.35rem; font-weight: 600; }
+.badge-read { font-size: 0.75rem; background: #6c757d; color: #fff; padding: 0.2rem 0.5rem; border-radius: 6px; margin-left: 0.35rem; font-weight: 600; }
+.row-unread { background: #fff5f5 !important; }
+.row-unread:hover { background: #ffe8e8 !important; }
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #5f6368;
+}
+
+.body-preview {
+  max-width: 300px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.9rem;
+  color: #5f6368;
+}
+
+.btn-view-email {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: #fff;
+  padding: 0.35rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-view-email:hover { opacity: 0.9; }
+
+.btn-view-req { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); color: #fff; padding: 0.35rem 0.75rem; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-right: 0.5rem; }
+.btn-view-req:hover { opacity: 0.9; }
+.btn-approve-req { background: linear-gradient(135deg, #28a745 0%, #218838 100%); color: #fff; padding: 0.35rem 0.75rem; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; margin-right: 0.5rem; }
+.btn-approve-req:hover { opacity: 0.9; }
+.btn-reject-req { background: #6c757d; color: #fff; padding: 0.35rem 0.75rem; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+.btn-reject-req:hover { opacity: 0.9; }
+
+.email-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1100; display: none; align-items: center; justify-content: center; padding: 1.5rem; }
+.email-modal-content { background: #fff; border-radius: 12px; max-width: 560px; width: 100%; max-height: 85vh; box-shadow: 0 24px 48px rgba(0,0,0,0.2); overflow: hidden; display: flex; flex-direction: column; }
+.email-modal-header { padding: 1rem 1.25rem; border-bottom: 1px solid #e8eaed; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+.email-modal-header h3 { margin: 0; font-size: 1.2rem; color: #1a1d24; }
+.email-modal-close { background: none; border: none; font-size: 1.5rem; color: #5f6368; cursor: pointer; line-height: 1; }
+.email-modal-body { padding: 1.25rem 1.5rem; overflow-y: auto; flex: 1; }
+.email-modal-body .email-meta { margin-bottom: 1rem; font-size: 0.9rem; color: #5f6368; }
+.email-modal-body .email-meta div { margin-bottom: 0.35rem; }
+.email-modal-body .email-body { white-space: pre-wrap; font-family: inherit; font-size: 0.95rem; line-height: 1.5; color: #1a1d24; background: #f8f9fa; padding: 1rem; border-radius: 8px; }
+
+.req-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1200; display: none; align-items: center; justify-content: center; padding: 1rem; }
+.req-modal-content { background: #fff; border-radius: 12px; max-width: 420px; width: 100%; box-shadow: 0 24px 48px rgba(0,0,0,0.2); overflow: hidden; }
+.req-modal-header { padding: 1rem 1.25rem; border-bottom: 1px solid #e8eaed; display: flex; justify-content: space-between; align-items: center; }
+.req-modal-header h3 { margin: 0; font-size: 1.25rem; color: #1a1d24; }
+.req-modal-close { background: none; border: none; font-size: 1.5rem; color: #5f6368; cursor: pointer; line-height: 1; }
+.req-modal-body { padding: 1.25rem 1.5rem; }
+.req-modal-body .form-group { margin-bottom: 1rem; }
+.req-modal-body label { display: block; font-weight: 600; margin-bottom: 0.35rem; font-size: 0.9rem; }
+.req-modal-body input[type="password"],
+.req-modal-body input[type="text"].pw-input { width: 100%; padding: 0.6rem 2.5rem 0.6rem 0.75rem; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 1rem; }
+.req-modal-body .pw-wrap { position: relative; }
+.req-modal-body .pw-wrap .pw-toggle { position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: #5f6368; cursor: pointer; padding: 0.25rem; font-size: 1rem; }
+.req-modal-body .pw-wrap .pw-toggle:hover { color: #1e3a5f; }
+.req-modal-footer { padding: 1rem 1.5rem; border-top: 1px solid #e8eaed; display: flex; gap: 0.75rem; justify-content: flex-end; }
+
+/* Reject confirm modal - dark theme */
+.reject-confirm-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1300; display: none; align-items: center; justify-content: center; padding: 1.5rem; }
+.reject-confirm-modal[aria-hidden="false"] { display: flex; }
+.reject-confirm-content { background: #2d3748; border-radius: 16px; padding: 1.5rem 1.75rem; max-width: 360px; width: 100%; box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
+.reject-confirm-source { font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-bottom: 0.5rem; }
+.reject-confirm-msg { font-size: 1rem; color: #fff; margin: 0 0 1.25rem; }
+.reject-confirm-btns { display: flex; gap: 0.75rem; justify-content: flex-end; }
+.reject-confirm-ok { background: #e2e8f0; color: #2d3748; border: 1px solid #cbd5e0; padding: 0.5rem 1.25rem; border-radius: 999px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+.reject-confirm-ok:hover { background: #cbd5e0; }
+.reject-confirm-cancel { background: #4a5568; color: #fff; border: none; padding: 0.5rem 1.25rem; border-radius: 999px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+.reject-confirm-cancel:hover { background: #5a6578; }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+  <h1 class="page-title">
+    <i class="fas fa-envelope" style="color: #4299e1;"></i> Email
+  </h1>
+  <p class="page-subtitle">Password change requests and sent emails.</p>
+</div>
+
+<!-- Email Log (combined: requests + sent emails) -->
+<div class="card-container">
+  <div class="card-header">
+    <h2>Email Log</h2>
+  </div>
+
+  <table class="email-table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Recipient</th>
+        <th>Subject</th>
+        <th>Type</th>
+        <th>Sent By</th>
+        <th>Related User</th>
+        <th>Body Preview</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      {% if item.type == 'request' %}
+      {% with req=item.request %}
+      <tr class="row-request {% if not req.read_at %}row-unread{% endif %}">
+        <td style="color: #5f6368;">{{ req.requested_at|date:"Y-m-d H:i" }}</td>
+        <td><strong>{{ req.user.email|default:"—" }}</strong></td>
+        <td>Password change request</td>
+        <td>
+          <span class="badge-request">Request</span>
+          {% if not req.read_at %}<span class="badge-unread" title="Unread">Unread</span>{% else %}<span class="badge-read" title="Read">Read</span>{% endif %}
+        </td>
+        <td>—</td>
+        <td>{{ req.user.username }}</td>
+        <td class="body-preview">—</td>
+        <td>
+          <button type="button" class="btn-view-req" data-req-id="{{ req.pk }}" data-username="{{ req.user.username }}" data-email="{{ req.user.email }}" data-requested="{{ req.requested_at|date:'M d, Y H:i' }}" data-fullname="{{ req.user.get_full_name|default:'' }}"><i class="fas fa-eye"></i> View</button>
+        </td>
+      </tr>
+      {% endwith %}
+      {% else %}
+      {% with email=item.email %}
+      <tr>
+        <td style="color: #5f6368;">{{ email.sent_at|date:"Y-m-d H:i:s" }}</td>
+        <td><strong>{{ email.recipient_email }}</strong></td>
+        <td>{{ email.subject }}</td>
+        <td>
+          {% if email.email_type == 'password_change' %}
+          <span class="badge-password-change"><i class="fas fa-key"></i> Password Change</span>
+          {% elif email.email_type == 'password_reset' %}
+          <span class="badge-password-change"><i class="fas fa-unlock-alt"></i> Password Reset</span>
+          {% else %}
+          <span class="badge-other">{{ email.get_email_type_display }}</span>
+          {% endif %}
+        </td>
+        <td>{% if email.sent_by %}{{ email.sent_by.get_full_name|default:email.sent_by.username }}{% else %}—{% endif %}</td>
+        <td>{% if email.related_user %}{{ email.related_user.username }}{% else %}—{% endif %}</td>
+        <td class="body-preview" title="{{ email.body_plain|truncatechars:200 }}">{{ email.body_plain|truncatechars:60 }}</td>
+        <td>
+          <button type="button" class="btn-view-email" data-email-id="{{ email.pk }}" title="View full email"><i class="fas fa-eye"></i> View</button>
+        </td>
+      </tr>
+      {% endwith %}
+      {% endif %}
+      {% empty %}
+      <tr>
+        <td colspan="8" class="empty-state">
+          No password change requests or emails yet.
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Modal: View full email -->
+<div id="emailViewModal" class="email-modal" onclick="if(event.target===this)closeEmailModal()">
+  <div class="email-modal-content" onclick="event.stopPropagation()">
+    <div class="email-modal-header">
+      <h3 id="emailModalSubject">—</h3>
+      <button type="button" class="email-modal-close" onclick="closeEmailModal()">&times;</button>
+    </div>
+    <div class="email-modal-body">
+      <div class="email-meta">
+        <div><strong>To:</strong> <span id="emailModalRecipient">—</span></div>
+        <div><strong>Sent:</strong> <span id="emailModalSentAt">—</span></div>
+        <div><strong>Type:</strong> <span id="emailModalType">—</span></div>
+        <div><strong>Sent by:</strong> <span id="emailModalSentBy">—</span></div>
+      </div>
+      <div><strong>Body:</strong></div>
+      <div class="email-body" id="emailModalBody">—</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function closeEmailModal() {
+  document.getElementById('emailViewModal').style.display = 'none';
+}
+function closeReqViewModal() {
+  document.getElementById('reqViewModal').style.display = 'none';
+}
+function closeApproveModal() {
+  document.getElementById('approveModal').style.display = 'none';
+}
+document.addEventListener('DOMContentLoaded', function() {
+document.querySelectorAll('.btn-view-email').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var id = this.dataset.emailId;
+    var modal = document.getElementById('emailViewModal');
+    modal.style.display = 'flex';
+    document.getElementById('emailModalSubject').textContent = 'Loading...';
+    document.getElementById('emailModalRecipient').textContent = '—';
+    document.getElementById('emailModalSentAt').textContent = '—';
+    document.getElementById('emailModalType').textContent = '—';
+    document.getElementById('emailModalSentBy').textContent = '—';
+    document.getElementById('emailModalBody').textContent = '—';
+    fetch("{% url 'administrator:sent_email_view' 0 %}".replace('/0/', '/' + id + '/'))
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        document.getElementById('emailModalSubject').textContent = data.subject || '—';
+        document.getElementById('emailModalRecipient').textContent = data.recipient_email || '—';
+        document.getElementById('emailModalSentAt').textContent = data.sent_at || '—';
+        document.getElementById('emailModalType').textContent = data.email_type || '—';
+        document.getElementById('emailModalSentBy').textContent = data.sent_by || '—';
+        document.getElementById('emailModalBody').textContent = data.body_plain || '(empty)';
+      })
+      .catch(function() {
+        document.getElementById('emailModalSubject').textContent = 'Error loading email';
+      });
+  });
+});
+
+// View request modal - shows request details, then Set password and Reject buttons. Mark as read when opened.
+document.querySelectorAll('.btn-view-req').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    var reqId = this.dataset.reqId;
+    var un = this.dataset.username || '—';
+    var em = this.dataset.email || '—';
+    var req = this.dataset.requested || '—';
+    var fn = this.dataset.fullname || '';
+    document.getElementById('reqViewUser').textContent = un + (fn ? ' (' + fn + ')' : '');
+    document.getElementById('reqViewEmail').textContent = em;
+    document.getElementById('reqViewRequested').textContent = req;
+    document.getElementById('reqViewReqId').value = reqId;
+    document.getElementById('reqViewRejectId').value = reqId;
+    document.getElementById('reqViewModal').style.display = 'flex';
+    // Mark request as read
+    fetch("{% url 'administrator:mark_request_read' 0 %}".replace('/0/', '/' + reqId + '/'), { method: 'GET', credentials: 'same-origin' }).then(function() {
+      var row = document.querySelector('.row-request .btn-view-req[data-req-id="' + reqId + '"]');
+      if (row) {
+        var tr = row.closest('tr');
+        if (tr) {
+          tr.classList.remove('row-unread');
+          var typeCell = tr.querySelector('td:nth-child(4)');
+          if (typeCell) {
+            var unreadBadge = typeCell.querySelector('.badge-unread');
+            if (unreadBadge) {
+              unreadBadge.outerHTML = '<span class="badge-read" title="Read">Read</span>';
+            }
+          }
+        }
+      }
+    }).catch(function(){});
+  });
+});
+
+// Reject confirmation modal - custom styled (replaces browser confirm)
+var rejectConfirmModal = document.getElementById('rejectConfirmModal');
+var rejectConfirmOk = document.getElementById('rejectConfirmOk');
+var rejectConfirmCancel = document.getElementById('rejectConfirmCancel');
+var rejectBtn = document.getElementById('reqViewRejectBtn');
+if (rejectBtn) {
+  rejectBtn.addEventListener('click', function() {
+    document.getElementById('rejectConfirmSource').textContent = (window.location.host || '') + ' says';
+    rejectConfirmModal.style.display = 'flex';
+    rejectConfirmModal.setAttribute('aria-hidden', 'false');
+  });
+}
+if (rejectConfirmOk) {
+  rejectConfirmOk.addEventListener('click', function() {
+    rejectConfirmModal.style.display = 'none';
+    rejectConfirmModal.setAttribute('aria-hidden', 'true');
+    closeReqViewModal();
+    document.getElementById('reqViewRejectForm').submit();
+  });
+}
+if (rejectConfirmCancel) {
+  rejectConfirmCancel.addEventListener('click', function() {
+    rejectConfirmModal.style.display = 'none';
+    rejectConfirmModal.setAttribute('aria-hidden', 'true');
+  });
+}
+rejectConfirmModal.addEventListener('click', function(e) {
+  if (e.target === rejectConfirmModal) {
+    rejectConfirmModal.style.display = 'none';
+    rejectConfirmModal.setAttribute('aria-hidden', 'true');
+  }
+});
+
+// Set password from request view modal - opens approve modal
+var setPassBtn = document.getElementById('reqViewSetPassBtn');
+if (setPassBtn) setPassBtn.addEventListener('click', function() {
+  var reqId = document.getElementById('reqViewReqId').value;
+  var row = document.querySelector('.btn-view-req[data-req-id="' + reqId + '"]');
+  if (row) {
+    document.getElementById('approveIdInput').value = reqId;
+    document.getElementById('approveModalUser').textContent = 'User: ' + (row.dataset.username || '') + ' → ' + (row.dataset.email || '');
+    document.getElementById('new_password').value = '';
+    document.getElementById('new_password_confirm').value = '';
+    document.getElementById('approvePasswordError').style.display = 'none';
+    closeReqViewModal();
+    document.getElementById('approveModal').style.display = 'flex';
+  }
+});
+
+// Show/hide password toggles
+(function() {
+  function setupToggle(btnId, inputId) {
+    var btn = document.getElementById(btnId);
+    var input = document.getElementById(inputId);
+    if (!btn || !input) return;
+    btn.addEventListener('click', function() {
+      var icon = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        if (icon) { icon.className = 'fas fa-eye-slash'; }
+        btn.title = 'Hide password';
+      } else {
+        input.type = 'password';
+        if (icon) { icon.className = 'fas fa-eye'; }
+        btn.title = 'Show password';
+      }
+    });
+  }
+  setupToggle('toggleNewPass', 'new_password');
+  setupToggle('toggleNewPassConfirm', 'new_password_confirm');
+})();
+
+var approveForm = document.getElementById('approveForm');
+if (approveForm) approveForm.addEventListener('submit', function(e) {
+  var p1 = document.getElementById('new_password').value;
+  var p2 = document.getElementById('new_password_confirm').value;
+  if (p1 !== p2) {
+    e.preventDefault();
+    document.getElementById('approvePasswordError').style.display = 'block';
+    return false;
+  }
+});
+});
+</script>
+
+<!-- Modal: View request (with Set password and Reject inside) -->
+<div id="reqViewModal" class="req-modal" style="display: none;" onclick="if(event.target===this)closeReqViewModal()">
+  <div class="req-modal-content" onclick="event.stopPropagation()">
+    <div class="req-modal-header">
+      <h3>Password change request</h3>
+      <button type="button" class="req-modal-close" onclick="closeReqViewModal()">&times;</button>
+    </div>
+    <div class="req-modal-body">
+      <div class="email-meta">
+        <div><strong>User:</strong> <span id="reqViewUser">—</span></div>
+        <div><strong>Email:</strong> <span id="reqViewEmail">—</span></div>
+        <div><strong>Requested:</strong> <span id="reqViewRequested">—</span></div>
+      </div>
+      <input type="hidden" id="reqViewReqId">
+      <div class="req-modal-footer" style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e8eaed;">
+        <button type="button" id="reqViewSetPassBtn" class="btn-approve-req"><i class="fas fa-key"></i> Set new password</button>
+        <form method="post" style="display: inline;" id="reqViewRejectForm">
+          {% csrf_token %}
+          <input type="hidden" name="reject_id" id="reqViewRejectId">
+          <button type="button" class="btn-reject-req" id="reqViewRejectBtn"><i class="fas fa-times"></i> Reject</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Reject confirmation -->
+<div id="rejectConfirmModal" class="reject-confirm-modal" aria-hidden="true">
+  <div class="reject-confirm-content">
+    <div class="reject-confirm-source" id="rejectConfirmSource">— says</div>
+    <p class="reject-confirm-msg">Reject this request?</p>
+    <div class="reject-confirm-btns">
+      <button type="button" class="reject-confirm-ok" id="rejectConfirmOk">OK</button>
+      <button type="button" class="reject-confirm-cancel" id="rejectConfirmCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Set new password -->
+<div id="approveModal" class="req-modal" style="display: none;" onclick="if(event.target===this)closeApproveModal()">
+  <div class="req-modal-content" onclick="event.stopPropagation()">
+    <div class="req-modal-header">
+      <h3>Set new password</h3>
+      <button type="button" class="req-modal-close" onclick="closeApproveModal()">&times;</button>
+    </div>
+    <form method="post" id="approveForm">
+      {% csrf_token %}
+      <input type="hidden" name="approve_id" id="approveIdInput">
+      <div class="req-modal-body">
+        <p id="approveModalUser" style="margin: 0 0 1rem; color: #5f6368;"></p>
+        <div class="form-group">
+          <label for="new_password">New password <span style="color:#dc3545;">*</span></label>
+          <div class="pw-wrap">
+            <input type="password" name="new_password" id="new_password" required minlength="8" placeholder="At least 8 characters">
+            <button type="button" class="pw-toggle" id="toggleNewPass" title="Show password" aria-label="Show password"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="new_password_confirm">Confirm password <span style="color:#dc3545;">*</span></label>
+          <div class="pw-wrap">
+            <input type="password" name="new_password_confirm" id="new_password_confirm" required minlength="8" placeholder="Re-enter password">
+            <button type="button" class="pw-toggle" id="toggleNewPassConfirm" title="Show password" aria-label="Show password"><i class="fas fa-eye"></i></button>
+          </div>
+        </div>
+        <div id="approvePasswordError" style="color: #dc3545; font-size: 0.9rem; margin-bottom: 0.5rem; display: none;">Passwords do not match.</div>
+      </div>
+      <div class="req-modal-footer">
+        <button type="button" class="btn-reject-req" onclick="closeApproveModal()">Cancel</button>
+        <button type="submit" class="btn-approve-req"><i class="fas fa-paper-plane"></i> Send to email</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
