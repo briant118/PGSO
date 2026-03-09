@@ -687,13 +687,16 @@ body {
 
 .dashboard-rms-cards {
   display: grid;
-  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1.25rem;
   margin-bottom: 1.5rem;
   width: 100%;
 }
+@media (min-width: 1500px) {
+  .dashboard-rms-cards { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+}
 @media (max-width: 1200px) {
-  .dashboard-rms-cards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .dashboard-rms-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 .dashboard-rms-card-link {
   text-decoration: none !important;
@@ -704,7 +707,7 @@ body {
   min-width: 0;
   background: #fff;
   border-radius: 12px;
-  padding: 1.25rem 1.5rem;
+  padding: clamp(0.9rem, 1.4vw, 1.25rem) clamp(1rem, 1.8vw, 1.5rem);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
@@ -718,14 +721,14 @@ body {
   border-color: rgba(66, 153, 225, 0.22);
 }
 .dashboard-rms-card-icon-wrap {
-  width: 48px;
-  height: 48px;
+  width: clamp(40px, 4vw, 48px);
+  height: clamp(40px, 4vw, 48px);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 1.25rem;
+  font-size: clamp(1.05rem, 1.6vw, 1.25rem);
 }
 .dashboard-rms-icon-blue   { background: #e3f2fd; color: #1976d2; }
 .dashboard-rms-icon-green  { background: #e8f5e9; color: #388e3c; }
@@ -736,15 +739,17 @@ body {
 }
 .dashboard-rms-card-value {
   display: block;
-  font-size: 1.75rem;
+  font-size: clamp(1.25rem, 3.2vw, 1.75rem);
   font-weight: 700;
   color: #1a1d24;
   line-height: 1.2;
 }
 .dashboard-rms-card-label {
-  font-size: 0.875rem;
+  font-size: clamp(0.82rem, 1.8vw, 0.875rem);
   color: #5f6368;
   margin: 0;
+  line-height: 1.2;
+  word-break: break-word;
 }
 .dashboard-rms-additional {
   width: 100%;

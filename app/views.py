@@ -5,12 +5,41 @@ from django.db.models import Q
 from operations.models import Resident
 
 
+def _get_profile_image_path(resident):
+    """Return (path, is_temp) for profile image. is_temp=True means caller should delete the file."""
+    import os
+    import tempfile
+    import urllib.request
+
+    # Supabase or external URL - fetch to temp file
+    if resident.profile_picture_url:
+        try:
+            with urllib.request.urlopen(resident.profile_picture_url, timeout=10) as resp:
+                data = resp.read()
+            fd, path = tempfile.mkstemp(suffix='.jpg')
+            with os.fdopen(fd, 'wb') as f:
+                f.write(data)
+            return path, True
+        except Exception:
+            return None, False
+
+    # Django ImageField (local file)
+    if resident.profile_picture:
+        try:
+            return resident.profile_picture.path, False
+        except Exception:
+            return None, False
+    return None, False
+
+
 def resident_profile_pdf(request, pk):
-    """Generate and return resident profile PDF matching Profiling-template layout fields."""
+    """Generate and return resident profile PDF with profile picture and info."""
+    import os
+    import tempfile
     from reportlab.lib.pagesizes import letter
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
     from reportlab.lib.units import inch
-    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle
 
     resident = get_object_or_404(Resident, pk=pk)
     response = HttpResponse(content_type='application/pdf')
@@ -44,12 +73,35 @@ def resident_profile_pdf(request, pk):
     elements.append(Paragraph("PPS Palawan Profiling System", title_style))
     elements.append(Spacer(1, 0.15 * inch))
 
-    # Name line (similar to LASTNAME, FIRSTNAME in template)
-    full_name = resident.get_full_name()
-    elements.append(Paragraph(f"<b>{full_name}</b>", body_style))
-    elements.append(Spacer(1, 0.1 * inch))
+    # Profile picture + name (left: photo, right: name)
+    img_path, img_is_temp = _get_profile_image_path(resident)
+    try:
+        if img_path:
+            img = Image(img_path, width=1.2 * inch, height=1.2 * inch)
+            tbl = Table(
+                [[img, Paragraph(f"<b>{resident.get_full_name()}</b>", body_style)]],
+                colWidths=[1.5 * inch, 4 * inch],
+            )
+            tbl.setStyle(TableStyle([
+                ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                ('LEFTPADDING', (0, 0), (0, -1), 0),
+                ('RIGHTPADDING', (0, 0), (0, -1), 12),
+            ]))
+            elements.append(tbl)
+        else:
+            elements.append(Paragraph(f"<b>{resident.get_full_name()}</b>", body_style))
+        elements.append(Spacer(1, 0.15 * inch))
+    except Exception:
+        elements.append(Paragraph(f"<b>{resident.get_full_name()}</b>", body_style))
+        elements.append(Spacer(1, 0.1 * inch))
+    finally:
+        if img_path and img_is_temp:
+            try:
+                os.unlink(img_path)
+            except Exception:
+                pass
 
-    # Birthdate, Age, Gender, Contact No (single line, as in docx template)
+    # Birthdate, Age, Gender, Contact No
     birthdate_str = resident.date_of_birth.strftime('%b-%d-%Y') if resident.date_of_birth else '—'
     age_val = resident.get_age() if resident.date_of_birth else ''
     age_str = f"{age_val}" if age_val else '—'
@@ -69,7 +121,11 @@ def resident_profile_pdf(request, pk):
         addr = f"{addr}, {resident.purok}"
     elements.append(Paragraph(f"<b>Address:</b> {addr}", body_style))
 
-    # PWD / SENIOR / VOTERS badges (from template wording)
+    # Barangay
+    barangay_str = resident.barangay.name if resident.barangay else '—'
+    elements.append(Paragraph(f"<b>Barangay:</b> {barangay_str}", body_style))
+
+    # PWD / SENIOR / VOTERS badges
     badges = []
     if resident.health_status == 'PWD':
         badges.append('PWD')

@@ -4,7 +4,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.db import transaction
 from django.views.decorators.http import require_http_methods
-from .models import UserProfile, UserActivity, SentEmail, PasswordChangeRequest
+from django.utils import timezone
+from django.contrib.auth.hashers import make_password, check_password
+import secrets
+
+from .models import UserProfile, UserActivity, SentEmail, PasswordChangeRequest, AdminOTP
 from .utils import ADMIN_GROUP_NAME, STAFF_GROUP_NAME, user_is_admin, is_fixed_admin_user, get_fixed_admin_username
 from .activity_log import log_activity
 from .email_utils import send_and_log_email
@@ -38,8 +42,6 @@ def administrator_index(request):
 @admin_required
 def sent_emails(request):
     """List sent emails and pending password change requests. Admin can approve/reject from here."""
-    from django.utils import timezone
-
     # Handle approve/reject for password change requests
     if request.method == 'POST':
         approve_id = request.POST.get('approve_id')
@@ -50,6 +52,32 @@ def sent_emails(request):
             if not user_email:
                 messages.error(request, f'User {user.username} has no email. Add email in User Edit first.')
                 return redirect('administrator:sent_emails')
+
+            otp = (request.POST.get('otp') or '').strip()
+            if not (otp.isdigit() and len(otp) == 4):
+                messages.error(request, 'OTP is required (4 digits). Click "Set new password" again to resend OTP if needed.')
+                return redirect('administrator:sent_emails')
+
+            otp_row = (
+                AdminOTP.objects.filter(
+                    admin=request.user,
+                    purpose=AdminOTP.PURPOSE_PASSWORD_REQUEST_APPROVAL,
+                    related_request=req,
+                    consumed_at__isnull=True,
+                    expires_at__gt=timezone.now(),
+                )
+                .order_by('-created_at')
+                .first()
+            )
+            if not otp_row or not check_password(otp, otp_row.code_hash):
+                if otp_row:
+                    otp_row.attempts = min((otp_row.attempts or 0) + 1, 999)
+                    otp_row.save(update_fields=['attempts'])
+                messages.error(request, 'Invalid or expired OTP. Please resend OTP and try again.')
+                return redirect('administrator:sent_emails')
+
+            otp_row.consumed_at = timezone.now()
+            otp_row.save(update_fields=['consumed_at'])
 
             new_password = (request.POST.get('new_password') or '').strip()
             new_password_confirm = (request.POST.get('new_password_confirm') or '').strip()
@@ -112,6 +140,51 @@ def sent_emails(request):
     items.sort(key=lambda x: x['date'], reverse=True)
 
     return render(request, 'administrator/sent_emails.html', {'items': items})
+
+
+@admin_required
+@require_http_methods(['POST'])
+def password_request_send_otp(request, pk):
+    """Send a 4-digit OTP to the admin's email for approving a password request."""
+    req = get_object_or_404(PasswordChangeRequest, pk=pk, status=PasswordChangeRequest.STATUS_PENDING)
+
+    admin_email = (request.user.email or '').strip()
+    if not admin_email:
+        messages.error(request, 'Your admin account has no email set. Add an email first, then try again.')
+        return redirect('administrator:sent_emails')
+
+    code = f'{secrets.randbelow(10000):04d}'
+    expires_at = timezone.now() + timezone.timedelta(minutes=10)
+
+    AdminOTP.objects.create(
+        admin=request.user,
+        purpose=AdminOTP.PURPOSE_PASSWORD_REQUEST_APPROVAL,
+        code_hash=make_password(code),
+        expires_at=expires_at,
+        related_request=req,
+        related_user=req.user,
+    )
+
+    body = (
+        f'Hello {request.user.get_full_name() or request.user.username},\n\n'
+        f'Your OTP for approving a password reset request is:\n\n'
+        f'OTP: {code}\n\n'
+        f'This code will expire in 10 minutes.\n\n'
+        f'— Profiling System'
+    )
+    ok = send_and_log_email(
+        recipient_email=admin_email,
+        subject='OTP Code – Profiling System',
+        body_plain=body,
+        email_type=SentEmail.TYPE_OTHER,
+        sent_by=request.user,
+        related_user=req.user,
+    )
+    if ok:
+        messages.success(request, f'OTP sent to {admin_email}.')
+    else:
+        messages.error(request, 'Failed to send OTP email. Please check email settings and try again.')
+    return redirect('administrator:sent_emails')
 
 
 @admin_required
@@ -430,6 +503,38 @@ def user_change_password(request, pk):
                 'is_fixed_admin': is_fixed,
             })
 
+        otp = (request.POST.get('otp') or '').strip()
+        if not (otp.isdigit() and len(otp) == 4):
+            messages.error(request, 'OTP is required (4 digits). Click "Send OTP" first.')
+            return render(request, 'administrator/user_change_password.html', {
+                'target_user': target_user,
+                'is_fixed_admin': is_fixed,
+            })
+
+        otp_row = (
+            AdminOTP.objects.filter(
+                admin=request.user,
+                purpose=AdminOTP.PURPOSE_PASSWORD_CHANGE,
+                related_user=target_user,
+                consumed_at__isnull=True,
+                expires_at__gt=timezone.now(),
+            )
+            .order_by('-created_at')
+            .first()
+        )
+        if not otp_row or not check_password(otp, otp_row.code_hash):
+            if otp_row:
+                otp_row.attempts = min((otp_row.attempts or 0) + 1, 999)
+                otp_row.save(update_fields=['attempts'])
+            messages.error(request, 'Invalid or expired OTP. Please resend OTP and try again.')
+            return render(request, 'administrator/user_change_password.html', {
+                'target_user': target_user,
+                'is_fixed_admin': is_fixed,
+            })
+
+        otp_row.consumed_at = timezone.now()
+        otp_row.save(update_fields=['consumed_at'])
+
         target_user.set_password(new_password)
         target_user.save()
         log_activity(request, UserActivity.ACTION_UPDATE, f'Changed password for user "{target_user.username}".')
@@ -460,6 +565,52 @@ def user_change_password(request, pk):
         'target_user': target_user,
         'is_fixed_admin': is_fixed,
     })
+
+
+@admin_required
+@require_http_methods(['POST'])
+def user_change_password_send_otp(request, pk):
+    """Send a 4-digit OTP to the admin's email for changing a user's password."""
+    if not user_is_admin(request.user):
+        messages.error(request, 'You do not have permission to change passwords.')
+        return redirect('administrator:user_accounts')
+
+    target_user = get_object_or_404(User, pk=pk)
+    admin_email = (request.user.email or '').strip()
+    if not admin_email:
+        messages.error(request, 'Your admin account has no email set. Add an email first, then try again.')
+        return redirect('administrator:user_change_password', pk=pk)
+
+    code = f'{secrets.randbelow(10000):04d}'
+    expires_at = timezone.now() + timezone.timedelta(minutes=10)
+    AdminOTP.objects.create(
+        admin=request.user,
+        purpose=AdminOTP.PURPOSE_PASSWORD_CHANGE,
+        code_hash=make_password(code),
+        expires_at=expires_at,
+        related_user=target_user,
+    )
+
+    body = (
+        f'Hello {request.user.get_full_name() or request.user.username},\n\n'
+        f'Your OTP for changing a user password is:\n\n'
+        f'OTP: {code}\n\n'
+        f'This code will expire in 10 minutes.\n\n'
+        f'— Profiling System'
+    )
+    ok = send_and_log_email(
+        recipient_email=admin_email,
+        subject='OTP Code – Profiling System',
+        body_plain=body,
+        email_type=SentEmail.TYPE_OTHER,
+        sent_by=request.user,
+        related_user=target_user,
+    )
+    if ok:
+        messages.success(request, f'OTP sent to {admin_email}.')
+    else:
+        messages.error(request, 'Failed to send OTP email. Please check email settings and try again.')
+    return redirect('administrator:user_change_password', pk=pk)
 
 
 @admin_required

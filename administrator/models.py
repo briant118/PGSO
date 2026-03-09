@@ -106,12 +106,14 @@ class UserActivity(models.Model):
     """Log of user actions (login, logout, etc.) for the User Activity page."""
     ACTION_LOGIN = 'login'
     ACTION_LOGOUT = 'logout'
+    ACTION_FORGOT_PASSWORD = 'forgot_password'
     ACTION_CREATE = 'create'
     ACTION_UPDATE = 'update'
     ACTION_DELETE = 'delete'
     ACTION_CHOICES = [
         (ACTION_LOGIN, 'Login'),
         (ACTION_LOGOUT, 'Logout'),
+        (ACTION_FORGOT_PASSWORD, 'Forgot Password'),
         (ACTION_CREATE, 'Create'),
         (ACTION_UPDATE, 'Update'),
         (ACTION_DELETE, 'Delete'),
@@ -214,3 +216,49 @@ class SentEmail(models.Model):
 
     def __str__(self):
         return f'{self.subject} to {self.recipient_email} at {self.sent_at}'
+
+
+class AdminOTP(models.Model):
+    """Email OTP for sensitive admin actions (e.g. changing passwords)."""
+    PURPOSE_PASSWORD_CHANGE = 'password_change'
+    PURPOSE_PASSWORD_REQUEST_APPROVAL = 'password_request_approval'
+    PURPOSE_CHOICES = [
+        (PURPOSE_PASSWORD_CHANGE, 'Password change'),
+        (PURPOSE_PASSWORD_REQUEST_APPROVAL, 'Password request approval'),
+    ]
+
+    admin = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='admin_otps',
+    )
+    purpose = models.CharField(max_length=50, choices=PURPOSE_CHOICES)
+    code_hash = models.CharField(max_length=128)
+    attempts = models.PositiveSmallIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    consumed_at = models.DateTimeField(null=True, blank=True)
+
+    # Optional context (not enforced at DB-level, but helps prevent OTP reuse)
+    related_user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='admin_otps_related_to_me',
+    )
+    related_request = models.ForeignKey(
+        'administrator.PasswordChangeRequest',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='admin_otps',
+    )
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Admin OTP'
+        verbose_name_plural = 'Admin OTPs'
+
+    def __str__(self):
+        return f'{self.purpose} OTP for {self.admin_id} at {self.created_at}'

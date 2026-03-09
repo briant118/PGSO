@@ -390,11 +390,15 @@ if (setPassBtn) setPassBtn.addEventListener('click', function() {
   if (row) {
     document.getElementById('approveIdInput').value = reqId;
     document.getElementById('approveModalUser').textContent = 'User: ' + (row.dataset.username || '') + ' → ' + (row.dataset.email || '');
+    document.getElementById('otp').value = '';
+    document.getElementById('otpStatus').style.display = 'none';
     document.getElementById('new_password').value = '';
     document.getElementById('new_password_confirm').value = '';
     document.getElementById('approvePasswordError').style.display = 'none';
     closeReqViewModal();
     document.getElementById('approveModal').style.display = 'flex';
+    sendOtpForRequest(reqId);
+    setTimeout(function(){ try { document.getElementById('otp').focus(); } catch(e){} }, 50);
   }
 });
 
@@ -431,6 +435,38 @@ if (approveForm) approveForm.addEventListener('submit', function(e) {
     return false;
   }
 });
+
+function getCsrfToken() {
+  var el = document.querySelector('#approveForm input[name="csrfmiddlewaretoken"]');
+  return el ? el.value : '';
+}
+
+function sendOtpForRequest(reqId) {
+  var statusEl = document.getElementById('otpStatus');
+  if (statusEl) {
+    statusEl.style.display = 'block';
+    statusEl.style.color = '#5f6368';
+    statusEl.textContent = 'Sending OTP...';
+  }
+  fetch("{% url 'administrator:password_request_send_otp' 0 %}".replace('/0/', '/' + reqId + '/'), {
+    method: 'POST',
+    headers: {
+      'X-CSRFToken': getCsrfToken(),
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    credentials: 'same-origin'
+  }).then(function() {
+    if (statusEl) {
+      statusEl.style.color = '#218838';
+      statusEl.textContent = 'OTP sent to your email (valid for 10 minutes).';
+    }
+  }).catch(function() {
+    if (statusEl) {
+      statusEl.style.color = '#dc3545';
+      statusEl.textContent = 'Failed to send OTP. Please try again.';
+    }
+  });
+}
 });
 </script>
 
@@ -484,6 +520,11 @@ if (approveForm) approveForm.addEventListener('submit', function(e) {
       <input type="hidden" name="approve_id" id="approveIdInput">
       <div class="req-modal-body">
         <p id="approveModalUser" style="margin: 0 0 1rem; color: #5f6368;"></p>
+        <div class="form-group">
+          <label for="otp">OTP (4 digits) <span style="color:#dc3545;">*</span></label>
+          <input type="text" name="otp" id="otp" class="pw-input" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" minlength="4" required placeholder="Enter 4-digit OTP">
+          <div id="otpStatus" style="margin-top:0.35rem; font-size:0.85rem; color:#5f6368; display:none;"></div>
+        </div>
         <div class="form-group">
           <label for="new_password">New password <span style="color:#dc3545;">*</span></label>
           <div class="pw-wrap">

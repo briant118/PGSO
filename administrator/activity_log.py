@@ -5,6 +5,7 @@ from .models import UserActivity
 ACTION_CREATE = UserActivity.ACTION_CREATE
 ACTION_UPDATE = UserActivity.ACTION_UPDATE
 ACTION_DELETE = UserActivity.ACTION_DELETE
+ACTION_FORGOT_PASSWORD = UserActivity.ACTION_FORGOT_PASSWORD
 
 
 def _get_client_ip(request):
@@ -33,7 +34,7 @@ def _safe_ip(ip_str):
 def log_activity(request, action, description):
     """
     Record a user action for the User Activity page.
-    action: UserActivity.ACTION_CREATE, ACTION_UPDATE, or ACTION_DELETE
+    action: any value from UserActivity.ACTION_CHOICES
     description: short string (max 255 chars), e.g. 'Added barangay "X"'
     """
     if not request:
@@ -52,3 +53,20 @@ def log_activity(request, action, description):
         )
     except Exception:
         pass  # don't break the request if logging fails
+
+
+def log_activity_for_user(user, request, action, description):
+    """
+    Record an action for a specific user (useful for unauthenticated flows like forgot password).
+    """
+    ip = _safe_ip(_get_client_ip(request))
+    desc = (description or '')[:255]
+    try:
+        UserActivity.objects.create(
+            user=user,
+            action=action,
+            description=desc,
+            ip_address=ip,
+        )
+    except Exception:
+        pass

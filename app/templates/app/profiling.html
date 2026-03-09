@@ -142,6 +142,30 @@
     }
     .btn-download:hover { opacity: 0.9; }
     .badge-deceased { background: #f8d7da; color: #721c24; }
+    /* Full info section */
+    .profiling-info {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid #e8eaed;
+      background: #f8f9fa;
+    }
+    .profiling-info-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #5f6368;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+    .profiling-info-grid {
+      display: grid;
+      gap: 0.5rem;
+    }
+    .profiling-info-row {
+      display: flex;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .profiling-info-row .label { font-weight: 600; color: #5f6368; min-width: 100px; }
+    .profiling-info-row .value { color: #1a1d24; }
   </style>
 </head>
 <body>
@@ -183,7 +207,51 @@
         {% endif %}
       </div>
     </div>
-    <a href="{% url 'app:resident_profile_pdf' resident.pk %}" class="btn-download">Download PDF</a>
+    <!-- Full resident info -->
+    <div class="profiling-info">
+      <div class="profiling-info-title">Personal Information</div>
+      <div class="profiling-info-grid">
+        <div class="profiling-info-row">
+          <span class="label">Full Name:</span>
+          <span class="value">{{ resident.get_full_name }}</span>
+        </div>
+        <div class="profiling-info-row">
+          <span class="label">Birthdate:</span>
+          <span class="value">{% if resident.date_of_birth %}{{ resident.date_of_birth|date:"M d, Y" }}{% else %}—{% endif %}</span>
+        </div>
+        <div class="profiling-info-row">
+          <span class="label">Age:</span>
+          <span class="value">{% if resident.date_of_birth %}{{ resident.get_age }}{% else %}—{% endif %}</span>
+        </div>
+        <div class="profiling-info-row">
+          <span class="label">Gender:</span>
+          <span class="value">{{ resident.get_gender_display }}</span>
+        </div>
+        <div class="profiling-info-row">
+          <span class="label">Contact:</span>
+          <span class="value">{{ resident.contact_no|default:"—" }}</span>
+        </div>
+        <div class="profiling-info-row">
+          <span class="label">Address:</span>
+          <span class="value">{{ resident.address|default:"—" }}{% if resident.purok %}, {{ resident.purok }}{% endif %}</span>
+        </div>
+        <div class="profiling-info-row">
+          <span class="label">Civil Status:</span>
+          <span class="value">{{ resident.get_civil_status_display }}</span>
+        </div>
+        <div class="profiling-info-row">
+          <span class="label">Occupation:</span>
+          <span class="value">{{ resident.occupation|default:"—" }}</span>
+        </div>
+        {% if resident.is_voter %}
+        <div class="profiling-info-row">
+          <span class="label">Voter:</span>
+          <span class="value">Yes{% if resident.precinct_number %} – Precinct {{ resident.precinct_number }}{% endif %}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    <a href="{% url 'app:resident_profile_pdf' resident.pk %}" class="btn-download">Download PDF (with profile picture)</a>
   </div>
 </body>
 </html>

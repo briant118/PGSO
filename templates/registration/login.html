@@ -36,6 +36,43 @@
       border-radius: 16px;
       box-shadow: 0 24px 48px rgba(0, 0, 0, 0.25);
     }
+    .login-layout {
+      width: min(980px, calc(100% - 2rem));
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      padding: 1rem;
+    }
+    @media (min-width: 900px) {
+      .login-layout { grid-template-columns: 1fr 1fr; align-items: start; }
+      .login-card { max-width: none; width: 100%; }
+    }
+    .tabbar {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      justify-content: center;
+    }
+    .tabbtn {
+      flex: 1;
+      max-width: 220px;
+      padding: 0.75rem 1rem;
+      border-radius: 999px;
+      border: 1px solid #cbd5e0;
+      background: rgba(255,255,255,0.9);
+      color: #1a1d24;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.15s;
+    }
+    .tabbtn:hover { transform: translateY(-1px); }
+    .tabbtn[aria-selected="true"] {
+      background: linear-gradient(135deg, #1e3a5f 0%, #152a45 100%);
+      color: #fff;
+      border-color: transparent;
+    }
+    .panel { display: none; }
+    .panel.is-active { display: block; }
     .login-header {
       text-align: center;
       margin-bottom: 2rem;
@@ -139,77 +176,138 @@
 </head>
 <body>
   <div class="login-bg-pattern"></div>
-  <div class="login-card">
-    <div class="login-header">
-      <div class="login-logo">🏛️</div>
-      <h1 class="login-title">PGSO</h1>
-      <p class="login-subtitle">Profiling System – Sign in to continue</p>
+  <div class="login-layout" style="grid-template-columns: 1fr; max-width: 520px;">
+    <div class="tabbar" role="tablist" aria-label="Sign in as">
+      <button type="button" class="tabbtn" id="tab-admin" role="tab" aria-selected="false" aria-controls="panel-admin">Admin</button>
+      <button type="button" class="tabbtn" id="tab-user" role="tab" aria-selected="true" aria-controls="panel-user">User</button>
     </div>
-    <form method="post" action="{% url 'login' %}" class="login-form">
-      {% csrf_token %}
-      <input type="hidden" name="next" value="{{ next }}">
-      {% if form.non_field_errors %}
-        <ul class="errorlist">
-          {% for error in form.non_field_errors %}
-            <li>{{ error }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-      <div class="form-group">
-        <label for="id_username">Username</label>
-        <input type="text" name="username" id="id_username" placeholder="Enter your username" autofocus required value="{{ form.username.value|default:'' }}">
-        {% if form.username.errors %}
+
+    <div class="login-card panel" id="panel-admin" role="tabpanel" aria-labelledby="tab-admin">
+      <div class="login-header">
+        <div class="login-logo">🏛️</div>
+        <h1 class="login-title">Admin Login</h1>
+        <p class="login-subtitle">For Admin accounts only</p>
+      </div>
+      <form method="post" action="{% url 'login' %}" class="login-form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{% url 'administrator:index' %}">
+        <input type="hidden" name="login_type" value="admin">
+        {% if form.non_field_errors %}
           <ul class="errorlist">
-            {% for error in form.username.errors %}
+            {% for error in form.non_field_errors %}
               <li>{{ error }}</li>
             {% endfor %}
           </ul>
         {% endif %}
-      </div>
-      <div class="form-group">
-        <label for="id_password">Password</label>
-        <div class="password-wrap">
-          <input type="password" name="password" id="id_password" placeholder="Enter your password" required>
-          <button type="button" class="password-toggle" id="togglePassword" title="Show password" aria-label="Show password">
-            <i class="fas fa-eye" id="togglePasswordIcon"></i>
-          </button>
+        <div class="form-group">
+          <label for="id_username_admin">Username</label>
+          <input type="text" name="username" id="id_username_admin" placeholder="Enter admin username" autofocus required value="{{ form.username.value|default:'' }}">
         </div>
-        {% if form.password.errors %}
+        <div class="form-group">
+          <label for="id_password_admin">Password</label>
+          <div class="password-wrap">
+            <input type="password" name="password" id="id_password_admin" placeholder="Enter your password" required>
+            <button type="button" class="password-toggle" id="togglePasswordAdmin" title="Show password" aria-label="Show password">
+              <i class="fas fa-eye" id="togglePasswordIconAdmin"></i>
+            </button>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom: 0.5rem;">
+          <a href="{% url 'admin_password_reset' %}" class="forgot-link" style="font-size: 0.9rem; color: #1e3a5f; text-decoration: none;">Forgot password</a>
+        </div>
+        <button type="submit" class="login-btn">
+          <i class="fas fa-user-shield" style="margin-right: 0.5rem;"></i> Sign In (Admin)
+        </button>
+      </form>
+      <p class="login-footer">Admins can manage users, permissions, and approvals.</p>
+    </div>
+
+    <div class="login-card panel is-active" id="panel-user" role="tabpanel" aria-labelledby="tab-user">
+      <div class="login-header">
+        <div class="login-logo">🏛️</div>
+        <h1 class="login-title">User Login</h1>
+        <p class="login-subtitle">For Staff/User accounts</p>
+      </div>
+      <form method="post" action="{% url 'login' %}" class="login-form">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        <input type="hidden" name="login_type" value="user">
+        {% if form.non_field_errors %}
           <ul class="errorlist">
-            {% for error in form.password.errors %}
+            {% for error in form.non_field_errors %}
               <li>{{ error }}</li>
             {% endfor %}
           </ul>
         {% endif %}
-      </div>
-      <div class="form-group" style="margin-bottom: 0.5rem;">
-        <a href="{% url 'password_reset' %}" class="forgot-link" style="font-size: 0.9rem; color: #1e3a5f; text-decoration: none;">Request password change</a>
-      </div>
-      <button type="submit" class="login-btn">
-        <i class="fas fa-sign-in-alt" style="margin-right: 0.5rem;"></i> Sign In
-      </button>
-    </form>
-    <p class="login-footer">Use your account credentials to access the system.</p>
+        <div class="form-group">
+          <label for="id_username_user">Username</label>
+          <input type="text" name="username" id="id_username_user" placeholder="Enter your username" required value="{{ form.username.value|default:'' }}">
+        </div>
+        <div class="form-group">
+          <label for="id_password_user">Password</label>
+          <div class="password-wrap">
+            <input type="password" name="password" id="id_password_user" placeholder="Enter your password" required>
+            <button type="button" class="password-toggle" id="togglePasswordUser" title="Show password" aria-label="Show password">
+              <i class="fas fa-eye" id="togglePasswordIconUser"></i>
+            </button>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom: 0.5rem;">
+          <a href="{% url 'password_reset' %}" class="forgot-link" style="font-size: 0.9rem; color: #1e3a5f; text-decoration: none;">Request password</a>
+        </div>
+        <button type="submit" class="login-btn">
+          <i class="fas fa-sign-in-alt" style="margin-right: 0.5rem;"></i> Sign In (User)
+        </button>
+      </form>
+      <p class="login-footer">Use your credentials to access the system.</p>
+    </div>
   </div>
   <script>
     (function() {
-      var input = document.getElementById('id_password');
-      var btn = document.getElementById('togglePassword');
-      var icon = document.getElementById('togglePasswordIcon');
-      if (!input || !btn) return;
-      btn.addEventListener('click', function() {
-        if (input.type === 'password') {
-          input.type = 'text';
-          icon.className = 'fas fa-eye-slash';
-          btn.title = 'Hide password';
-          btn.setAttribute('aria-label', 'Hide password');
-        } else {
-          input.type = 'password';
-          icon.className = 'fas fa-eye';
-          btn.title = 'Show password';
-          btn.setAttribute('aria-label', 'Show password');
-        }
-      });
+      function setup(inputId, btnId, iconId) {
+        var input = document.getElementById(inputId);
+        var btn = document.getElementById(btnId);
+        var icon = document.getElementById(iconId);
+        if (!input || !btn) return;
+        btn.addEventListener('click', function() {
+          if (input.type === 'password') {
+            input.type = 'text';
+            if (icon) icon.className = 'fas fa-eye-slash';
+            btn.title = 'Hide password';
+            btn.setAttribute('aria-label', 'Hide password');
+          } else {
+            input.type = 'password';
+            if (icon) icon.className = 'fas fa-eye';
+            btn.title = 'Show password';
+            btn.setAttribute('aria-label', 'Show password');
+          }
+        });
+      }
+      setup('id_password_admin', 'togglePasswordAdmin', 'togglePasswordIconAdmin');
+      setup('id_password_user', 'togglePasswordUser', 'togglePasswordIconUser');
+
+      var tabAdmin = document.getElementById('tab-admin');
+      var tabUser = document.getElementById('tab-user');
+      var panelAdmin = document.getElementById('panel-admin');
+      var panelUser = document.getElementById('panel-user');
+
+      function activate(which) {
+        var isAdmin = which === 'admin';
+        if (tabAdmin) tabAdmin.setAttribute('aria-selected', isAdmin ? 'true' : 'false');
+        if (tabUser) tabUser.setAttribute('aria-selected', isAdmin ? 'false' : 'true');
+        if (panelAdmin) panelAdmin.classList.toggle('is-active', isAdmin);
+        if (panelUser) panelUser.classList.toggle('is-active', !isAdmin);
+        try { localStorage.setItem('pgso-login-tab', which); } catch(e) {}
+      }
+
+      if (tabAdmin) tabAdmin.addEventListener('click', function(){ activate('admin'); });
+      if (tabUser) tabUser.addEventListener('click', function(){ activate('user'); });
+
+      // Restore last selected tab (default: user)
+      try {
+        var saved = localStorage.getItem('pgso-login-tab');
+        if (saved === 'admin' || saved === 'user') activate(saved);
+      } catch(e) {}
     })();
   </script>
 </body>
