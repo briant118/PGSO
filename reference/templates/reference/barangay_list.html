@@ -241,7 +241,11 @@
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  overflow: hidden;
+  /* Scroll when there are many rows */
+  max-height: min(65vh, 520px);
+  overflow-y: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .barangay-table {
@@ -261,6 +265,11 @@
   font-size: 0.95rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  /* Keep header visible while tbody scrolls */
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
 }
 
 .barangay-table tbody tr {
