@@ -3,6 +3,8 @@
 {% block title %}List of MALE - PGSO{% endblock %}
 
 {% block content %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/reports_folders.css' %}">
 <style>
 /* Page Header */
 .page-header {
@@ -70,6 +72,15 @@
   color: #1a1d24;
 }
 
+
+th, td {
+      border: 1px solid #111827;
+      padding: 6px 8px;
+      font-size: 12px;
+      vertical-align: middle;
+      text-align: center;
+    }
+
 /* Empty State */
 .empty-state {
   text-align: center;
@@ -95,8 +106,6 @@
   margin: 0;
   color: #5f6368;
 }
-
-{% include 'reports/includes/barangay_folders_styles.html' %}
 </style>
 
 <!-- Page Header -->

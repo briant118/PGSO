@@ -1,0 +1,150 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Print – {{ report_title|default:"Report" }}</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+      margin: 24px;
+      color: #111827;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: flex-start;
+      border-bottom: 2px solid #111827;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+    .title {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+    .meta {
+      font-size: 12px;
+      color: #374151;
+      text-align: right;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+    .sub {
+      margin: 6px 0 0;
+      font-size: 12px;
+      color: #374151;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #111827;
+      padding: 6px 8px;
+      font-size: 12px;
+      vertical-align: middle;
+      text-align: center;
+    }
+    th {
+      background: #f3f4f6;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .nowrap { white-space: nowrap; }
+    .profile-cell { width: 44px; text-align: center; }
+    .profile-img {
+      width: 40px;
+      height: 40px;
+      border-radius: 4px;
+      object-fit: cover;
+      display: inline-block;
+      border: none;
+    }
+    @media print {
+      body { margin: 10mm; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print" style="display:flex; justify-content:flex-end; gap:0.5rem; margin-bottom:10px;">
+    <button type="button" onclick="window.print()">Print</button>
+    <button type="button" onclick="window.close()">Close</button>
+  </div>
+
+  <div class="header">
+    <div>
+      <h1 class="title">{{ report_title|default:"Report" }}</h1>
+      <p class="sub">
+        {% if barangay %}
+          Barangay: <strong>{{ barangay.name }}</strong>{% if barangay.municipality %}, {{ barangay.municipality.name }}{% endif %}
+        {% else %}
+          Barangay: <strong>All</strong>
+        {% endif %}
+        {% if selected_year %} • Year: <strong>{{ selected_year }}</strong>{% endif %}
+        {% if selected_month %} • Month: <strong>{{ selected_month }}</strong>{% endif %}
+        • Total: <strong>{{ count }}</strong>
+      </p>
+    </div>
+    <div class="meta">
+      Printed at<br>
+      <strong>{{ printed_at|date:"M d, Y h:i A" }}</strong>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="profile-cell">Profile</th>
+        <th class="nowrap">Resident ID</th>
+        <th>Name</th>
+        <th class="nowrap">Gender</th>
+        <th class="nowrap">Age</th>
+        <th class="nowrap">Barangay</th>
+        <th class="nowrap">Purok</th>
+        <th class="nowrap">Contact</th>
+        <th class="nowrap">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for resident in residents %}
+      <tr>
+        <td class="profile-cell">
+          {% if resident.profile_picture_url %}
+            <img class="profile-img" src="{{ resident.profile_picture_url }}" alt="" />
+          {% elif resident.profile_picture %}
+            <img class="profile-img" src="{{ resident.profile_picture.url }}" alt="" />
+          {% endif %}
+        </td>
+        <td class="nowrap"><strong>{{ resident.resident_id }}</strong></td>
+        <td>{{ resident.get_full_name }}</td>
+        <td class="nowrap">{{ resident.get_gender_display }}</td>
+        <td class="nowrap">{{ resident.get_age }}</td>
+        <td class="nowrap">{{ resident.barangay.name }}</td>
+        <td class="nowrap">{{ resident.purok }}</td>
+        <td class="nowrap">{{ resident.contact_no }}</td>
+        <td class="nowrap">{{ resident.get_status_display }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="9" style="text-align:center; padding: 14px;">No records found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    window.addEventListener('load', function () {
+      try { window.print(); } catch (e) {}
+    });
+  </script>
+</body>
+</html>
+

@@ -5,6 +5,7 @@ from operations.models import Resident
 from django.db.models import Count, Prefetch, Q
 from django.utils import timezone
 from reference.models import Barangay, Municipality
+from django.urls import reverse
 
 
 def reports_index(request):
@@ -116,6 +117,7 @@ def list_male(request):
         'selected_barangay_id': selected_barangay_id,
         'municipalities': _sidebar_municipalities_for_report(rel_q),
         'base_path': request.path,
+        'print_path': reverse('reports:print_male'),
         'available_years': available_years,
         'selected_year': selected_year,
     }
@@ -149,6 +151,7 @@ def list_female(request):
         'selected_barangay_id': selected_barangay_id,
         'municipalities': _sidebar_municipalities_for_report(rel_q),
         'base_path': request.path,
+        'print_path': reverse('reports:print_female'),
         'available_years': available_years,
         'selected_year': selected_year,
     }
@@ -182,6 +185,7 @@ def list_pwd(request):
         'selected_barangay_id': selected_barangay_id,
         'municipalities': _sidebar_municipalities_for_report(rel_q),
         'base_path': request.path,
+        'print_path': reverse('reports:print_pwd'),
         'available_years': available_years,
         'selected_year': selected_year,
     }
@@ -215,6 +219,7 @@ def list_solo_parent(request):
         'selected_barangay_id': selected_barangay_id,
         'municipalities': _sidebar_municipalities_for_report(rel_q),
         'base_path': request.path,
+        'print_path': reverse('reports:print_solo_parent'),
         'available_years': available_years,
         'selected_year': selected_year,
     }
@@ -248,6 +253,7 @@ def list_senior_citizen(request):
         'selected_barangay_id': selected_barangay_id,
         'municipalities': _sidebar_municipalities_for_report(rel_q),
         'base_path': request.path,
+        'print_path': reverse('reports:print_senior_citizen'),
         'available_years': available_years,
         'selected_year': selected_year,
     }
@@ -281,6 +287,7 @@ def list_4ps_member(request):
         'selected_barangay_id': selected_barangay_id,
         'municipalities': _sidebar_municipalities_for_report(rel_q),
         'base_path': request.path,
+        'print_path': reverse('reports:print_4ps_member'),
         'available_years': available_years,
         'selected_year': selected_year,
     }
@@ -319,6 +326,7 @@ def list_voters(request):
         'selected_barangay_id': selected_barangay_id,
         'municipalities': _sidebar_municipalities_for_report(rel_q),
         'base_path': request.path,
+        'print_path': reverse('reports:print_voters'),
         'available_years': available_years,
         'selected_year': selected_year,
     }
@@ -356,10 +364,77 @@ def list_residents_record(request):
         'selected_barangay_id': selected_barangay_id,
         'municipalities': _sidebar_municipalities_for_report(rel_q),
         'base_path': request.path,
+        'print_path': reverse('reports:print_residents_record'),
         'available_years': available_years,
         'selected_year': selected_year,
     }
     return render(request, 'reports/list_residents_record.html', context)
+
+
+def print_residents_record(request):
+    """Printable list of residents (all or per barangay)."""
+    return _render_print_resident_report(
+        request,
+        title="Residents Record",
+        base_qs=Resident.objects.filter(status=Resident.STATUS_ALIVE),
+    )
+
+
+def print_deceased(request):
+    """Printable list of deceased residents (all or per barangay).
+
+    Year/Month filters are based on date_of_birth (Birthdate) to match the on-screen report.
+    """
+    selected_barangay, selected_barangay_id = _get_selected_barangay(request)
+    selected_year = _get_selected_year(request)
+    selected_month = _get_selected_month(request)
+    if not selected_year:
+        selected_month = None
+
+    residents_qs = Resident.objects.filter(status=Resident.STATUS_DECEASED)
+    if selected_year:
+        residents_qs = residents_qs.filter(date_of_birth__year=selected_year)
+    if selected_month:
+        residents_qs = residents_qs.filter(date_of_birth__month=selected_month)
+    if selected_barangay:
+        residents_qs = residents_qs.filter(barangay=selected_barangay)
+
+    residents = residents_qs.select_related('barangay').order_by('id')
+    context = {
+        'report_title': 'List of Deceased',
+        'residents': residents,
+        'count': residents.count(),
+        'barangay': selected_barangay,
+        'selected_barangay_id': selected_barangay_id,
+        'selected_year': selected_year,
+        'selected_month': selected_month,
+        'printed_at': timezone.localtime(timezone.now()),
+    }
+    return render(request, 'reports/print_residents_report.html', context)
+
+
+def print_birth_by_year(request):
+    """Printable birth-by-year report (all or per barangay)."""
+    selected_barangay, selected_barangay_id = _get_selected_barangay(request)
+    selected_year = _get_selected_year(request)
+
+    residents_qs = Resident.objects.filter(status=Resident.STATUS_ALIVE)
+    if selected_year:
+        residents_qs = residents_qs.filter(date_of_birth__year=selected_year)
+    if selected_barangay:
+        residents_qs = residents_qs.filter(barangay=selected_barangay)
+
+    residents = residents_qs.select_related('barangay').order_by('id')
+    context = {
+        'report_title': 'Birth By Year',
+        'residents': residents,
+        'count': residents.count(),
+        'barangay': selected_barangay,
+        'selected_barangay_id': selected_barangay_id,
+        'selected_year': selected_year,
+        'printed_at': timezone.localtime(timezone.now()),
+    }
+    return render(request, 'reports/print_residents_report.html', context)
 
 
 def list_deceased(request):
@@ -411,6 +486,7 @@ def list_deceased(request):
         'selected_barangay_id': selected_barangay_id,
         'municipalities': _sidebar_municipalities_for_report(rel_q),
         'base_path': request.path,
+        'print_path': reverse('reports:print_deceased'),
         'available_years': available_years,
         'selected_year': selected_year,
         'available_months': available_months,
@@ -452,7 +528,87 @@ def list_birth_by_year(request):
         'selected_barangay_id': selected_barangay_id,
         'municipalities': _sidebar_municipalities_for_report(rel_q),
         'base_path': request.path,
+        'print_path': reverse('reports:print_birth_by_year'),
         'available_years': available_years,
         'selected_year': selected_year,
     }
     return render(request, 'reports/list_birth_by_year.html', context)
+
+
+def _render_print_resident_report(request, *, title: str, base_qs):
+    selected_barangay, selected_barangay_id = _get_selected_barangay(request)
+    selected_year = _get_selected_year(request)
+
+    residents_qs = base_qs
+    if selected_year:
+        residents_qs = residents_qs.filter(created_at__year=selected_year)
+    if selected_barangay:
+        residents_qs = residents_qs.filter(barangay=selected_barangay)
+
+    residents = residents_qs.select_related('barangay').order_by('id')
+    context = {
+        'report_title': title,
+        'residents': residents,
+        'count': residents.count(),
+        'barangay': selected_barangay,
+        'selected_barangay_id': selected_barangay_id,
+        'selected_year': selected_year,
+        'printed_at': timezone.localtime(timezone.now()),
+    }
+    return render(request, 'reports/print_residents_report.html', context)
+
+
+def print_male(request):
+    return _render_print_resident_report(
+        request,
+        title='List of Male',
+        base_qs=Resident.objects.filter(status=Resident.STATUS_ALIVE, gender=Resident.GENDER_MALE),
+    )
+
+
+def print_female(request):
+    return _render_print_resident_report(
+        request,
+        title='List of Female',
+        base_qs=Resident.objects.filter(status=Resident.STATUS_ALIVE, gender=Resident.GENDER_FEMALE),
+    )
+
+
+def print_pwd(request):
+    return _render_print_resident_report(
+        request,
+        title='List of PWD',
+        base_qs=Resident.objects.filter(status=Resident.STATUS_ALIVE, health_status='PWD'),
+    )
+
+
+def print_solo_parent(request):
+    return _render_print_resident_report(
+        request,
+        title='List of Solo Parent',
+        base_qs=Resident.objects.filter(status=Resident.STATUS_ALIVE, economic_status='SOLO PARENT'),
+    )
+
+
+def print_senior_citizen(request):
+    return _render_print_resident_report(
+        request,
+        title='List of Senior Citizen',
+        base_qs=Resident.objects.filter(status=Resident.STATUS_ALIVE, economic_status='SENIOR CITIZEN'),
+    )
+
+
+def print_4ps_member(request):
+    return _render_print_resident_report(
+        request,
+        title='List of 4PS Member',
+        base_qs=Resident.objects.filter(status=Resident.STATUS_ALIVE, economic_status='4PS MEMBER'),
+    )
+
+
+def print_voters(request):
+    return _render_print_resident_report(
+        request,
+        title='List of Voters',
+        base_qs=Resident.objects.filter(status=Resident.STATUS_ALIVE, is_voter=True),
+    )

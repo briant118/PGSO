@@ -38,6 +38,14 @@
             disabled>
       View
     </button>
+    {% if print_path %}
+      <a class="btn-view"
+         target="_blank"
+         rel="noopener"
+         href="{{ print_path }}{% if selected_barangay_id or selected_year or selected_month %}?{% endif %}{% if selected_barangay_id %}barangay={{ selected_barangay_id }}{% endif %}{% if selected_year %}{% if selected_barangay_id %}&{% endif %}year={{ selected_year }}{% endif %}{% if selected_month %}{% if selected_barangay_id or selected_year %}&{% endif %}month={{ selected_month }}{% endif %}">
+        Print
+      </a>
+    {% endif %}
   </div>
 </div>
 
